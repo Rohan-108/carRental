@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+    />
+    <link rel="stylesheet" href="../css/index.css" />
+    <link rel="stylesheet" href="./css/form.css" />
+    <script type="module" src="./js/db.js"></script>
+    <script type="module" src="./js/index.js"></script>
+    <script type="module" src="./js/register.js"></script>
+    <title>Register - Rent IT</title>
+  </head>
+  <body>
+    <div class="navbar">
+      <div class="container">
+        <a class="logo" href="index.html">RENT <span>IT</span></a>
+        <img
+          id="mobile-cta"
+          class="mobile-menu"
+          src="/images/menu.svg"
+          alt="Open navigation"
+        />
+        <nav>
+          <img
+            id="mobile-exit"
+            class="mobile-menu-exit"
+            src="/images/exit.svg"
+            alt="close navigation"
+          />
+          <ul class="primary-nav">
+            <li class="current"><a href="index.html">Home</a></li>
+            <li><a href="cars.html">Cars</a></li>
+            <li><a href="dashboard.html" id="profileLink">Profile</a></li>
+            <li><a href="chat.html" id="chatLink">Chat</a></li>
+          </ul>
+          <ul class="secondary-nav">
+            <li class="go-premium-cta" style="display: block" id="registerLink">
+              <a href="login.html">Login</a>
+            </li>
+            <li class="go-premium-cta" style="display: none" id="dashboardLink">
+              <a href="carAdmin.html">Admin-Dashboard</a>
+            </li>
+            <li class="go-premium-cta" style="display: none" id="logoutLink">
+              <a href="index.html">Logout</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+    <!-- Register Section -->
+    <div class="login-root">
+      <div
+        class="flex-flex flex-direction--column"
+        style="min-height: 100vh; flex-grow: 1"
+      >
+        <div
+          class="padding-top--24 flex-flex flex-direction--column"
+          style="flex-grow: 1; z-index: 9"
+        >
+          <div
+            class="padding-top--48 padding-bottom--24 flex-flex flex-justifyContent--center"
+          >
+            <h1 class="logo">
+              <a class="logo" href="#" aria-label="Go to Rent IT homepage">
+                RENT <span>IT</span>
+              </a>
+            </h1>
+          </div>
+          <div class="formbg-outer">
+            <div class="formbg">
+              <div class="formbg-inner padding-horizontal--48">
+                <p class="padding-bottom--15 spanText">Register your details</p>
+                <form id="register">
+                  <!-- Name Field -->
+                  <div class="field">
+                    <label for="name">Name</label>
+                    <input
+                      type="text"
+                      name="name"
+                      id="name"
+                      placeholder="Enter your full name"
+                      pattern="^[A-Za-z\s]{3,50}$"
+                      title="Name must contain only letters and be 3-50 characters long."
+                      required
+                      autocomplete="name"
+                    />
+                  </div>
+
+                  <!-- Email Field -->
+                  <div class="field">
+                    <label for="email">Email</label>
+                    <input
+                      type="email"
+                      name="email"
+                      id="email"
+                      placeholder="Enter your email"
+                      autocomplete="email"
+                      required
+                    />
+                  </div>
+
+                  <!-- Phone Number Field -->
+                  <div class="field">
+                    <label for="phone">Phone Number</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      id="phone"
+                      placeholder="Enter your phone number"
+                      pattern="^\d{10}$"
+                      title="Phone number must be 10 digits long"
+                      autocomplete="tel"
+                      required
+                    />
+                  </div>
+                  <!-- Adhaar Number Field -->
+                  <div class="field">
+                    <label for="adhaar">Adhaar Number</label>
+                    <input
+                      type="text"
+                      name="adhaar"
+                      id="adhaar"
+                      placeholder="Enter your Adhaar number"
+                      pattern="^\d{12}$"
+                      title="Adhaar number must be 12 digits long"
+                      autocomplete="adhaar"
+                      required
+                    />
+                  </div>
+                  <!-- Avatar Field -->
+                  <div class="field">
+                    <label for="avatar">Avatar</label>
+                    <input
+                      type="file"
+                      name="avatar"
+                      id="avatar"
+                      accept="image/png, image/jpeg, image/jpg"
+                      title="Please upload a valid image file(png, jpeg, jpg) of size less than 500Kb."
+                    />
+                  </div>
+                  <!-- Password Field -->
+                  <div class="field">
+                    <label for="password">Password</label>
+                    <input
+                      type="password"
+                      name="password"
+                      id="password"
+                      placeholder="Enter your password"
+                      minlength="8"
+                      title="Password must be at least 8 characters long."
+                      required
+                    />
+                  </div>
+
+                  <!-- Confirm Password Field -->
+                  <div class="field">
+                    <label for="ConfirmPassword">Confirm Password</label>
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      id="confirmPassword"
+                      placeholder="Re-enter your password"
+                      minlength="8"
+                      title="Password must match the above password."
+                      required
+                    />
+                  </div>
+
+                  <!-- Submit Button -->
+                  <div class="field">
+                    <input type="submit" name="submit" value="Register" />
+                  </div>
+                </form>
+                <div>
+                  Already have an account?
+                  <a
+                    href="login.html"
+                    style="color: blue"
+                    aria-label="Go to Login page"
+                    >Login</a
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toastify Script -->
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/toastify-js"
+    ></script>
+  </body>
+</html>

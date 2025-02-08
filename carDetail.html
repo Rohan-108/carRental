@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+    />
+    <link rel="stylesheet" href="./css/carDetail.css" />
+    <link rel="stylesheet" href="./css/index.css" />
+    <link rel="stylesheet" href="css/chat.css" />
+    <link rel="stylesheet" href="css/form.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.umd.min.js"></script>
+    <title>RENT-IT - Car Details</title>
+  </head>
+  <body>
+    <div class="navbar">
+      <div class="container">
+        <a class="logo" href="index.html">RENT <span>IT</span></a>
+        <img
+          id="mobile-cta"
+          class="mobile-menu"
+          src="/images/menu.svg"
+          alt="Open navigation"
+        />
+        <nav>
+          <img
+            id="mobile-exit"
+            class="mobile-menu-exit"
+            src="/images/exit.svg"
+            alt="close navigation"
+          />
+          <ul class="primary-nav">
+            <li class="current"><a href="index.html">Home</a></li>
+            <li><a href="cars.html">Cars</a></li>
+            <li><a href="dashboard.html" id="profileLink">Profile</a></li>
+            <li><a href="chat.html" id="chatLink">Chat</a></li>
+          </ul>
+          <ul class="secondary-nav">
+            <li class="go-premium-cta" style="display: block" id="registerLink">
+              <a href="login.html">Login</a>
+            </li>
+            <li class="go-premium-cta" style="display: none" id="dashboardLink">
+              <a href="carAdmin.html">Dashboard</a>
+            </li>
+            <li class="go-premium-cta" style="display: none" id="logoutLink">
+              <a href="index.html">Logout</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+    <main class="carDetailContainer">
+      <section class="carDetail">
+        <div class="carImage">
+          <div class="image-gallery">
+            <img
+              id="mainImage"
+              src="https://picsum.photos/500/300"
+              alt="Car Image"
+            />
+            <div class="thumbnail-container" id="thumbnailContainer"></div>
+          </div>
+        </div>
+        <div class="details">
+          <h2>🚗 Car Details</h2>
+          <div class="infoBox">
+            <h3>Car Name</h3>
+            <p id="carName">Loading...</p>
+          </div>
+          <div class="infoBox">
+            <h3>💰 Price</h3>
+            <p id="carPrice">Loading...</p>
+          </div>
+          <div class="infoBox">
+            <h3>🛑 Seats</h3>
+            <p id="carSeats">Loading...</p>
+          </div>
+          <div class="infoBox">
+            <h3>⛽ Fuel</h3>
+            <p id="carFuel">Loading...</p>
+          </div>
+          <div class="infoBox">
+            <h3>⚙️ Transmission</h3>
+            <p id="carTransmission">Loading...</p>
+          </div>
+          <div class="infoBox">
+            <h3>🚘 Type</h3>
+            <p id="carType">Loading...</p>
+          </div>
+        </div>
+
+        <div class="ownerDetails">
+          <h2>👤 Owner Details</h2>
+          <div class="owner">
+            <div class="infoBox">
+              <h3>🏷️ Name</h3>
+              <p id="ownerName">Loading...</p>
+            </div>
+            <div class="infoBox">
+              <h3>📧 Email</h3>
+              <p id="ownerEmail">Loading...</p>
+            </div>
+            <div class="infoBox">
+              <h3>📞 Contact</h3>
+              <p id="ownerPhone">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div>
+        <section class="date-picker-container">
+          <h2>📅 Select Dates</h2>
+
+          <div class="dateContainer">
+            <input id="datepicker" placeholder="Select your dates" />
+            <p>min:<span id="minRentalPeriod"></span> days</p>
+            <p>max:<span id="maxRentalPeriod"></span> days</p>
+          </div>
+          <label for="amount" style="margin: 0">Pick your price:</label>
+          <input
+            id="amount"
+            type="number"
+            name="amount"
+            min="100"
+            placeholder="Give the amount"
+          />
+          <p style="color: gray; margin: 0">
+            Pick price greater than base price, to have higher chance of
+            confirmation by owner.
+          </p>
+          <button id="rentButton" class="btn">Bid Now</button>
+        </section>
+        <div class="carUserChat">
+          <header class="msger-header">
+            <div class="msger-header-title">Chat With Owner</div>
+          </header>
+          <main class="userChat" id="messageBoxUser"></main>
+          <form class="msger-inputarea">
+            <textarea
+              type="text"
+              class="msger-input"
+              placeholder="Enter your message..."
+              id="msgUser"
+            ></textarea>
+            <button type="button" id="openImageModal" style="cursor: pointer">
+              📎
+            </button>
+            <button
+              type="submit"
+              class="msger-send-btn"
+              id="sendUser"
+              style="height: max-content; margin-block: auto"
+            >
+              Send
+            </button>
+          </form>
+          <div class="imageModal" style="display: none" id="modal">
+            <div class="formbg innerModal">
+              <div class="formbg-inner" style="padding: 1rem">
+                <div class="closeButton" id="closeButton">
+                  <img src="./images/exit.svg" alt="Close" />
+                </div>
+                <p class="padding-bottom--15 spanText">
+                  Send Image with Message
+                </p>
+                <form id="imageForm">
+                  <div class="field">
+                    <label for="image">Upload Image (500Kb)</label>
+                    <input
+                      type="file"
+                      name="image"
+                      id="image"
+                      accept="image/jpg, image/jpeg, image/png"
+                      title="Upload Image (jpg, jpeg, png) only allowed and less than 500kb"
+                      required
+                    />
+                  </div>
+                  <div class="field">
+                    <input
+                      type="submit"
+                      name="submit"
+                      value="Send"
+                      style="margin: 0"
+                    />
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/toastify-js"
+    ></script>
+    <script type="module" src="./js/index.js"></script>
+    <script type="module" src="./js/utils.js"></script>
+    <script type="module" src="./js/db.js"></script>
+    <script type="module" src="./js/carDetail.js"></script>
+    <script type="module" src="./js/carChat.js"></script>
+    <script type="module" src="./js/rental.js"></script>
+  </body>
+</html>

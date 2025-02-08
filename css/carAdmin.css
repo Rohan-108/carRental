@@ -1,0 +1,284 @@
+/* Base Styles */
+:root {
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --light-bg: #f8f9fa;
+  --white: #fff;
+  --gray: #6c757d;
+  --border-radius: 0.5rem;
+  --box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+  --font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+/* Car Cards Section */
+#car-cards-section {
+  background: var(--white);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+#car-cards-section .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+#car-cards-section h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+#carCardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 0.5rem;
+  justify-content: center;
+  place-items: center;
+}
+
+#editCarForm {
+  height: max-content !important;
+}
+
+/* Overall card styling */
+.car-card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+  margin: 15px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.car-card:hover {
+  transform: translateY(-5px);
+}
+.car-image-container {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.car-image {
+  width: 100%;
+  height: 200px;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+}
+
+.car-details {
+  padding: 15px;
+}
+
+.car-name {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.car-price,
+.car-id,
+.car-plate {
+  margin: 5px 0;
+  color: #666;
+}
+.car-actions {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.car-actions button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.car-actions button:hover {
+  transform: scale(1.05);
+}
+.editCarBtn {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.editCarBtn:hover {
+  background-color: #0056b3;
+}
+
+.deleteCarBtn {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.deleteCarBtn:hover {
+  background-color: #b02a37;
+}
+
+/* Bidding Section */
+#bidding-section {
+  background: var(--white);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+#bidding-chart {
+  background: var(--white);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+#bidding-section h2 {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.filters {
+  margin-bottom: 1rem;
+  text-align: center;
+  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filters label {
+  font-size: 1rem;
+  margin-right: 0.5rem;
+}
+
+.filters select {
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 0.25rem;
+  border: 1px solid #ccc;
+}
+
+#biddingTable button {
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+#biddingTable button.approveBid {
+  background: var(--success-color);
+  color: var(--white);
+  margin-right: 0.5rem;
+}
+
+#biddingTable button.approveBid:hover {
+  background: #218838;
+}
+
+#biddingTable button.cancelBid {
+  background: var(--danger-color);
+  color: var(--white);
+}
+
+#biddingTable button.cancelBid:hover {
+  background: #c82333;
+}
+.closeButton {
+  float: right;
+  cursor: pointer;
+}
+.carModal {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(5px);
+  z-index: 9999;
+}
+.innerModal {
+  padding: 1rem;
+  height: max-content;
+}
+.selectOne {
+  display: flex;
+  justify-content: space-between;
+  padding-block: 1rem;
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+}
+.chart-container {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-height: 30rem;
+}
+
+.chartHeader {
+  display: flex;
+  margin-block: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.fields {
+  display: flex;
+  gap: 0.5rem;
+}
+.analytics {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.dataSection {
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+  gap: 1rem;
+  background: var(--white);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.card h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.card p {
+  font-size: 1rem;
+  margin: 1rem 0;
+  font-weight: bold;
+  color: #2c3e50;
+}

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+    />
+    <link rel="stylesheet" href="./css/carAdmin.css" />
+    <link rel="stylesheet" href="./css/index.css" />
+    <link rel="stylesheet" href="./css/form.css" />
+    <link rel="stylesheet" href="./css/table.css" />
+    <link rel="stylesheet" href="./css/chat.css" />
+    <title>Admin Dashboard</title>
+  </head>
+  <body>
+    <div class="navbar">
+      <div class="container">
+        <a class="logo" href="index.html">RENT <span>IT</span></a>
+        <img
+          id="mobile-cta"
+          class="mobile-menu"
+          src="/images/menu.svg"
+          alt="Open navigation"
+        />
+        <nav>
+          <img
+            id="mobile-exit"
+            class="mobile-menu-exit"
+            src="/images/exit.svg"
+            alt="close navigation"
+          />
+          <ul class="primary-nav">
+            <li class="current"><a href="index.html">Home</a></li>
+            <li><a href="cars.html">Cars</a></li>
+            <li><a href="dashboard.html" id="profileLink">Profile</a></li>
+            <li><a href="chat.html" id="chatLink">Chat</a></li>
+          </ul>
+          <ul class="secondary-nav">
+            <li class="go-premium-cta" style="display: block" id="registerLink">
+              <a href="login.html">Login</a>
+            </li>
+            <li class="go-premium-cta" style="display: none" id="dashboardLink">
+              <a href="carAdmin.html">Dashboard</a>
+            </li>
+            <li class="go-premium-cta" style="display: none" id="logoutLink">
+              <a href="index.html">Logout</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+
+    <main class="container">
+      <div class="dataSection">
+        <h2>Your Numbers</h2>
+        <div class="summary-cards">
+          <div class="card">
+            <h3>Total Bid</h3>
+            <p id="biddingCount">Loading...</p>
+          </div>
+          <div class="card">
+            <h3>Total Booking</h3>
+            <p id="bookingCount">Loading...</p>
+          </div>
+          <div class="card">
+            <h3>Cars</h3>
+            <p><span id="noOfCars">Loading...</span></p>
+          </div>
+          <div class="card">
+            <h3>Total Revenue</h3>
+            <p style="color: gray; font-size: 0.8rem">
+              After 25% Commission Cut
+            </p>
+            <p><span id="revenue">Loading...</span></p>
+          </div>
+          <div class="card">
+            <h3>Average Rental Period</h3>
+            <p><span id="averageRentDay">Loading...</span></p>
+          </div>
+          <div class="card">
+            <h3>Rejected Bids</h3>
+            <p><span id="rejectedBids">Loading...</span></p>
+          </div>
+        </div>
+      </div>
+      <!-- Car Cards Section -->
+      <div id="car-cards-section">
+        <div class="card-header">
+          <h2>My Cars</h2>
+          <div style="display: flex; gap: 0.2rem">
+            <button class="btn" id="addCar" style="width: 8rem">
+              Add New Car
+            </button>
+            <select name="archived" id="archived">
+              <option value="true">Cars</option>
+              <option value="false">Archieved Cars</option>
+            </select>
+          </div>
+        </div>
+        <div id="carCardsGrid">
+          <!-- Car cards will be dynamically populated -->
+        </div>
+      </div>
+      <!-- Bidding Section -->
+      <div id="bidding-section">
+        <h2>Biddings:</h2>
+        <div class="filters">
+          <div>
+            <label for="carFilter">Filter by Car:</label>
+            <select id="carFilter">
+              <option value="all">All Cars</option>
+              <!-- Car filter options will be dynamically populated -->
+            </select>
+          </div>
+          <div>
+            <label for="carFilter">Filter by Status:</label>
+            <select id="statusFilter">
+              <option value="pending">Pending</option>
+              <option value="rejected">Rejected</option>
+              <option value="approved">Approved</option>
+            </select>
+          </div>
+        </div>
+        <table id="biddingTable">
+          <thead>
+            <tr>
+              <th scope="col">Bid ID</th>
+              <th scope="col">Car Name</th>
+              <th scope="col">Renter</th>
+              <th scope="col">Start Date</th>
+              <th scope="col">End Date</th>
+              <th scope="col">Amount</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="biddingConatiner">
+            <!-- Bidding rows will be dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+      <div id="bidding-chart">
+        <div class="chartHeader">
+          <h2>Revenue Analytics</h2>
+          <div class="analytics">
+            <div class="fields">
+              <label for="revenueFilter">Filter:</label>
+              <select name="revenueFilter" id="revenueFilter">
+                <option value="vehicleType">By Car Type</option>
+                <option value="status">By Status</option>
+                <option value="fuelType">By FuelType</option>
+                <option value="transmission">By Transmission Type</option>
+                <option value="location" selected>By Location</option>
+                <option value="plateNumber">By CarID</option>
+              </select>
+            </div>
+            <div class="fields">
+              <label for="revenueChartType">Chart:</label>
+              <select name="revenueChartType" id="revenueChartType">
+                <option value="bar" selected>Bar</option>
+                <option value="pie">Pie</option>
+                <option value="doughnut">DoughNut</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+      <div id="bidding-chart">
+        <div class="chartHeader">
+          <h2>Booking Analytics</h2>
+          <div class="analytics">
+            <div class="fields">
+              <label for="bookingFilter">Filter:</label>
+              <select name="bookingFilter" id="bookingFilter">
+                <option value="vehicleType">By Car Type</option>
+                <option value="status" selected>By Status</option>
+                <option value="fuelType">By FuelType</option>
+                <option value="transmission">By Transmission Type</option>
+                <option value="location">By Location</option>
+                <option value="plateNumber">By CarID</option>
+              </select>
+            </div>
+            <div class="fields">
+              <label for="bookChartType">Chart:</label>
+              <select name="bookChartType" id="bookChartType">
+                <option value="bar" selected>Bar</option>
+                <option value="pie">Pie</option>
+                <option value="doughnut">DoughNut</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="bookChart"></canvas>
+        </div>
+      </div>
+    </main>
+    <div class="carModal" id="carModal" style="display: none">
+      <div class="formbg innerModal">
+        <div class="formbg-inner" style="padding: 1rem">
+          <div class="closeButton" id="closeButton">
+            <img src="./images/exit.svg" alt="Close" />
+          </div>
+          <p class="padding-bottom--15 spanText">Register Your Car Details</p>
+          <form id="addCarForm">
+            <!-- Car Name -->
+            <div class="flexFields"></div>
+            <div class="field">
+              <label for="carName">Car Name</label>
+              <input
+                type="text"
+                name="carName"
+                id="carName"
+                placeholder="Enter car name"
+                pattern="^[A-Za-z0-9\s\-]{3,20}$"
+                title="Car name must be 3-20 characters long and can include letters, numbers, and hyphens."
+                required
+                autocomplete="off"
+              />
+            </div>
+
+            <!-- Vehicle Type -->
+            <div class="field selectOne">
+              <label for="vehicleType">Vehicle Type</label>
+              <select name="vehicleType" id="vehicleType" required>
+                <option value="" disabled selected>Select vehicle type</option>
+                <option value="Sedan">Sedan</option>
+                <option value="SUV">SUV</option>
+                <option value="Coupe">Coupe</option>
+                <option value="Hatchback">Hatchback</option>
+                <option value="Convertible">Convertible</option>
+              </select>
+            </div>
+
+            <!-- Number of Seats -->
+            <div class="field">
+              <label for="seats">Number of Seats</label>
+              <input
+                type="number"
+                name="seats"
+                id="seats"
+                placeholder="Enter number of seats"
+                min="2"
+                max="5"
+                required
+              />
+            </div>
+
+            <!-- Fuel Type -->
+            <div class="field selectOne">
+              <label for="fuelType">Fuel Type</label>
+              <select name="fuelType" id="fuelType" required>
+                <option value="" disabled selected>Select fuel type</option>
+                <option value="Petrol">Petrol</option>
+                <option value="Diesel">Diesel</option>
+                <option value="Electric">Electric</option>
+                <option value="Hybrid">Hybrid</option>
+              </select>
+            </div>
+
+            <!-- Transmission -->
+            <div class="field selectOne">
+              <label for="transmission">Transmission</label>
+              <select name="transmission" id="transmission" required>
+                <option value="" disabled selected>
+                  Select transmission type
+                </option>
+                <option value="Automatic">Automatic</option>
+                <option value="Manual">Manual</option>
+              </select>
+            </div>
+            <!--Plate Number-->
+            <div class="field">
+              <label for="plateNumber">Plate Number</label>
+              <input
+                type="text"
+                name="plateNumber"
+                id="plateNumber"
+                placeholder="XX-XX-XX-XXXX || XX-XX-XXXX"
+                title="Plate number should be in the format XX-XX-XXXX or XX-XX-XX-XXXX"
+                required
+              />
+            </div>
+            <!-- Base Rental Price (Per Day) -->
+            <div class="field">
+              <label for="rentalPrice">Base Rental Price (Rs/day)</label>
+              <input
+                type="number"
+                name="rentalPrice"
+                id="rentalPrice"
+                placeholder="Enter rental price per day"
+                min="100"
+                max="100000"
+                title="Rental price should be between 100 and 100000"
+                required
+              />
+            </div>
+
+            <!-- Location -->
+            <div class="field selectOne">
+              <label for="location">Location</label>
+              <select name="location" id="location" required>
+                <option value="">Select City</option>
+              </select>
+            </div>
+
+            <!-- Minimum Rental Period -->
+            <div class="field">
+              <label for="minRental">Minimum Rental Period (Days)</label>
+              <input
+                type="number"
+                name="minRental"
+                id="minRental"
+                placeholder="Minimum rental period in days"
+                min="1"
+                max="365"
+                title="Minimum rental period should be between 1 and 365 days"
+                required
+              />
+            </div>
+
+            <!-- Maximum Rental Period -->
+            <div class="field">
+              <label for="maxRental">Maximum Rental Period (Days)</label>
+              <input
+                type="number"
+                name="maxRental"
+                id="maxRental"
+                placeholder="Maximum rental period in days"
+                min="1"
+                title="Maximum rental period should be between 1 and 365 days"
+                max="365"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="carImage">Car Image</label>
+              <input
+                type="file"
+                name="carImage"
+                id="carImage"
+                accept="image/jpg, image/jpeg, image/png"
+                multiple
+                required
+              />
+            </div>
+            <!-- Submit Button -->
+            <div class="field">
+              <input
+                type="submit"
+                name="submit"
+                value="Register Car"
+                style="margin: 0"
+              />
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="carModal" id="editModal" style="display: none">
+      <div class="formbg innerModal">
+        <div class="formbg-inner" style="padding: 1rem">
+          <div class="closeButton" id="editCloseButton">
+            <img src="./images/exit.svg" alt="Close" />
+          </div>
+          <p class="padding-bottom--15 spanText">Change Your Car Details</p>
+          <form id="editCarForm" style="height: max-content" data-id="">
+            <!-- Base Rental Price (Per Day) -->
+            <div class="field">
+              <label for="rentalPrice">Base Rental Price (Rs/day)</label>
+              <input
+                type="number"
+                name="rentalPrice"
+                id="rentalPrice"
+                placeholder="Enter rental price per day"
+                min="100"
+                max="100000"
+                title="Rental price should be between 100 and 100000"
+                required
+              />
+            </div>
+
+            <!-- Location -->
+            <div class="field selectOne">
+              <label for="location">Location</label>
+              <select name="location" id="location" required>
+                <option value="">Select City</option>
+              </select>
+            </div>
+
+            <!-- Minimum Rental Period -->
+            <div class="field">
+              <label for="minRental">Minimum Rental Period (Days)</label>
+              <input
+                type="number"
+                name="minRental"
+                id="minRental"
+                placeholder="Minimum rental period in days"
+                min="1"
+                max="365"
+                title="Minimum rental period should be between 1 and 365 days"
+                required
+              />
+            </div>
+
+            <!-- Maximum Rental Period -->
+            <div class="field">
+              <label for="maxRental">Maximum Rental Period (Days)</label>
+              <input
+                type="number"
+                name="maxRental"
+                id="maxRental"
+                placeholder="Maximum rental period in days"
+                min="1"
+                title="Maximum rental period should be between 1 and 365 days"
+                max="365"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="carImage">Car Image</label>
+              <input
+                type="file"
+                name="carImage"
+                id="carImage"
+                accept="image/jpg, image/jpeg, image/png"
+                title="Upload a new image to change the existing one(size less than 500kb)"
+                multiple
+              />
+            </div>
+            <!-- Submit Button -->
+            <div class="field">
+              <input
+                type="submit"
+                name="submit"
+                value="Change"
+                style="margin: 0"
+              />
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="./js/index.js"></script>
+    <script type="module" src="./js/db.js"></script>
+    <script type="module" src="./js/utils.js"></script>
+    <script type="module" src="./js/carAdmin.js"></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/toastify-js"
+    ></script>
+  </body>
+</html>

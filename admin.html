@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RENT-IT - Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="./css/index.css" />
+    <link rel="stylesheet" href="./css/admin.css" />
+    <link rel="stylesheet" href="css/table.css" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+    />
+  </head>
+  <body>
+    <div class="navbar">
+      <div class="container">
+        <a class="logo" href="index.html">RENT <span>IT</span></a>
+        <img
+          id="mobile-cta"
+          class="mobile-menu"
+          src="/images/menu.svg"
+          alt="Open navigation"
+        />
+        <nav>
+          <img
+            id="mobile-exit"
+            class="mobile-menu-exit"
+            src="/images/exit.svg"
+            alt="close navigation"
+          />
+          <ul class="primary-nav">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="cars.html">Cars</a></li>
+            <li><a href="dashboard.html" id="profileLink">Profile</a></li>
+            <li><a href="chat.html" id="chatLink">Chat</a></li>
+          </ul>
+          <ul class="secondary-nav">
+            <li class="go-premium-cta" style="display: block" id="registerLink">
+              <a href="register.html">Register</a>
+            </li>
+            <li class="go-premium-cta" style="display: none" id="dashboardLink">
+              <a href="carAdmin.html">Admin-Dashboard</a>
+            </li>
+            <li class="go-premium-cta" style="display: none" id="logoutLink">
+              <a href="index.html">Logout</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+
+    <div class="admin-container">
+      <div id="dashboard" class="dashboard-div">
+        <h2>Admin Dashboard</h2>
+        <div class="summary-cards">
+          <div class="card">
+            <h3>Total Bid</h3>
+            <p id="biddingCount">Loading...</p>
+          </div>
+          <div class="card">
+            <h3>Total Booking</h3>
+            <p id="bookingCount">Loading...</p>
+          </div>
+          <div class="card">
+            <h3>Users</h3>
+            <p><span id="noOfAdmin">Loading...</span></p>
+          </div>
+          <div class="card">
+            <h3>Cars</h3>
+            <p><span id="noOfCars">Loading...</span></p>
+          </div>
+          <div class="card">
+            <h3>Total Revenue</h3>
+            <p style="color: gray; font-size: 0.8rem">25% Commission</p>
+            <p><span id="revenue">Loading...</span></p>
+          </div>
+          <div class="card">
+            <h3>Average Rental Period</h3>
+            <p><span id="averageRentDay">Loading...</span></p>
+          </div>
+          <div class="card">
+            <h3>Rejected Bids</h3>
+            <p><span id="rejectedBids">Loading...</span></p>
+          </div>
+          <div class="card">
+            <h3>Conversion rate(total bookings/total bids)</h3>
+            <p><span id="conversionRatio">Loading...</span></p>
+          </div>
+        </div>
+      </div>
+      <div class="revenueChart">
+        <div class="chartHeader">
+          <h2>Revenue Analytics</h2>
+          <div class="analytics">
+            <div class="field">
+              <label for="revenueFilter">Filter:</label>
+              <select name="revenueFilter" id="revenueFilter">
+                <option value="vehicleType">By Car Type</option>
+                <option value="status" selected>By Status</option>
+                <option value="fuelType">By FuelType</option>
+                <option value="transmission">By Transmission Type</option>
+                <option value="location">By Location</option>
+                <option value="plateNumber">By Per Car</option>
+                <option value="email">By Car Owner</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="revenueChartType">Value:</label>
+              <select name="revenueChartType" id="revenueChartType">
+                <option value="bar" selected>Bar</option>
+                <option value="pie">Pie</option>
+                <option value="doughnut">DoughNut</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+      <div class="bidChart">
+        <div class="chartHeader">
+          <h2>Number of Bookings</h2>
+          <div class="analytics">
+            <div class="field">
+              <label for="bookingFilter">Filter:</label>
+              <select name="bookingFilter" id="bookingFilter">
+                <option value="vehicleType">By Car Type</option>
+                <option value="status" selected>By Status</option>
+                <option value="fuelType">By FuelType</option>
+                <option value="transmission">By Transmission Type</option>
+                <option value="location">By Location</option>
+                <option value="plateNumber">By CarID</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="bookChartType">Value:</label>
+              <select name="bookChartType" id="bookChartType">
+                <option value="bar" selected>Bar</option>
+                <option value="pie">Pie</option>
+                <option value="doughnut">DoughNut</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="bookChart"></canvas>
+        </div>
+      </div>
+      <div class="carChart">
+        <div class="chartHeader">
+          <h2>Number of Cars</h2>
+          <div class="analytics">
+            <div class="field">
+              <label for="carfilter">Filter:</label>
+              <select name="carfilter" id="carfilter">
+                <option value="vehicleType" selected>By Car Type</option>
+                <option value="seats">By Seats</option>
+                <option value="fuelType">By FuelType</option>
+                <option value="transmission">By Transmission Type</option>
+                <option value="location">By Location</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="chartType">Value:</label>
+              <select name="chartType" id="chartType">
+                <option value="bar" selected>Bar</option>
+                <option value="pie">Pie</option>
+                <option value="doughnut">DoughNut</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart"></canvas>
+        </div>
+      </div>
+      <!-- Approvals div -->
+      <div id="approvals" class="approval-div">
+        <div class="div-header">
+          <h2>Users:</h2>
+        </div>
+        <div
+          style="
+            display: flex;
+            justify-content: end;
+            margin: 0.5rem;
+            gap: 0.5rem;
+          "
+        >
+          <label for="approvalFilter">Filter by Status:</label>
+          <select id="approvalFilter">
+            <option value="pending">Pending</option>
+            <option value="rejected">Rejected</option>
+            <option value="approved">Approved</option>
+          </select>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Approval ID</th>
+                <th scope="col">UserID</th>
+                <th scope="col">Email</th>
+                <th scope="col">Request Date</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="approvalsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="./js/index.js"></script>
+    <script type="module" src="./js/db.js"></script>
+    <script type="module" src="./js/admin.js"></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/toastify-js"
+    ></script>
+  </body>
+</html>

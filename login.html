@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+    />
+    <link rel="stylesheet" href="../css/index.css" />
+    <link rel="stylesheet" href="./css/form.css" />
+    <script type="module" src="./js/db.js"></script>
+    <script type="module" src="./js/index.js"></script>
+    <script type="module" src="./js/login.js"></script>
+    <title>Login - Rent IT</title>
+  </head>
+  <body>
+    <div class="navbar">
+      <div class="container">
+        <a class="logo" href="index.html">RENT <span>IT</span></a>
+        <img
+          id="mobile-cta"
+          class="mobile-menu"
+          src="/images/menu.svg"
+          alt="Open navigation"
+        />
+        <nav>
+          <img
+            id="mobile-exit"
+            class="mobile-menu-exit"
+            src="/images/exit.svg"
+            alt="close navigation"
+          />
+          <ul class="primary-nav">
+            <li class="current"><a href="index.html">Home</a></li>
+            <li><a href="cars.html">Cars</a></li>
+            <li><a href="dashboard.html" id="profileLink">Profile</a></li>
+            <li><a href="chat.html" id="chatLink">Chat</a></li>
+          </ul>
+          <ul class="secondary-nav">
+            <li class="go-premium-cta" style="display: block" id="registerLink">
+              <a href="login.html">Login</a>
+            </li>
+            <li class="go-premium-cta" style="display: none" id="dashboardLink">
+              <a href="carAdmin.html">Admin-Dashboard</a>
+            </li>
+            <li class="go-premium-cta" style="display: none" id="logoutLink">
+              <a href="index.html">Logout</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+    <!-- Login Section -->
+    <div class="login-root">
+      <div
+        class="flex-flex flex-direction--column"
+        style="min-height: 100vh; flex-grow: 1"
+      >
+        <div
+          class="padding-top--48 padding-bottom--24 flex-flex flex-justifyContent--center"
+        >
+          <h1 class="logo">
+            <a class="logo" href="#" aria-label="Go to Rent IT homepage">
+              Welcome <span>To</span> Rent <span>IT</span>
+            </a>
+          </h1>
+        </div>
+        <div class="formbg-outer">
+          <div class="formbg">
+            <div class="formbg-inner padding-horizontal--48">
+              <p class="padding-bottom--15 spanText">Sign in to your account</p>
+              <form id="login">
+                <!-- Email Field -->
+                <div class="field padding-bottom--24">
+                  <label for="email">Email</label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+                <!-- Password Field -->
+                <div class="field padding-bottom--24">
+                  <label for="password">Password</label>
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    required
+                  />
+                </div>
+                <!-- Submit Button -->
+                <div class="field padding-bottom--24">
+                  <input type="submit" name="submit" value="Login" />
+                </div>
+              </form>
+              <div>
+                Don't have an account?
+                <a
+                  href="register.html"
+                  style="color: blue"
+                  aria-label="Go to Register page"
+                  >Register</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toastify Script -->
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/toastify-js"
+    ></script>
+  </body>
+</html>

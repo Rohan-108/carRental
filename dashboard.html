@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./css/index.css" />
+    <link rel="stylesheet" href="./css/dashboard.css" />
+    <link rel="stylesheet" href="./css/form.css" />
+    <link rel="stylesheet" href="./css/cars.css" />
+    <link rel="stylesheet" href="css/cars.css" />
+    <link rel="stylesheet" href="css/table.css" />
+    <script type="module" src="./js/index.js"></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+    />
+    <script type="module" src="./js/db.js"></script>
+    <script type="module" src="./js/dashboard.js"></script>
+    <title>Rent IT- Dashboard</title>
+  </head>
+  <body>
+    <div class="navbar">
+      <div class="container">
+        <a class="logo" href="index.html">RENT <span>IT</span></a>
+        <img
+          id="mobile-cta"
+          class="mobile-menu"
+          src="/images/menu.svg"
+          alt="Open navigation"
+        />
+        <nav>
+          <img
+            id="mobile-exit"
+            class="mobile-menu-exit"
+            src="/images/exit.svg"
+            alt="close navigation"
+          />
+          <ul class="primary-nav">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="cars.html">Cars</a></li>
+            <li class="current">
+              <a href="dashboard.html" id="profileLink">Profile</a>
+            </li>
+            <li><a href="chat.html" id="chatLink">Chat</a></li>
+          </ul>
+          <ul class="secondary-nav">
+            <li class="go-premium-cta" style="display: block" id="registerLink">
+              <a href="login.html">Login</a>
+            </li>
+            <li class="go-premium-cta" style="display: none" id="dashboardLink">
+              <a href="carAdmin.html">Dashboard</a>
+            </li>
+            <li class="go-premium-cta" style="display: none" id="logoutLink">
+              <a href="index.html">Logout</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+    <main class="container">
+      <div class="userDetail">
+        <div class="details">
+          <!-- inserted trhough js -->
+          <h2>Your Details</h2>
+          <hr />
+          <p>Name : <span id="name">loading...</span></p>
+          <p>Email : <span id="email">loading...</span></p>
+          <p>Phone Number : <span id="phone">loading...</span></p>
+          <p>Adhaar Number : <span id="adhaar">loading...</span></p>
+        </div>
+        <div class="imageContainer">
+          <img
+            src="https://picsum.photos/200/300"
+            alt="User photo"
+            id="userAvatar"
+          />
+          <button id="editProfile">✏️</button>
+        </div>
+      </div>
+      <div class="bookings">
+        <h2>Your Bookings</h2>
+        <hr />
+        <div class="bookingContainer">
+          <p id="noBooking" style="display: none">
+            You haven't rented anything yet.
+          </p>
+          <div class="bookingList">
+            <table id="bookingTable" class="bookingTable">
+              <thead>
+                <tr>
+                  <th scope="col">Booking ID</th>
+                  <th scope="col">Car Name</th>
+                  <th scope="col">Owner Name</th>
+                  <th scope="col">Start Date</th>
+                  <th scope="col">End Date</th>
+                  <th scope="col">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Bidding rows will be dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="bookings">
+        <h2>Your Biddings</h2>
+        <hr />
+        <div class="bookingContainer">
+          <!-- Inserted through JS -->
+          <p id="noBidding" style="display: none">
+            You haven't bid on anything yet.
+          </p>
+          <div class="bookingList">
+            <table id="biddingTable" class="bookingTable">
+              <thead>
+                <tr>
+                  <th scope="col">Bidding ID</th>
+                  <th scope="col">Car Name</th>
+                  <th scope="col">Owner Name</th>
+                  <th scope="col">Start Date</th>
+                  <th scope="col">End Date</th>
+                  <th scope="col">Amount</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Bidding rows will be dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="approved" id="approvalNotice" style="display: none">
+        <p>You'are not approved.</p>
+        <p>To become a car renter, seek approval.</p>
+        <button class="btn" id="seekApproval">Seek Approval</button>
+      </div>
+      <div class="carModal" id="profileModal" style="display: none">
+        <div class="formbg innerModal">
+          <div class="formbg-inner" style="padding: 1rem">
+            <div class="closeButton" id="editCloseButton">
+              <img src="./images/exit.svg" alt="Close" />
+            </div>
+            <p class="padding-bottom--15 spanText">Update Profile</p>
+            <form id="editProfileForm" style="height: max-content">
+              <!-- Name Field -->
+              <div class="field">
+                <label for="name">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  id="name"
+                  placeholder="Enter your full name"
+                  pattern="^[A-Za-z\s]{3,50}$"
+                  title="Name must contain only letters and be 3-50 characters long."
+                  required
+                  autocomplete="name"
+                />
+              </div>
+              <!-- Phone Number Field -->
+              <div class="field">
+                <label for="phone">Phone Number</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  id="phone"
+                  placeholder="Enter your phone number"
+                  pattern="^\d{10}$"
+                  title="Phone number must be 10 digits long"
+                  autocomplete="tel"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label for="avatar">Avatar</label>
+                <input
+                  type="file"
+                  name="avatar"
+                  id="avatar"
+                  accept="image/jpg, image/jpeg, image/png"
+                  title="Upload a new image to change the existing one(size less than 500kb)"
+                  multiple
+                />
+              </div>
+              <div class="field">
+                <input
+                  type="submit"
+                  name="submit"
+                  value="Change"
+                  style="margin: 0"
+                />
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/toastify-js"
+    ></script>
+  </body>
+</html>

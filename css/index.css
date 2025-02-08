@@ -1,0 +1,273 @@
+:root {
+  --primary-color: #007af3;
+}
+
+body {
+  background: #f2f2f2;
+  margin: 0;
+  box-sizing: border-box;
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+}
+.navbar {
+  background: white;
+  padding: 1em;
+}
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.navbar .logo {
+  text-decoration: none;
+  font-weight: bold;
+  color: black;
+  font-size: 1.2em;
+}
+
+.logo span {
+  color: var(--primary-color);
+}
+
+.navbar nav {
+  display: none;
+}
+
+.navbar .container {
+  display: flex;
+  place-content: space-between;
+}
+
+.navbar .mobile-menu {
+  cursor: pointer;
+}
+
+a {
+  color: #444444;
+  text-decoration: none;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+section {
+  padding: 5em 2em;
+}
+label {
+  display: block;
+  font-size: 1.2em;
+  margin-bottom: 0.5em;
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 0.8em;
+  margin-bottom: 1em;
+  border-radius: 0.3em;
+  border: 1px solid gray;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+input[type="submit"] {
+  background: var(--primary-color);
+  color: white;
+  font-weight: bold;
+  border: none;
+  font-size: 1.3em;
+  border-radius: 5em;
+  margin-bottom: 5em;
+  display: inline-block;
+  padding: 0.8em 2em;
+  width: unset;
+  cursor: pointer;
+}
+
+iframe {
+  width: 100%;
+  height: 300px;
+}
+
+nav.menu-btn {
+  display: block;
+}
+
+nav {
+  position: fixed;
+  z-index: 999;
+  width: 50%;
+  right: 0;
+  top: 0;
+  background: grey;
+  height: 100vh;
+  padding: 1em;
+}
+
+nav ul.primary-nav {
+  margin-top: 5em;
+}
+
+nav li a {
+  color: white;
+  text-decoration: none;
+  display: block;
+  padding: 0.5em;
+  font-size: 1.3em;
+  text-align: right;
+}
+
+nav li a:hover {
+  font-weight: bold;
+}
+
+.mobile-menu-exit {
+  float: right;
+  margin: 0.5em;
+  cursor: pointer;
+}
+/* //hero section */
+.hero {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1rem;
+  align-items: start;
+  margin: 1rem 1rem;
+  padding-top: 3rem;
+}
+.text_container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  gap: 1rem;
+}
+.text_container h1 {
+  font-size: 2.5rem;
+  margin: 0;
+}
+.text_container > h1 > span {
+  color: var(--primary-color);
+}
+.text_container p {
+  font-size: 1.2em;
+  line-height: 1.8rem;
+  font-family: "Times New Roman", Times, serif;
+}
+/* // Responsive */
+@media only screen and (min-width: 768px) {
+  .mobile-menu,
+  .mobile-menu-exit {
+    display: none;
+  }
+  .navbar .container {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: 180px auto;
+    grid-template-columns: 180px auto;
+    -webkit-box-pack: unset;
+    -ms-flex-pack: unset;
+    justify-content: unset;
+  }
+  .navbar nav {
+    display: flex;
+    justify-content: space-between;
+    position: unset;
+    height: auto;
+    width: 100%;
+    background: none;
+    padding: 0;
+  }
+  .navbar nav ul {
+    display: flex;
+  }
+  .navbar nav a {
+    color: black;
+    font-size: 1em;
+    padding: 0.1em 1em;
+  }
+  .navbar nav ul.primary-nav {
+    margin: 0;
+  }
+  .navbar nav li.current a {
+    font-weight: bold;
+  }
+  .navbar nav li.go-premium-cta a {
+    color: var(--primary-color);
+    border: 3px solid var(--primary-color);
+    font-weight: bold;
+    border-radius: 5em;
+    margin-top: 0.2em;
+  }
+  .navbar nav li.go-premium-cta a:hover {
+    background: var(--primary-color);
+    color: white;
+  }
+}
+
+@media only screen and (min-width: 1080px) {
+  .container {
+    width: 1080px;
+    margin: 0 auto;
+  }
+  Section {
+    padding: 10em 4em;
+  }
+}
+/*# sourceMappingURL=style.css.map */
+/* CSS */
+.btn {
+  background-color: #33a9ec;
+  border-radius: 8px;
+  border-style: none;
+  box-sizing: border-box;
+  color: #ffffff;
+  cursor: pointer;
+  display: block;
+  font-weight: 500;
+  height: 40px;
+  line-height: 20px;
+  list-style: none;
+  margin: 0;
+  outline: none;
+  padding: 10px 16px;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  transition: color 100ms;
+  user-select: none;
+  touch-action: manipulation;
+  width: 15rem;
+}
+.primary {
+  background-color: #1383b3;
+  color: #fff;
+  margin-right: 10px;
+  line-height: 30px;
+}
+.secondary {
+  background-color: #fff;
+  color: #1383b3;
+  border: 2px solid #1383b3;
+  line-height: 26px;
+}
+.btn:hover,
+.btn:focus {
+  background-color: #0b9df2;
+}
