@@ -1,5 +1,7 @@
-import { getCurrentUser, toast } from "./index.js";
+import { toast } from "./index.js";
 import DbService from "./db.js";
+import { getDaysDiff, formatNumber } from "./utils.js";
+const dashboardContainer = document.querySelector(".dashboardPage");
 const biddingCount = document.getElementById("biddingCount");
 const bookingCount = document.getElementById("bookingCount");
 const noOfAdmin = document.getElementById("noOfAdmin");
@@ -18,88 +20,50 @@ const commissionRate = 0.25;
 let carschart = null;
 let bookingsChart = null;
 let revenueCharts = null;
-window.addEventListener("load", () => {
-  loadApprovals();
-  loadStat();
-  addEventListener();
-  carChart();
-  bookingChart();
-  revenueChart();
+function showLoader() {
+  const main = document.querySelector(".dashboard-main");
+  const loader = document.createElement("div");
+  loader.className = "loader-overlay";
+  loader.innerHTML = "<div class='loader'></div>";
+  main.appendChild(loader);
+}
+function hideLoader() {
+  const loader = document.querySelector(".loader-overlay");
+  if (loader) loader.remove();
+}
+dashboardContainer.addEventListener("click", (e) => {
+  const target = e.target.closest(".dashboard-page");
+  if (!target) return;
+  dashboardContainer
+    .querySelectorAll(".dashboard-page")
+    .forEach((page) => page.classList.remove("active"));
+  target.classList.add("active");
+  const selectedId = target.dataset.id;
+  document
+    .querySelectorAll(".dashboard-main > .hidden-section")
+    .forEach((section) => (section.style.display = "none"));
+  switch (selectedId) {
+    case "home":
+      document.getElementById("home").style.display = "flex";
+      loadStat();
+      break;
+    case "stat":
+      document.getElementById("carChart").style.display = "flex";
+      document.getElementById("bookingsChart").style.display = "flex";
+      carChart();
+      bookingChart();
+      break;
+    case "analytics":
+      document.getElementById("revenueChart").style.display = "flex";
+      revenueChart();
+      break;
+    case "approvals":
+      document.getElementById("approvals").style.display = "flex";
+      loadApprovals();
+      break;
+  }
 });
-async function loadApprovals() {
-  try {
-    const approvalBody = document.getElementById("approvalsBody");
-    const approvalFilterValue = document.getElementById("approvalFilter").value;
-    let approvals = await DbService.getAllItems("approvals");
-    approvals = approvals.filter((app) => app.status == approvalFilterValue);
-    approvalBody.innerHTML = "";
-    approvals.forEach((app) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-      <td data-label="Approval ID">${app.id}</td>
-      <td data-label="User ID">${app.userId}</td>
-      <td data-label="Email">${app.email}</td>
-      <td data-label="Request Date">${new Date(
-        app.createdAt
-      ).toDateString()}</td>
-      ${
-        approvalFilterValue == "pending"
-          ? `<td data-label="Actions">
-        <button class="btn-approve" data-id="${app.id}">Approve</button>
-        <button class="btn-deny" data-id="${app.id}">Cancel</button>
-      </td>`
-          : `<td data-label="Status">${approvalFilterValue}</td>`
-      }
-    `;
-
-      approvalBody.appendChild(tr);
-    });
-  } catch (error) {
-    console.log(error);
-    toast("error", "Error loading approvals").showToast();
-  }
-}
-async function loadStat() {
-  try {
-    const nUsers = await DbService.countItems("users", "id");
-    const nCars = await DbService.countItems("cars", "id");
-
-    const allBids = await DbService.getAllItems("bids");
-    let revenue = 0,
-      noOfPendingBids = 0,
-      noOfRejectedBids = 0,
-      noOfApprovedBids = 0,
-      noOfBids = 0,
-      totalDay = 0;
-    for (let bid of allBids) {
-      const days = getDaysDiff(bid.startDate, bid.endDate);
-      if (bid.status == "pending") {
-        noOfPendingBids++;
-      } else if (bid.status == "rejected") {
-        noOfRejectedBids++;
-      } else {
-        noOfApprovedBids++;
-        revenue += Number(bid.amount) * days * commissionRate; //25% commission
-      }
-      totalDay += days;
-      noOfBids++;
-    }
-    //assigning data
-    biddingCount.textContent = noOfBids;
-    bookingCount.textContent = noOfApprovedBids;
-    conversionRatio.textContent = `${Math.floor(
-      (noOfApprovedBids / noOfBids) * 100
-    )}%`;
-    noOfAdmin.textContent = nUsers;
-    nOfCars.textContent = nCars;
-    totalRevenue.textContent = `Rs.${revenue}`;
-    rejectedBids.textContent = noOfRejectedBids;
-    averageRentDay.textContent = `${Math.floor(totalDay / noOfBids)}`;
-  } catch (error) {
-    toast("error", "Error loading stat").showToast();
-  }
-}
-function addEventListener() {
+function addEventListeners() {
   const approvalBody = document.getElementById("approvalsBody");
   approvalBody.addEventListener("click", (e) => {
     const approve = e.target.closest(".btn-approve");
@@ -114,6 +78,11 @@ function addEventListener() {
   document.getElementById("approvalFilter").addEventListener("change", () => {
     loadApprovals();
   });
+  document
+    .getElementById("sortOrderApproval")
+    .addEventListener("change", () => {
+      loadApprovals();
+    });
   chartType.addEventListener("change", () => {
     carChart();
   });
@@ -133,14 +102,106 @@ function addEventListener() {
     revenueChart();
   });
 }
+window.addEventListener("load", () => {
+  loadStat();
+  addEventListeners();
+});
+async function loadApprovals() {
+  try {
+    showLoader();
+    const approvalBody = document.getElementById("approvalsBody");
+    const approvalFilterValue = document.getElementById("approvalFilter").value;
+    const sortFilterValue = document.getElementById("sortFilterApproval").value;
+    const sortOrderValue = document.getElementById("sortOrderApproval").value;
+    let approvals = await DbService.getAllItems("approvals");
+    if (approvalFilterValue !== "all") {
+      approvals = approvals.filter((app) => app.status === approvalFilterValue);
+    }
+    if (sortFilterValue === "date") {
+      approvals = approvals.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+    }
+    if (sortOrderValue === "desc") {
+      approvals.reverse();
+    }
+    if (approvals.length === 0) {
+      approvalBody.innerHTML = `<tr><td colspan="5" class="no-data">There is no data</td></tr>`;
+      return;
+    }
+    approvalBody.innerHTML = "";
+    for (const app of approvals) {
+      const tr = document.createElement("tr");
+      const user = await DbService.getItem("users", app.userId);
+      tr.innerHTML = `
+        <td data-label="Name">${app.name}</td>
+        <td data-label="Adhaar">${user.adhaar}</td>
+        <td data-label="Email">${app.email}</td>
+        <td data-label="Request Date">${new Date(
+          app.createdAt
+        ).toDateString()}</td>
+        ${
+          app.status === "pending"
+            ? `<td data-label="Actions">
+                <button class="btn-approve" data-id="${app.id}">Approve</button>
+                <button class="btn-deny" data-id="${app.id}">Cancel</button>
+              </td>`
+            : `<td data-label="Status">${app.status}</td>`
+        }
+      `;
+      approvalBody.appendChild(tr);
+    }
+  } catch (error) {
+    toast("error", "Error loading approvals").showToast();
+  } finally {
+    hideLoader();
+  }
+}
+async function loadStat() {
+  showLoader();
+  try {
+    const nUsers = await DbService.countItems("users", "id");
+    const nCars = await DbService.countItems("cars", "id");
+    const allBids = await DbService.getAllItems("bids");
+    let revenue = 0,
+      noOfPendingBids = 0,
+      noOfRejectedBids = 0,
+      noOfApprovedBids = 0,
+      noOfBids = 0,
+      totalDay = 0;
+    for (let bid of allBids) {
+      const days = getDaysDiff(bid.startDate, bid.endDate);
+      if (bid.status === "pending") {
+        noOfPendingBids++;
+      } else if (bid.status === "rejected") {
+        noOfRejectedBids++;
+      } else {
+        noOfApprovedBids++;
+        revenue += Number(bid.amount) * days * commissionRate;
+      }
+      totalDay += days;
+      noOfBids++;
+    }
+    biddingCount.textContent = formatNumber(noOfBids);
+    bookingCount.textContent = formatNumber(noOfApprovedBids);
+    conversionRatio.textContent = `${Math.floor(
+      (noOfApprovedBids / noOfBids) * 100
+    )}%`;
+    noOfAdmin.textContent = formatNumber(nUsers);
+    nOfCars.textContent = formatNumber(nCars);
+    totalRevenue.textContent = `Rs.${formatNumber(revenue)}`;
+    rejectedBids.textContent = formatNumber(noOfRejectedBids);
+    averageRentDay.textContent = `${Math.floor(totalDay / noOfBids)} days`;
+  } catch (error) {
+    toast("error", "Error loading stats").showToast();
+  } finally {
+    hideLoader();
+  }
+}
 async function approveRequest(id) {
   try {
-    const user = getCurrentUser();
     const approval = await DbService.getItem("approvals", id);
-    await DbService.updateItem("approvals", {
-      id,
-      status: "approved",
-    });
+    await DbService.updateItem("approvals", { id, status: "approved" });
     await DbService.updateItem("users", { id: approval.userId, role: "admin" });
     toast("success", "Request approved").showToast();
     loadApprovals();
@@ -148,21 +209,15 @@ async function approveRequest(id) {
     toast("error", "Error approving request").showToast();
   }
 }
-
 async function denyRequest(id) {
   try {
-    await DbService.updateItem("approvals", {
-      id,
-      status: "rejected",
-    });
+    await DbService.updateItem("approvals", { id, status: "rejected" });
     toast("success", "Request rejected").showToast();
     loadApprovals();
   } catch (error) {
     toast("error", "Error denying request").showToast();
   }
 }
-
-// bookingChart Function
 async function bookingChart() {
   try {
     const analyticsField = bookingFilter?.value;
@@ -176,9 +231,7 @@ async function bookingChart() {
     );
     let groupedData, datasetLabel;
     if (analyticsField === "status") {
-      groupedData = groupData(bidsWithCars, (bid) => {
-        return bid.status;
-      });
+      groupedData = groupData(bidsWithCars, (bid) => bid.status);
       datasetLabel = "Number of Bookings by Status";
       const data = buildChartData(groupedData, datasetLabel);
       loadChart(data, typeOfChart, "bookChart");
@@ -200,47 +253,6 @@ async function bookingChart() {
     toast("error", "Error loading booking chart").showToast();
   }
 }
-function groupDataForBids(bids, keyAccessor, options = {}) {
-  const approved = {};
-  const all = {};
-  bids.forEach((bid) => {
-    const key = keyAccessor(bid) || "Unknown";
-    if (bid.status == "approved") {
-      approved[key] = (approved[key] || 0) + 1;
-    }
-    all[key] = (all[key] || 0) + 1;
-  });
-  return { approved, all };
-}
-function buildChartDataForBids(groupedData) {
-  const labels = Object.keys(groupedData.approved);
-  const dataValuesForApproved = Object.values(groupedData.approved);
-  const dataValuesForAll = Object.values(groupedData.all);
-  console.log("approved", dataValuesForApproved);
-  console.log("all", dataValuesForAll);
-  console.log(labels);
-  const numItems = labels.length;
-  return {
-    labels: labels,
-    datasets: [
-      {
-        label: "Bookings",
-        data: dataValuesForApproved,
-        backgroundColor: generateRandomColors(numItems, 0.5),
-        borderColor: generateRandomColors(numItems, 1),
-        borderWidth: 1,
-      },
-      {
-        label: "Bids",
-        data: dataValuesForAll,
-        backgroundColor: generateRandomColors(numItems, 0.5),
-        borderColor: generateRandomColors(numItems, 1),
-        borderWidth: 1,
-      },
-    ],
-  };
-}
-//revenueChart Function
 async function revenueChart() {
   try {
     const analyticsField = revenueFilter?.value;
@@ -274,12 +286,12 @@ async function revenueChart() {
       analyticsField.charAt(0).toUpperCase() +
       analyticsField.slice(1);
     const data = buildChartData(groupedData, datasetLabel);
-    loadChart(data, typeOfChart, "revenueChart", true);
+    loadChart(data, typeOfChart, "chartRevenue", true);
   } catch (error) {
+    console.log(error);
     toast("error", "Error loading revenue chart").showToast();
   }
 }
-// carChart Function
 async function carChart() {
   try {
     const cars = await DbService.searchAllByIndex("cars", "show", "true");
@@ -296,8 +308,6 @@ async function carChart() {
     toast("error", "Error loading car chart").showToast();
   }
 }
-
-//utils
 function groupData(items, keyAccessor, options = {}) {
   const grouped = {};
   const { summationField, status } = options;
@@ -305,10 +315,10 @@ function groupData(items, keyAccessor, options = {}) {
     const key = keyAccessor(item) || "Unknown";
     if (summationField) {
       let val;
-      if (status == "all") {
+      if (status === "all") {
         val = Number(item[summationField]);
       } else {
-        val = item.status == status ? Number(item[summationField]) : 0;
+        val = item.status === status ? Number(item[summationField]) : 0;
       }
       val *=
         getDaysDiff(item.startDate, item.endDate) *
@@ -320,9 +330,20 @@ function groupData(items, keyAccessor, options = {}) {
   });
   return grouped;
 }
-
+function groupDataForBids(bids, keyAccessor, options = {}) {
+  const approved = {};
+  const all = {};
+  bids.forEach((bid) => {
+    const key = keyAccessor(bid) || "Unknown";
+    if (bid.status === "approved") {
+      approved[key] = (approved[key] || 0) + 1;
+    }
+    all[key] = (all[key] || 0) + 1;
+  });
+  return { approved, all };
+}
 function buildChartData(groupedData, datasetLabel) {
-  let labels = Object.keys(groupedData);
+  const labels = Object.keys(groupedData);
   const dataValues = Object.values(groupedData);
   const numItems = labels.length;
   return {
@@ -338,26 +359,42 @@ function buildChartData(groupedData, datasetLabel) {
     ],
   };
 }
+function buildChartDataForBids(groupedData) {
+  const labels = Object.keys(groupedData.approved);
+  const dataValuesForApproved = Object.values(groupedData.approved);
+  const dataValuesForAll = Object.values(groupedData.all);
+  const numItems = labels.length;
+  return {
+    labels: labels,
+    datasets: [
+      {
+        label: "Bookings",
+        data: dataValuesForApproved,
+        backgroundColor: "rgba(54, 162, 235, 0.5)",
+      },
+      {
+        label: "Bids",
+        data: dataValuesForAll,
+        backgroundColor: "rgba(255, 99, 132, 0.5)",
+      },
+    ],
+  };
+}
 function loadChart(data, chartType, id, isAmount = false) {
-  const ctx = document.getElementById(id).getContext("2d");
-  if (id == "chart" && carschart) {
+  const ctx = document.getElementById(id);
+  if (id === "chart" && carschart) {
     carschart.destroy();
   }
-  if (id == "bookChart" && bookingsChart) {
+  if (id === "bookChart" && bookingsChart) {
     bookingsChart.destroy();
   }
-  if (id == "revenueChart" && revenueCharts) {
+  if (id === "chartRevenue" && revenueCharts) {
     revenueCharts.destroy();
   }
-
   const yAxisTicksCallback = isAmount
-    ? function (value) {
-        return "Rs. " + value;
-      }
-    : function (value) {
-        return value % 1 === 0 ? value : "";
-      };
-  const chart = new Chart(ctx, {
+    ? (value) => "Rs. " + formatNumber(value)
+    : (value) => (value % 1 === 0 ? value : "");
+  const chartInstance = new Chart(ctx, {
     type: chartType,
     data: data,
     options: {
@@ -366,18 +403,12 @@ function loadChart(data, chartType, id, isAmount = false) {
         title: {
           display: true,
           text: data.datasets[0].label,
-          font: {
-            size: 20,
-            weight: "bold",
-          },
+          font: { size: 20, weight: "bold" },
           color: "#333",
         },
         legend: {
           labels: {
-            font: {
-              size: 14,
-              weight: "bold",
-            },
+            font: { size: 14, weight: "bold" },
             color: "#555",
           },
         },
@@ -389,39 +420,29 @@ function loadChart(data, chartType, id, isAmount = false) {
               y: {
                 beginAtZero: true,
                 ticks: {
-                  font: {
-                    size: 14,
-                    weight: "bold",
-                  },
+                  font: { size: 14, weight: "bold" },
                   color: "#333",
                   callback: yAxisTicksCallback,
                 },
               },
               x: {
                 ticks: {
-                  font: {
-                    size: 14,
-                    weight: "bold",
-                  },
+                  font: { size: 14, weight: "bold" },
                   color: "#333",
                 },
               },
             },
     },
   });
-
   if (id === "chart") {
-    carschart = chart;
+    carschart = chartInstance;
   }
-  if (id === "bookChart") bookingsChart = chart;
-  if (id === "revenueChart") revenueCharts = chart;
-}
-function getDaysDiff(startDate, endDate) {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  const diffInMilliseconds = end - start;
-  const diffInDays = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24)) + 1;
-  return diffInDays;
+  if (id === "bookChart") {
+    bookingsChart = chartInstance;
+  }
+  if (id === "chartRevenue") {
+    revenueCharts = chartInstance;
+  }
 }
 function generateRandomColors(count, opacity) {
   const colors = [];

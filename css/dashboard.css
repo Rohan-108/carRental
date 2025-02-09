@@ -1,102 +1,453 @@
-.userDetail {
+:root {
+  --sidebar-bg: #2c3e50;
+  --sidebar-hover: #34495e;
+  --sidebar-active: #1abc9c;
+  --sidebar-text: #ecf0f1;
+  --main-bg: #ecf0f1;
+  --main-padding: 2rem;
+  --border-radius: 0.5rem;
+  --box-shadow: 0 0.2rem 1rem rgba(0, 0, 0, 0.1);
+}
+.loader-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
   display: flex;
-  justify-content: space-between;
-  flex-direction: row;
-  flex-wrap: wrap;
-  margin-top: 1rem;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
 }
-#userAvatar {
-  width: 200px;
-  height: 200px;
+.loader {
+  border: 0.5rem solid #f3f3f3;
+  border-top: 0.5rem solid #3498db;
   border-radius: 50%;
-  object-fit: cover;
-  overflow: hidden;
+  width: 3rem;
+  height: 3rem;
+  animation: spin 1s linear infinite;
 }
-.details,
-.userCars,
-.bookings {
-  padding: 0.8rem;
-  /* min-width: 100%; */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
-.details > P {
+.no-data {
+  text-align: center;
+  padding: 1rem;
   font-size: 1rem;
-  font-weight: 600;
-  line-height: 2rem;
+  color: #888;
 }
-.imageContainer {
+.dashboard {
+  display: flex;
+  height: 91vh;
+}
+.dashboard-sidebar {
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  width: 15rem;
+  padding: 1rem;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+.dashboard-sidebar > p {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+}
+.dashboardPage {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.dashboard-page {
+  padding: 0.75rem 1rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s ease;
+}
+.dashboard-page:hover {
+  background-color: var(--sidebar-hover);
+}
+.dashboard-page::before {
+  margin-right: 0.5rem;
+  font-size: 1.25rem;
+}
+.dashboard-page[data-id="home"]::before {
+  content: "🏠";
+}
+.dashboard-page[data-id="bookings"]::before {
+  content: "📅";
+}
+.dashboard-page[data-id="biddings"]::before {
+  content: "💰";
+}
+.dashboard-page[data-id="approval"]::before {
+  content: "👤";
+}
+.dashboard-page.active {
+  background-color: var(--sidebar-active);
+  color: var(--sidebar-bg);
+}
+.dashboard-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background-color: var(--main-bg);
+  overflow-y: scroll;
+  overflow-x: hidden;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.profile-home {
   display: flex;
   justify-content: center;
-  align-items: center;
+  padding: 2rem;
+  background-color: var(--main-bg);
+}
+
+.profile-card {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 0.2rem 1rem rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 40rem;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+  gap: 1.5rem;
+}
+
+.profile-image {
+  position: relative;
+  width: 10rem;
+  height: 10rem;
+}
+
+.profile-image img {
+  width: 10rem;
+  height: 10rem;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 0.2rem solid var(--sidebar-active);
+}
+
+.edit-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-color: var(--sidebar-active);
+  border: none;
+  border-radius: 50%;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: var(--sidebar-bg);
+  font-size: 1.25rem;
+}
+
+.profile-details {
+  text-align: center;
+  width: 100%;
+}
+
+.profile-details h2 {
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.profile-details hr {
+  width: 50%;
+  margin: 0.5rem auto 1rem;
+  border: none;
+  border-top: 0.1rem solid #ddd;
+}
+
+.profile-details ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 1rem;
+  color: #555;
+}
+
+.profile-details li {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.icon {
+  font-size: 1.25rem;
+}
+
+.change-password-btn {
+  background-color: #e74c3c;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 1rem;
+}
+
+.change-password-btn:hover {
+  background-color: #c0392b;
+}
+.custom-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(0.5rem);
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+.custom-modal-inner {
+  background: #fff;
+  border-radius: var(--border-radius);
+  max-width: 50rem;
+  width: 90%;
+  max-height: 90vh;
+  padding: 1.5rem;
+  box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.2);
+  animation: modalFadeIn 0.3s ease-out;
+  overflow-y: auto;
+  margin: auto;
+}
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.custom-modal-header {
+  display: flex;
+  justify-content: flex-end;
+}
+.custom-modal-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+.custom-modal-body {
+  margin-top: 1rem;
+}
+.custom-modal-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.custom-form {
+  display: flex;
   flex-direction: column;
   gap: 1rem;
 }
-.imageContainer > img {
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-.imageContainer > button {
-  color: white;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-}
-.closeButton {
-  float: right;
-  cursor: pointer;
-}
-.carModal {
-  position: absolute;
-  inset: 0;
-  backdrop-filter: blur(5px);
-  z-index: 9999;
-}
-.innerModal {
-  padding: 1rem;
-  height: max-content;
-}
-.approved {
-  background-color: rgb(167, 45, 45);
+.form-group {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding-block: 1rem;
-  border-radius: 1rem;
+  gap: 0.5rem;
 }
-.approved > p {
-  color: white;
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+.form-group label {
   font-size: 1rem;
-  font-weight: 600;
+  color: #555;
 }
-/* Container styling for responsiveness */
-.bookingContainer {
-  width: 100%;
-  padding: 0 20px;
-  overflow-x: auto;
-  margin: 20px 0;
+.required {
+  color: red;
+  margin-left: 0.25rem;
 }
-
-.userCars {
-  display: flex;
-  flex-direction: column;
-  margin-block: 1rem;
+.form-group input,
+.form-group select {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 0.1rem solid #ccc;
+  border-radius: var(--border-radius);
+  outline: none;
+  transition: border-color 0.3s;
 }
-#noBooking,
-#noCars {
-  text-align: center;
-  font-size: 1.2rem;
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #3498db;
 }
-@media only screen and (max-width: 500px) {
+.custom-form input[type="submit"] {
+  background-color: #1abc9c;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--border-radius);
+  transition: background-color 0.3s;
+}
+.custom-form input[type="submit"]:hover {
+  background-color: #16a085;
+}
+@media (max-width: 40rem) {
+  .dashboard {
+    flex-direction: column;
+  }
+  .dashboard-sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .dashboard-sidebar > p {
+    display: none;
+  }
+  .dashboard-page {
+    margin: 0 0.5rem;
+  }
+  .dashboardPage {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+  }
+  .dashboard-main {
+    padding: 1rem;
+  }
   .userDetail {
-    flex-direction: column-reverse;
+    flex-direction: column;
     align-items: center;
   }
-  .details {
-    min-width: 100% !important;
+}
+
+/* table css */
+.tableSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: var(--white);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  height: 100%;
+}
+.chartHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.chartHeader h2 {
+  font-size: 1.5rem;
+  color: #333333;
+  margin: 0;
+  font-weight: 600;
+}
+
+.analytics {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 1rem;
+  width: 100%;
+  justify-content: flex-start;
+}
+.analytics > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.analytics label {
+  font-size: 0.875rem;
+  color: #666;
+}
+.analytics select {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  border: 0.1rem solid #ccc;
+  border-radius: 0.5rem;
+  background-color: #f8f8f8;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+.analytics select:focus {
+  border-color: #3498db;
+}
+
+@media (max-width: 40rem) {
+  .chartHeader {
+    flex-direction: column;
+    align-items: flex-start;
   }
+  .analytics {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .analytics .fields {
+    width: 48%;
+  }
+}
+
+.approval-section {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.approval-card {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 0.2rem 1rem rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  max-width: 30rem;
+  width: 100%;
+  text-align: center;
+}
+
+.approval-message {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.approval-btn {
+  background-color: #f1c40f;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.approval-btn:hover {
+  background-color: #f39c12;
 }

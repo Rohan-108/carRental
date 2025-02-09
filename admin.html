@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="./css/index.css" />
     <link rel="stylesheet" href="./css/admin.css" />
-    <link rel="stylesheet" href="css/table.css" />
+    <link rel="stylesheet" href="./css/table.css" />
     <link
       rel="stylesheet"
       type="text/css"
@@ -29,7 +29,7 @@
             id="mobile-exit"
             class="mobile-menu-exit"
             src="/images/exit.svg"
-            alt="close navigation"
+            alt="Close navigation"
           />
           <ul class="primary-nav">
             <li><a href="index.html">Home</a></li>
@@ -38,181 +38,216 @@
             <li><a href="chat.html" id="chatLink">Chat</a></li>
           </ul>
           <ul class="secondary-nav">
-            <li class="go-premium-cta" style="display: block" id="registerLink">
+            <li class="go-premium-cta" id="registerLink" style="display: block">
               <a href="register.html">Register</a>
             </li>
-            <li class="go-premium-cta" style="display: none" id="dashboardLink">
+            <li class="go-premium-cta" id="dashboardLink" style="display: none">
               <a href="carAdmin.html">Admin-Dashboard</a>
             </li>
-            <li class="go-premium-cta" style="display: none" id="logoutLink">
+            <li class="go-premium-cta" id="logoutLink" style="display: none">
               <a href="index.html">Logout</a>
             </li>
           </ul>
         </nav>
       </div>
     </div>
-
-    <div class="admin-container">
-      <div id="dashboard" class="dashboard-div">
-        <h2>Admin Dashboard</h2>
-        <div class="summary-cards">
-          <div class="card">
-            <h3>Total Bid</h3>
-            <p id="biddingCount">Loading...</p>
+    <div class="dashboard">
+      <div class="dashboard-sidebar">
+        <p>Dashboard</p>
+        <div class="dashboardPage">
+          <div class="dashboard-page active" data-id="home">Home</div>
+          <div class="dashboard-page" data-id="analytics">
+            Revenue Analytics
           </div>
-          <div class="card">
-            <h3>Total Booking</h3>
-            <p id="bookingCount">Loading...</p>
+          <div class="dashboard-page" data-id="stat">
+            Booking & Car Analytics
           </div>
-          <div class="card">
-            <h3>Users</h3>
-            <p><span id="noOfAdmin">Loading...</span></p>
-          </div>
-          <div class="card">
-            <h3>Cars</h3>
-            <p><span id="noOfCars">Loading...</span></p>
-          </div>
-          <div class="card">
-            <h3>Total Revenue</h3>
-            <p style="color: gray; font-size: 0.8rem">25% Commission</p>
-            <p><span id="revenue">Loading...</span></p>
-          </div>
-          <div class="card">
-            <h3>Average Rental Period</h3>
-            <p><span id="averageRentDay">Loading...</span></p>
-          </div>
-          <div class="card">
-            <h3>Rejected Bids</h3>
-            <p><span id="rejectedBids">Loading...</span></p>
-          </div>
-          <div class="card">
-            <h3>Conversion rate(total bookings/total bids)</h3>
-            <p><span id="conversionRatio">Loading...</span></p>
-          </div>
+          <div class="dashboard-page" data-id="approvals">Approvals</div>
         </div>
       </div>
-      <div class="revenueChart">
-        <div class="chartHeader">
-          <h2>Revenue Analytics</h2>
-          <div class="analytics">
-            <div class="field">
-              <label for="revenueFilter">Filter:</label>
-              <select name="revenueFilter" id="revenueFilter">
-                <option value="vehicleType">By Car Type</option>
-                <option value="status" selected>By Status</option>
-                <option value="fuelType">By FuelType</option>
-                <option value="transmission">By Transmission Type</option>
-                <option value="location">By Location</option>
-                <option value="plateNumber">By Per Car</option>
-                <option value="email">By Car Owner</option>
-              </select>
+      <main class="dashboard-main">
+        <section id="home" class="stat hidden-section">
+          <h2>Admin Dashboard</h2>
+          <div class="summary-cards">
+            <div class="card">
+              <h3>Total Bid</h3>
+              <p id="biddingCount">Loading...</p>
             </div>
-            <div class="field">
-              <label for="revenueChartType">Value:</label>
-              <select name="revenueChartType" id="revenueChartType">
-                <option value="bar" selected>Bar</option>
-                <option value="pie">Pie</option>
-                <option value="doughnut">DoughNut</option>
-              </select>
+            <div class="card">
+              <h3>Total Booking</h3>
+              <p id="bookingCount">Loading...</p>
             </div>
-          </div>
-        </div>
-        <div class="chart-container">
-          <canvas id="revenueChart"></canvas>
-        </div>
-      </div>
-      <div class="bidChart">
-        <div class="chartHeader">
-          <h2>Number of Bookings</h2>
-          <div class="analytics">
-            <div class="field">
-              <label for="bookingFilter">Filter:</label>
-              <select name="bookingFilter" id="bookingFilter">
-                <option value="vehicleType">By Car Type</option>
-                <option value="status" selected>By Status</option>
-                <option value="fuelType">By FuelType</option>
-                <option value="transmission">By Transmission Type</option>
-                <option value="location">By Location</option>
-                <option value="plateNumber">By CarID</option>
-              </select>
+            <div class="card">
+              <h3>Users</h3>
+              <p id="noOfAdmin">Loading...</p>
             </div>
-            <div class="field">
-              <label for="bookChartType">Value:</label>
-              <select name="bookChartType" id="bookChartType">
-                <option value="bar" selected>Bar</option>
-                <option value="pie">Pie</option>
-                <option value="doughnut">DoughNut</option>
-              </select>
+            <div class="card">
+              <h3>Cars</h3>
+              <p id="noOfCars">Loading...</p>
+            </div>
+            <div class="card">
+              <h3>Total Revenue</h3>
+              <p style="color: gray; font-size: 0.8rem">25% Commission</p>
+              <p id="revenue">Loading...</p>
+            </div>
+            <div class="card">
+              <h3>Average Rental Period</h3>
+              <p id="averageRentDay">Loading...</p>
+            </div>
+            <div class="card">
+              <h3>Rejected Bids</h3>
+              <p id="rejectedBids">Loading...</p>
+            </div>
+            <div class="card">
+              <h3>Conversion Ratio</h3>
+              <p id="conversionRatio">Loading...</p>
             </div>
           </div>
-        </div>
-        <div class="chart-container">
-          <canvas id="bookChart"></canvas>
-        </div>
-      </div>
-      <div class="carChart">
-        <div class="chartHeader">
-          <h2>Number of Cars</h2>
-          <div class="analytics">
-            <div class="field">
-              <label for="carfilter">Filter:</label>
-              <select name="carfilter" id="carfilter">
-                <option value="vehicleType" selected>By Car Type</option>
-                <option value="seats">By Seats</option>
-                <option value="fuelType">By FuelType</option>
-                <option value="transmission">By Transmission Type</option>
-                <option value="location">By Location</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="chartType">Value:</label>
-              <select name="chartType" id="chartType">
-                <option value="bar" selected>Bar</option>
-                <option value="pie">Pie</option>
-                <option value="doughnut">DoughNut</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="chart-container">
-          <canvas id="chart"></canvas>
-        </div>
-      </div>
-      <!-- Approvals div -->
-      <div id="approvals" class="approval-div">
-        <div class="div-header">
-          <h2>Users:</h2>
-        </div>
-        <div
-          style="
-            display: flex;
-            justify-content: end;
-            margin: 0.5rem;
-            gap: 0.5rem;
-          "
+        </section>
+        <section
+          id="revenueChart"
+          class="chart hidden-section"
+          style="display: none"
         >
-          <label for="approvalFilter">Filter by Status:</label>
-          <select id="approvalFilter">
-            <option value="pending">Pending</option>
-            <option value="rejected">Rejected</option>
-            <option value="approved">Approved</option>
-          </select>
-        </div>
-        <div class="table-container">
-          <table>
+          <div class="chartHeader">
+            <h2>Revenue Analytics</h2>
+            <div class="analytics">
+              <div class="field">
+                <label for="revenueFilter">Filter:</label>
+                <select name="revenueFilter" id="revenueFilter">
+                  <option value="vehicleType">By Car Type</option>
+                  <option value="fuelType">By FuelType</option>
+                  <option value="transmission">By Transmission Type</option>
+                  <option value="location" selected>By Location</option>
+                  <option value="plateNumber">By Per Car</option>
+                  <option value="email">By Car Owner</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="revenueChartType">Chart:</label>
+                <select name="revenueChartType" id="revenueChartType">
+                  <option value="bar" selected>Bar</option>
+                  <option value="pie">Pie</option>
+                  <option value="doughnut">DoughNut</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="chartRevenue"></canvas>
+          </div>
+        </section>
+        <section
+          id="bookingsChart"
+          class="chart hidden-section"
+          style="display: none"
+        >
+          <div class="chartHeader">
+            <h2>Number of Bookings</h2>
+            <div class="analytics">
+              <div class="field">
+                <label for="bookingFilter">Filter:</label>
+                <select name="bookingFilter" id="bookingFilter">
+                  <option value="vehicleType">By Car Type</option>
+                  <option value="status" selected>By Status</option>
+                  <option value="fuelType">By FuelType</option>
+                  <option value="transmission">By Transmission Type</option>
+                  <option value="location">By Location</option>
+                  <option value="plateNumber">By CarID</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="bookChartType">Chart:</label>
+                <select name="bookChartType" id="bookChartType">
+                  <option value="bar" selected>Bar</option>
+                  <option value="pie">Pie</option>
+                  <option value="doughnut">DoughNut</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="bookChart"></canvas>
+          </div>
+        </section>
+        <section
+          id="carChart"
+          class="chart hidden-section"
+          style="display: none"
+        >
+          <div class="chartHeader">
+            <h2>Number of Cars</h2>
+            <div class="analytics">
+              <div class="field">
+                <label for="carfilter">Filter:</label>
+                <select name="carfilter" id="carfilter">
+                  <option value="vehicleType" selected>By Car Type</option>
+                  <option value="seats">By Seats</option>
+                  <option value="fuelType">By FuelType</option>
+                  <option value="transmission">By Transmission Type</option>
+                  <option value="location">By Location</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="chartType">Chart:</label>
+                <select name="chartType" id="chartType">
+                  <option value="bar" selected>Bar</option>
+                  <option value="pie">Pie</option>
+                  <option value="doughnut">DoughNut</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="chart"></canvas>
+          </div>
+        </section>
+        <section
+          id="approvals"
+          class="hidden-section tableSection"
+          style="display: none"
+        >
+          <div class="chartHeader">
+            <h2>Approvals</h2>
+            <div class="analytics">
+              <div>
+                <label for="approvalFilter">Filter by Status:</label>
+                <select id="approvalFilter">
+                  <option value="all" selected>All</option>
+                  <option value="pending">Pending</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="approved">Approved</option>
+                </select>
+              </div>
+              <div>
+                <label for="sortFilterApproval">Sort by:</label>
+                <select id="sortFilterApproval">
+                  <option value="date" selected>Date Created</option>
+                </select>
+              </div>
+              <div>
+                <label for="sortOrderApproval">Order:</label>
+                <select id="sortOrderApproval">
+                  <option value="asc" selected>Ascending &#9650;</option>
+                  <option value="desc">Descending &#9660;</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <table id="approvalTable">
             <thead>
               <tr>
-                <th scope="col">Approval ID</th>
-                <th scope="col">UserID</th>
+                <th scope="col">User Name</th>
+                <th scope="col">Adhaar</th>
                 <th scope="col">Email</th>
                 <th scope="col">Request Date</th>
-                <th scope="col">Actions</th>
+                <th scope="col">status</th>
               </tr>
             </thead>
             <tbody id="approvalsBody"></tbody>
           </table>
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
     <script type="module" src="./js/index.js"></script>
     <script type="module" src="./js/db.js"></script>

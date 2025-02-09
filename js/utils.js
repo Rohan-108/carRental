@@ -28,6 +28,16 @@ function getDaysDiff(startDate, endDate) {
   const diffInDays = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24)) + 1;
   return diffInDays;
 }
+function formatNumber(num) {
+  if (Math.abs(num) < 1000) return num.toString();
+  const units = ["K", "M", "B", "T"];
+  let unitIndex = -1;
+  do {
+    num /= 1000;
+    unitIndex++;
+  } while (Math.abs(num) >= 1000 && unitIndex < units.length - 1);
+  return num.toFixed(1).replace(/\.0$/, "") + units[unitIndex];
+}
 
 const getFileFromInput = (input, index = 0) => {
   return new Promise((resolve, reject) => {
@@ -68,7 +78,13 @@ const cities = [
   "Vadodara",
   "Nashik",
 ];
-
+function debounce(func, wait) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+}
 export {
   isEmailValid,
   isPasswordStrong,
@@ -77,4 +93,6 @@ export {
   getDaysDiff,
   getFileFromInput,
   cities,
+  formatNumber,
+  debounce,
 };

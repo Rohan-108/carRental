@@ -3,21 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="./css/index.css" />
-    <link rel="stylesheet" href="./css/dashboard.css" />
-    <link rel="stylesheet" href="./css/form.css" />
-    <link rel="stylesheet" href="./css/cars.css" />
-    <link rel="stylesheet" href="css/cars.css" />
+    <title>Rent IT - Profile</title>
+    <link rel="stylesheet" href="css/index.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <link rel="stylesheet" href="css/form.css" />
     <link rel="stylesheet" href="css/table.css" />
-    <script type="module" src="./js/index.js"></script>
     <link
       rel="stylesheet"
       type="text/css"
       href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
     />
-    <script type="module" src="./js/db.js"></script>
-    <script type="module" src="./js/dashboard.js"></script>
-    <title>Rent IT- Dashboard</title>
   </head>
   <body>
     <div class="navbar">
@@ -34,169 +29,246 @@
             id="mobile-exit"
             class="mobile-menu-exit"
             src="/images/exit.svg"
-            alt="close navigation"
+            alt="Close navigation"
           />
           <ul class="primary-nav">
             <li><a href="index.html">Home</a></li>
             <li><a href="cars.html">Cars</a></li>
             <li class="current">
-              <a href="dashboard.html" id="profileLink">Profile</a>
+              <a href="profile.html" id="profileLink">Profile</a>
             </li>
             <li><a href="chat.html" id="chatLink">Chat</a></li>
           </ul>
           <ul class="secondary-nav">
-            <li class="go-premium-cta" style="display: block" id="registerLink">
+            <li class="go-premium-cta" id="registerLink" style="display: block">
               <a href="login.html">Login</a>
             </li>
-            <li class="go-premium-cta" style="display: none" id="dashboardLink">
+            <li class="go-premium-cta" id="dashboardLink" style="display: none">
               <a href="carAdmin.html">Dashboard</a>
             </li>
-            <li class="go-premium-cta" style="display: none" id="logoutLink">
+            <li class="go-premium-cta" id="logoutLink" style="display: none">
               <a href="index.html">Logout</a>
             </li>
           </ul>
         </nav>
       </div>
     </div>
-    <main class="container">
-      <div class="userDetail">
-        <div class="details">
-          <!-- inserted trhough js -->
-          <h2>Your Details</h2>
-          <hr />
-          <p>Name : <span id="name">loading...</span></p>
-          <p>Email : <span id="email">loading...</span></p>
-          <p>Phone Number : <span id="phone">loading...</span></p>
-          <p>Adhaar Number : <span id="adhaar">loading...</span></p>
-        </div>
-        <div class="imageContainer">
-          <img
-            src="https://picsum.photos/200/300"
-            alt="User photo"
-            id="userAvatar"
-          />
-          <button id="editProfile">✏️</button>
+    <div class="dashboard">
+      <div class="dashboard-sidebar">
+        <p>Profile</p>
+        <div class="dashboardPage">
+          <div class="dashboard-page active" data-id="home">Home</div>
+          <div class="dashboard-page" data-id="bookings">Bookings</div>
+          <div class="dashboard-page" data-id="biddings">Biddings</div>
+          <div class="dashboard-page" data-id="approval">Approval</div>
         </div>
       </div>
-      <div class="bookings">
-        <h2>Your Bookings</h2>
-        <hr />
-        <div class="bookingContainer">
-          <p id="noBooking" style="display: none">
-            You haven't rented anything yet.
-          </p>
-          <div class="bookingList">
-            <table id="bookingTable" class="bookingTable">
-              <thead>
-                <tr>
-                  <th scope="col">Booking ID</th>
-                  <th scope="col">Car Name</th>
-                  <th scope="col">Owner Name</th>
-                  <th scope="col">Start Date</th>
-                  <th scope="col">End Date</th>
-                  <th scope="col">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                <!-- Bidding rows will be dynamically populated -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <div class="bookings">
-        <h2>Your Biddings</h2>
-        <hr />
-        <div class="bookingContainer">
-          <!-- Inserted through JS -->
-          <p id="noBidding" style="display: none">
-            You haven't bid on anything yet.
-          </p>
-          <div class="bookingList">
-            <table id="biddingTable" class="bookingTable">
-              <thead>
-                <tr>
-                  <th scope="col">Bidding ID</th>
-                  <th scope="col">Car Name</th>
-                  <th scope="col">Owner Name</th>
-                  <th scope="col">Start Date</th>
-                  <th scope="col">End Date</th>
-                  <th scope="col">Amount</th>
-                  <th scope="col">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <!-- Bidding rows will be dynamically populated -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <div class="approved" id="approvalNotice" style="display: none">
-        <p>You'are not approved.</p>
-        <p>To become a car renter, seek approval.</p>
-        <button class="btn" id="seekApproval">Seek Approval</button>
-      </div>
-      <div class="carModal" id="profileModal" style="display: none">
-        <div class="formbg innerModal">
-          <div class="formbg-inner" style="padding: 1rem">
-            <div class="closeButton" id="editCloseButton">
-              <img src="./images/exit.svg" alt="Close" />
+      <main class="dashboard-main">
+        <section id="profileHome" class="hidden-section profile-home">
+          <div class="profile-card">
+            <div class="profile-image">
+              <img
+                src="https://picsum.photos/200/200"
+                alt="User Photo"
+                id="userAvatar"
+              />
+              <button id="editProfileBtn" class="edit-btn">✏️</button>
             </div>
-            <p class="padding-bottom--15 spanText">Update Profile</p>
-            <form id="editProfileForm" style="height: max-content">
-              <!-- Name Field -->
-              <div class="field">
-                <label for="name">Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  id="name"
-                  placeholder="Enter your full name"
-                  pattern="^[A-Za-z\s]{3,50}$"
-                  title="Name must contain only letters and be 3-50 characters long."
-                  required
-                  autocomplete="name"
-                />
-              </div>
-              <!-- Phone Number Field -->
-              <div class="field">
-                <label for="phone">Phone Number</label>
-                <input
-                  type="tel"
-                  name="phone"
-                  id="phone"
-                  placeholder="Enter your phone number"
-                  pattern="^\d{10}$"
-                  title="Phone number must be 10 digits long"
-                  autocomplete="tel"
-                  required
-                />
-              </div>
-              <div class="field">
-                <label for="avatar">Avatar</label>
-                <input
-                  type="file"
-                  name="avatar"
-                  id="avatar"
-                  accept="image/jpg, image/jpeg, image/png"
-                  title="Upload a new image to change the existing one(size less than 500kb)"
-                  multiple
-                />
-              </div>
-              <div class="field">
-                <input
-                  type="submit"
-                  name="submit"
-                  value="Change"
-                  style="margin: 0"
-                />
-              </div>
-            </form>
+            <div class="profile-details">
+              <h2>Your Details</h2>
+              <hr />
+              <ul>
+                <li>
+                  <span class="icon">👤</span> <span class="label">Name:</span>
+                  <span id="name">loading...</span>
+                </li>
+                <li>
+                  <span class="icon">📧</span>
+                  <span class="label">Email:</span>
+                  <span id="email">loading...</span>
+                </li>
+                <li>
+                  <span class="icon">📞</span>
+                  <span class="label">Phone:</span>
+                  <span id="phone">loading...</span>
+                </li>
+                <li>
+                  <span class="icon">🆔</span>
+                  <span class="label">Adhaar:</span>
+                  <span id="adhaar">loading...</span>
+                </li>
+              </ul>
+              <button class="change-password-btn">🔒 Change Password</button>
+            </div>
           </div>
+        </section>
+
+        <section
+          id="profileBookings"
+          class="hidden-section tableSection"
+          style="display: none"
+        >
+          <div class="chartHeader">
+            <h2>Bookings</h2>
+            <div class="analytics">
+              <div>
+                <label for="sortFilterBooking">Sort by:</label>
+                <select id="sortFilterBooking">
+                  <option value="date" selected>Date Created</option>
+                  <option value="amount">Amount</option>
+                </select>
+              </div>
+              <div>
+                <label for="sortOrderBooking">Order:</label>
+                <select id="sortOrderBooking">
+                  <option value="asc" selected>Ascending &#9650;</option>
+                  <option value="desc">Descending &#9660;</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <table id="bookingTable">
+            <thead>
+              <tr>
+                <th scope="col">Car Name</th>
+                <th scope="col">Owner</th>
+                <th scope="col">Plate Number</th>
+                <th scope="col">Start Date</th>
+                <th scope="col">End Date</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Confirmed At</th>
+              </tr>
+            </thead>
+            <tbody id="bookingContainer">
+              <!-- Bidding rows will be dynamically populated -->
+            </tbody>
+          </table>
+        </section>
+        <section
+          id="profileBiddings"
+          class="hidden-section tableSection"
+          style="display: none"
+        >
+          <div class="chartHeader">
+            <h2>Biddings</h2>
+            <div class="analytics">
+              <div>
+                <label for="statusFilter">Filter by Status:</label>
+                <select id="statusFilter">
+                  <option value="all" selected>All</option>
+                  <option value="pending">Pending</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+              <div>
+                <label for="sortFilterBidding">Sort by:</label>
+                <select id="sortFilterBidding">
+                  <option value="date" selected>Date Created</option>
+                  <option value="amount">Amount</option>
+                </select>
+              </div>
+              <div>
+                <label for="sortOrderBidding">Order:</label>
+                <select id="sortOrderBidding">
+                  <option value="asc" selected>Ascending &#9650;</option>
+                  <option value="desc">Descending &#9660;</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <table id="biddingTable">
+            <thead>
+              <tr>
+                <th scope="col">Car Name</th>
+                <th scope="col">Owner</th>
+                <th scope="col">Plate Number</th>
+                <th scope="col">Start Date</th>
+                <th scope="col">End Date</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody id="biddingContainer"></tbody>
+          </table>
+        </section>
+        <section
+          id="approvalSection"
+          class="approval-section hidden-section"
+          style="display: none"
+        >
+          <div class="approval-card">
+            <p id="approvalMessage" class="approval-message">
+              Your account is not approved yet.
+            </p>
+            <button id="seekApprovalBtn" class="approval-btn">
+              Seek Approval
+            </button>
+          </div>
+        </section>
+      </main>
+    </div>
+    <div class="custom-modal" id="profileModal" style="display: none">
+      <div class="custom-modal-inner">
+        <div class="custom-modal-header">
+          <button class="custom-modal-close" id="editCloseButton">
+            <img src="./images/exit.svg" alt="Close" />
+          </button>
+        </div>
+        <div class="custom-modal-body">
+          <p class="custom-modal-title">Update Profile</p>
+          <form id="editProfileForm" class="custom-form" style="height: auto">
+            <div class="form-group">
+              <label for="profileName"
+                >Name <span class="required">*</span></label
+              >
+              <input
+                type="text"
+                name="name"
+                id="profileName"
+                placeholder="Enter your full name"
+                pattern="^[A-Za-z\s]{3,50}$"
+                title="Name must contain only letters and be 3-50 characters long."
+                required
+                autocomplete="name"
+              />
+            </div>
+            <div class="form-group">
+              <label for="profilePhone"
+                >Phone Number <span class="required">*</span></label
+              >
+              <input
+                type="tel"
+                name="phone"
+                id="profilePhone"
+                placeholder="Enter your phone number"
+                pattern="^\d{10}$"
+                title="Phone number must be 10 digits long"
+                autocomplete="tel"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="profileAvatar">Avatar</label>
+              <input
+                type="file"
+                name="avatar"
+                id="profileAvatar"
+                accept="image/jpg, image/jpeg, image/png"
+                title="Upload a new image to change the existing one (size less than 500kb)"
+                multiple
+              />
+            </div>
+            <div class="form-group full-width">
+              <input type="submit" name="submit" value="Change" />
+            </div>
+          </form>
         </div>
       </div>
-    </main>
+    </div>
+    <script type="module" src="js/index.js"></script>
+    <script type="module" src="js/utils.js"></script>
+    <script type="module" src="js/db.js"></script>
+    <script type="module" src="./js/dashboard.js"></script>
     <script
       type="text/javascript"
       src="https://cdn.jsdelivr.net/npm/toastify-js"

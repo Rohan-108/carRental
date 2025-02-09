@@ -3,18 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RENT IT - Cars</title>
     <link rel="stylesheet" href="./css/index.css" />
     <link rel="stylesheet" href="./css/cars.css" />
-    <script type="module" src="./js/index.js"></script>
+    <link rel="stylesheet" href="./css/table.css" />
     <link
       rel="stylesheet"
       type="text/css"
       href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
     />
-    <script type="module" src="./js/db.js"></script>
     <script type="module" src="./js/index.js"></script>
+    <script type="module" src="./js/db.js"></script>
     <script type="module" src="./js/car.js"></script>
-    <title>RENT IT- CARS</title>
   </head>
   <body>
     <div class="navbar">
@@ -31,7 +31,7 @@
             id="mobile-exit"
             class="mobile-menu-exit"
             src="/images/exit.svg"
-            alt="close navigation"
+            alt="Close navigation"
           />
           <ul class="primary-nav">
             <li><a href="index.html">Home</a></li>
@@ -40,22 +40,22 @@
             <li><a href="chat.html" id="chatLink">Chat</a></li>
           </ul>
           <ul class="secondary-nav">
-            <li class="go-premium-cta" style="display: block" id="registerLink">
+            <li class="go-premium-cta" id="registerLink" style="display: block">
               <a href="login.html">Login</a>
             </li>
-            <li class="go-premium-cta" style="display: none" id="dashboardLink">
+            <li class="go-premium-cta" id="dashboardLink" style="display: none">
               <a href="carAdmin.html">Dashboard</a>
             </li>
-            <li class="go-premium-cta" style="display: none" id="logoutLink">
+            <li class="go-premium-cta" id="logoutLink" style="display: none">
               <a href="index.html">Logout</a>
             </li>
           </ul>
         </nav>
       </div>
     </div>
-    <main class="container">
-      <div class="search-filter-container">
-        <div class="search-bar">
+    <main class="cars-page">
+      <aside class="cars-sidebar">
+        <div class="search-section">
           <label for="search">Search</label>
           <input
             type="text"
@@ -63,7 +63,6 @@
             name="search"
             placeholder="Search by car name"
           />
-          <button id="toggleFilter" class="filter-toggle">Filters</button>
         </div>
         <div class="filter-panel" id="filterPanel">
           <div class="filter-group">
@@ -73,23 +72,42 @@
             </select>
           </div>
           <div class="filter-group">
+            <label for="fuelType">Fuel Type</label>
+            <select name="fuelType" id="fuelType" required>
+              <option value="All" selected>All</option>
+              <option value="Petrol">Petrol</option>
+              <option value="Diesel">Diesel</option>
+              <option value="Electric">Electric</option>
+              <option value="Hybrid">Hybrid</option>
+            </select>
+          </div>
+          <div class="filter-group">
             <label for="carType">Car Type</label>
             <select id="carType" name="carType">
-              <option value="All" selected>All Type</option>
+              <option value="All" selected>All Types</option>
               <option value="Sedan">Sedan</option>
-              <option value="Suv">SUV</option>
+              <option value="SUV">SUV</option>
               <option value="Hatchback">Hatchback</option>
               <option value="Convertible">Convertible</option>
             </select>
           </div>
-          <button id="applyFilters" class="btn">Apply Filters</button>
+          <div class="filter-group">
+            <label for="transmission">Transmission</label>
+            <select name="transmission" id="transmission" required>
+              <option value="All" selected>Select transmission type</option>
+              <option value="Automatic">Automatic</option>
+              <option value="Manual">Manual</option>
+            </select>
+          </div>
+          <button id="applyFilters" class="btn apply-btn">Apply Filters</button>
+          <button id="clearFilters" class="btn clear-btn">Clear Filters</button>
         </div>
-      </div>
-
-      <div class="cars">
+      </aside>
+      <section class="cars-main">
         <h2>Our Cars</h2>
         <div class="carContainer" id="carContainer"></div>
-      </div>
+        <div class="pagination" id="pagination"></div>
+      </section>
     </main>
     <script
       type="text/javascript"

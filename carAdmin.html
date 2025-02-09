@@ -31,7 +31,7 @@
             id="mobile-exit"
             class="mobile-menu-exit"
             src="/images/exit.svg"
-            alt="close navigation"
+            alt="Close navigation"
           />
           <ul class="primary-nav">
             <li class="current"><a href="index.html">Home</a></li>
@@ -54,164 +54,247 @@
       </div>
     </div>
 
-    <main class="container">
-      <div class="dataSection">
-        <h2>Your Numbers</h2>
-        <div class="summary-cards">
-          <div class="card">
-            <h3>Total Bid</h3>
-            <p id="biddingCount">Loading...</p>
-          </div>
-          <div class="card">
-            <h3>Total Booking</h3>
-            <p id="bookingCount">Loading...</p>
-          </div>
-          <div class="card">
-            <h3>Cars</h3>
-            <p><span id="noOfCars">Loading...</span></p>
-          </div>
-          <div class="card">
-            <h3>Total Revenue</h3>
-            <p style="color: gray; font-size: 0.8rem">
-              After 25% Commission Cut
-            </p>
-            <p><span id="revenue">Loading...</span></p>
-          </div>
-          <div class="card">
-            <h3>Average Rental Period</h3>
-            <p><span id="averageRentDay">Loading...</span></p>
-          </div>
-          <div class="card">
-            <h3>Rejected Bids</h3>
-            <p><span id="rejectedBids">Loading...</span></p>
-          </div>
+    <div class="dashboard">
+      <div class="dashboard-sidebar">
+        <p>Dashboard</p>
+        <div class="dashboardPage">
+          <div class="dashboard-page active" data-id="home">Home</div>
+          <div class="dashboard-page" data-id="cars">Cars</div>
+          <div class="dashboard-page" data-id="bookings">Bookings</div>
+          <div class="dashboard-page" data-id="biddings">Biddings</div>
+          <div class="dashboard-page" data-id="analytics">Analytics</div>
         </div>
       </div>
-      <!-- Car Cards Section -->
-      <div id="car-cards-section">
-        <div class="card-header">
-          <h2>My Cars</h2>
-          <div style="display: flex; gap: 0.2rem">
-            <button class="btn" id="addCar" style="width: 8rem">
-              Add New Car
-            </button>
-            <select name="archived" id="archived">
-              <option value="true">Cars</option>
-              <option value="false">Archieved Cars</option>
-            </select>
-          </div>
-        </div>
-        <div id="carCardsGrid">
-          <!-- Car cards will be dynamically populated -->
-        </div>
-      </div>
-      <!-- Bidding Section -->
-      <div id="bidding-section">
-        <h2>Biddings:</h2>
-        <div class="filters">
-          <div>
-            <label for="carFilter">Filter by Car:</label>
-            <select id="carFilter">
-              <option value="all">All Cars</option>
-              <!-- Car filter options will be dynamically populated -->
-            </select>
-          </div>
-          <div>
-            <label for="carFilter">Filter by Status:</label>
-            <select id="statusFilter">
-              <option value="pending">Pending</option>
-              <option value="rejected">Rejected</option>
-              <option value="approved">Approved</option>
-            </select>
-          </div>
-        </div>
-        <table id="biddingTable">
-          <thead>
-            <tr>
-              <th scope="col">Bid ID</th>
-              <th scope="col">Car Name</th>
-              <th scope="col">Renter</th>
-              <th scope="col">Start Date</th>
-              <th scope="col">End Date</th>
-              <th scope="col">Amount</th>
-              <th scope="col">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="biddingConatiner">
-            <!-- Bidding rows will be dynamically populated -->
-          </tbody>
-        </table>
-      </div>
-      <div id="bidding-chart">
-        <div class="chartHeader">
-          <h2>Revenue Analytics</h2>
-          <div class="analytics">
-            <div class="fields">
-              <label for="revenueFilter">Filter:</label>
-              <select name="revenueFilter" id="revenueFilter">
-                <option value="vehicleType">By Car Type</option>
-                <option value="status">By Status</option>
-                <option value="fuelType">By FuelType</option>
-                <option value="transmission">By Transmission Type</option>
-                <option value="location" selected>By Location</option>
-                <option value="plateNumber">By CarID</option>
-              </select>
+      <main class="dashboard-main">
+        <div class="dataSection hidden-section" id="dataSection">
+          <h2>Your Numbers</h2>
+          <div class="summary-cards">
+            <div class="card">
+              <h3>Total Bid</h3>
+              <p id="biddingCount">Loading...</p>
             </div>
-            <div class="fields">
-              <label for="revenueChartType">Chart:</label>
-              <select name="revenueChartType" id="revenueChartType">
-                <option value="bar" selected>Bar</option>
-                <option value="pie">Pie</option>
-                <option value="doughnut">DoughNut</option>
-              </select>
+            <div class="card">
+              <h3>Total Booking</h3>
+              <p id="bookingCount">Loading...</p>
+            </div>
+            <div class="card">
+              <h3>Cars</h3>
+              <p><span id="noOfCars">Loading...</span></p>
+            </div>
+            <div class="card">
+              <h3>Total Revenue</h3>
+              <p style="color: gray; font-size: 0.8rem">
+                After 25% Commission Cut
+              </p>
+              <p><span id="revenue">Loading...</span></p>
+            </div>
+            <div class="card">
+              <h3>Average Rental Period</h3>
+              <p><span id="averageRentDay">Loading...</span></p>
+            </div>
+            <div class="card">
+              <h3>Rejected Bids</h3>
+              <p><span id="rejectedBids">Loading...</span></p>
             </div>
           </div>
         </div>
-        <div class="chart-container">
-          <canvas id="revenueChart"></canvas>
-        </div>
-      </div>
-      <div id="bidding-chart">
-        <div class="chartHeader">
-          <h2>Booking Analytics</h2>
-          <div class="analytics">
-            <div class="fields">
-              <label for="bookingFilter">Filter:</label>
-              <select name="bookingFilter" id="bookingFilter">
-                <option value="vehicleType">By Car Type</option>
-                <option value="status" selected>By Status</option>
-                <option value="fuelType">By FuelType</option>
-                <option value="transmission">By Transmission Type</option>
-                <option value="location">By Location</option>
-                <option value="plateNumber">By CarID</option>
-              </select>
-            </div>
-            <div class="fields">
-              <label for="bookChartType">Chart:</label>
-              <select name="bookChartType" id="bookChartType">
-                <option value="bar" selected>Bar</option>
-                <option value="pie">Pie</option>
-                <option value="doughnut">DoughNut</option>
-              </select>
+
+        <!-- Car Cards Section -->
+        <div id="car-cards-section" class="hidden-section">
+          <div class="card-header">
+            <h2>My Cars</h2>
+            <div style="display: flex; gap: 0.2rem">
+              <button class="btn" id="addCar" style="width: 8rem">
+                Add New Car
+              </button>
+              <!-- <select name="archived" id="archived">
+                <option value="true">Cars</option>
+                <option value="false">Archieved Cars</option>
+              </select> -->
             </div>
           </div>
+          <div id="carCardsGrid">
+            <!-- Car cards will be dynamically populated -->
+          </div>
+          <div class="pagination"></div>
         </div>
-        <div class="chart-container">
-          <canvas id="bookChart"></canvas>
+
+        <!-- Bidding Section -->
+        <div id="bidding-section" class="hidden-section tableSection">
+          <div class="chartHeader">
+            <h2>Biddings</h2>
+            <div class="analytics">
+              <div>
+                <label for="carFilter">Filter by Car:</label>
+                <select id="carFilter">
+                  <option value="all">All Cars</option>
+                  <!-- Car filter options will be dynamically populated -->
+                </select>
+              </div>
+              <div>
+                <label for="statusFilter">Filter by Status:</label>
+                <select id="statusFilter">
+                  <option value="all" selected>All</option>
+                  <option value="pending">Pending</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="approved">Approved</option>
+                </select>
+              </div>
+              <div>
+                <label for="sortFilterBidding">Sort by:</label>
+                <select id="sortFilterBidding">
+                  <option value="date" selected>Date Created</option>
+                  <option value="amount">Amount</option>
+                </select>
+              </div>
+              <div>
+                <label for="sortOrderBidding">Order:</label>
+                <select id="sortOrderBidding">
+                  <option value="asc" selected>Ascending &#9650;</option>
+                  <option value="desc">Descending &#9660;</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <table id="biddingTable">
+            <thead>
+              <tr>
+                <th scope="col">Car Name</th>
+                <th scope="col">Renter</th>
+                <th scope="col">Adhaar Number</th>
+                <th scope="col">Start Date</th>
+                <th scope="col">End Date</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="biddingContainer">
+              <!-- Bidding rows will be dynamically populated -->
+            </tbody>
+          </table>
+          <div class="pagination"></div>
         </div>
-      </div>
-    </main>
-    <div class="carModal" id="carModal" style="display: none">
-      <div class="formbg innerModal">
-        <div class="formbg-inner" style="padding: 1rem">
-          <div class="closeButton" id="closeButton">
+        <!-- Booking Section -->
+        <div id="booking-section" class="hidden-section tableSection">
+          <div class="chartHeader">
+            <h2>Bookings</h2>
+            <div class="analytics">
+              <div>
+                <label for="carFilterBooking">Filter by Car:</label>
+                <select id="carFilterBooking">
+                  <option value="all">All Cars</option>
+                  <!-- Car filter options will be dynamically populated -->
+                </select>
+              </div>
+              <div>
+                <label for="sortFilterBooking">Sort by:</label>
+                <select id="sortFilterBooking">
+                  <option value="date" selected>Date Created</option>
+                  <option value="amount">Amount</option>
+                </select>
+              </div>
+              <div>
+                <label for="sortOrderBooking">Order:</label>
+                <select id="sortOrderBooking">
+                  <option value="asc" selected>Ascending &#9650;</option>
+                  <option value="desc">Descending &#9660;</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <table id="bookingTable">
+            <thead>
+              <tr>
+                <th scope="col">Car Name</th>
+                <th scope="col">Renter</th>
+                <th scope="col">Adhaar Number</th>
+                <th scope="col">Start Date</th>
+                <th scope="col">End Date</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Confirmed At</th>
+              </tr>
+            </thead>
+            <tbody id="bookingContainer">
+              <!-- Bidding rows will be dynamically populated -->
+            </tbody>
+          </table>
+          <div class="pagination"></div>
+        </div>
+        <!-- Revenue Analytics Section -->
+        <div id="revenue-chart" class="hidden-section chart">
+          <div class="chartHeader">
+            <h2>Revenue Analytics</h2>
+            <div class="analytics">
+              <div class="fields">
+                <label for="revenueFilter">Filter:</label>
+                <select name="revenueFilter" id="revenueFilter">
+                  <option value="vehicleType">By Car Type</option>
+                  <option value="status">By Status</option>
+                  <option value="fuelType">By FuelType</option>
+                  <option value="transmission">By Transmission Type</option>
+                  <option value="location" selected>By Location</option>
+                  <option value="plateNumber">By CarID</option>
+                </select>
+              </div>
+              <div class="fields">
+                <label for="revenueChartType">Chart:</label>
+                <select name="revenueChartType" id="revenueChartType">
+                  <option value="bar" selected>Bar</option>
+                  <option value="pie">Pie</option>
+                  <option value="doughnut">DoughNut</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="revenueChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Booking Analytics Section -->
+        <div id="booking-chart" class="hidden-section chart">
+          <div class="chartHeader">
+            <h2>Booking Analytics</h2>
+            <div class="analytics">
+              <div class="fields">
+                <label for="bookingFilter">Filter:</label>
+                <select name="bookingFilter" id="bookingFilter">
+                  <option value="vehicleType">By Car Type</option>
+                  <option value="status" selected>By Status</option>
+                  <option value="fuelType">By FuelType</option>
+                  <option value="transmission">By Transmission Type</option>
+                  <option value="location">By Location</option>
+                  <option value="plateNumber">By CarID</option>
+                </select>
+              </div>
+              <div class="fields">
+                <label for="bookChartType">Chart:</label>
+                <select name="bookChartType" id="bookChartType">
+                  <option value="bar" selected>Bar</option>
+                  <option value="pie">Pie</option>
+                  <option value="doughnut">DoughNut</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="bookChart"></canvas>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div class="custom-modal" id="carModal" style="display: none">
+      <div class="custom-modal-inner">
+        <div class="custom-modal-header">
+          <button class="custom-modal-close" id="closeButton">
             <img src="./images/exit.svg" alt="Close" />
-          </div>
-          <p class="padding-bottom--15 spanText">Register Your Car Details</p>
-          <form id="addCarForm">
-            <!-- Car Name -->
-            <div class="flexFields"></div>
-            <div class="field">
+          </button>
+        </div>
+        <div class="custom-modal-body">
+          <p class="custom-modal-title">Register Your Car Details</p>
+          <form id="addCarForm" class="custom-form grid-form">
+            <div class="form-group">
               <label for="carName">Car Name</label>
               <input
                 type="text"
@@ -224,9 +307,7 @@
                 autocomplete="off"
               />
             </div>
-
-            <!-- Vehicle Type -->
-            <div class="field selectOne">
+            <div class="form-group select-group">
               <label for="vehicleType">Vehicle Type</label>
               <select name="vehicleType" id="vehicleType" required>
                 <option value="" disabled selected>Select vehicle type</option>
@@ -237,9 +318,7 @@
                 <option value="Convertible">Convertible</option>
               </select>
             </div>
-
-            <!-- Number of Seats -->
-            <div class="field">
+            <div class="form-group">
               <label for="seats">Number of Seats</label>
               <input
                 type="number"
@@ -251,9 +330,7 @@
                 required
               />
             </div>
-
-            <!-- Fuel Type -->
-            <div class="field selectOne">
+            <div class="form-group select-group">
               <label for="fuelType">Fuel Type</label>
               <select name="fuelType" id="fuelType" required>
                 <option value="" disabled selected>Select fuel type</option>
@@ -263,9 +340,7 @@
                 <option value="Hybrid">Hybrid</option>
               </select>
             </div>
-
-            <!-- Transmission -->
-            <div class="field selectOne">
+            <div class="form-group select-group">
               <label for="transmission">Transmission</label>
               <select name="transmission" id="transmission" required>
                 <option value="" disabled selected>
@@ -275,8 +350,7 @@
                 <option value="Manual">Manual</option>
               </select>
             </div>
-            <!--Plate Number-->
-            <div class="field">
+            <div class="form-group">
               <label for="plateNumber">Plate Number</label>
               <input
                 type="text"
@@ -287,8 +361,7 @@
                 required
               />
             </div>
-            <!-- Base Rental Price (Per Day) -->
-            <div class="field">
+            <div class="form-group">
               <label for="rentalPrice">Base Rental Price (Rs/day)</label>
               <input
                 type="number"
@@ -301,17 +374,13 @@
                 required
               />
             </div>
-
-            <!-- Location -->
-            <div class="field selectOne">
+            <div class="form-group select-group">
               <label for="location">Location</label>
               <select name="location" id="location" required>
                 <option value="">Select City</option>
               </select>
             </div>
-
-            <!-- Minimum Rental Period -->
-            <div class="field">
+            <div class="form-group">
               <label for="minRental">Minimum Rental Period (Days)</label>
               <input
                 type="number"
@@ -324,9 +393,7 @@
                 required
               />
             </div>
-
-            <!-- Maximum Rental Period -->
-            <div class="field">
+            <div class="form-group">
               <label for="maxRental">Maximum Rental Period (Days)</label>
               <input
                 type="number"
@@ -334,12 +401,12 @@
                 id="maxRental"
                 placeholder="Maximum rental period in days"
                 min="1"
-                title="Maximum rental period should be between 1 and 365 days"
                 max="365"
+                title="Maximum rental period should be between 1 and 365 days"
                 required
               />
             </div>
-            <div class="field">
+            <div class="form-group">
               <label for="carImage">Car Image</label>
               <input
                 type="file"
@@ -350,29 +417,30 @@
                 required
               />
             </div>
-            <!-- Submit Button -->
-            <div class="field">
-              <input
-                type="submit"
-                name="submit"
-                value="Register Car"
-                style="margin: 0"
-              />
+            <div class="form-group full-width">
+              <input type="submit" name="submit" value="Register Car" />
             </div>
           </form>
         </div>
       </div>
     </div>
-    <div class="carModal" id="editModal" style="display: none">
-      <div class="formbg innerModal">
-        <div class="formbg-inner" style="padding: 1rem">
-          <div class="closeButton" id="editCloseButton">
+
+    <div class="custom-modal" id="editModal" style="display: none">
+      <div class="custom-modal-inner">
+        <div class="custom-modal-header">
+          <button class="custom-modal-close" id="editCloseButton">
             <img src="./images/exit.svg" alt="Close" />
-          </div>
-          <p class="padding-bottom--15 spanText">Change Your Car Details</p>
-          <form id="editCarForm" style="height: max-content" data-id="">
-            <!-- Base Rental Price (Per Day) -->
-            <div class="field">
+          </button>
+        </div>
+        <div class="custom-modal-body">
+          <p class="custom-modal-title">Change Your Car Details</p>
+          <form
+            id="editCarForm"
+            class="custom-form"
+            data-id=""
+            style="height: auto"
+          >
+            <div class="form-group">
               <label for="rentalPrice">Base Rental Price (Rs/day)</label>
               <input
                 type="number"
@@ -385,17 +453,13 @@
                 required
               />
             </div>
-
-            <!-- Location -->
-            <div class="field selectOne">
+            <div class="form-group select-group">
               <label for="location">Location</label>
               <select name="location" id="location" required>
                 <option value="">Select City</option>
               </select>
             </div>
-
-            <!-- Minimum Rental Period -->
-            <div class="field">
+            <div class="form-group">
               <label for="minRental">Minimum Rental Period (Days)</label>
               <input
                 type="number"
@@ -408,9 +472,7 @@
                 required
               />
             </div>
-
-            <!-- Maximum Rental Period -->
-            <div class="field">
+            <div class="form-group">
               <label for="maxRental">Maximum Rental Period (Days)</label>
               <input
                 type="number"
@@ -418,35 +480,30 @@
                 id="maxRental"
                 placeholder="Maximum rental period in days"
                 min="1"
-                title="Maximum rental period should be between 1 and 365 days"
                 max="365"
+                title="Maximum rental period should be between 1 and 365 days"
                 required
               />
             </div>
-            <div class="field">
+            <div class="form-group">
               <label for="carImage">Car Image</label>
               <input
                 type="file"
                 name="carImage"
                 id="carImage"
                 accept="image/jpg, image/jpeg, image/png"
-                title="Upload a new image to change the existing one(size less than 500kb)"
+                title="Upload a new image to change the existing one (size less than 500kb)"
                 multiple
               />
             </div>
-            <!-- Submit Button -->
-            <div class="field">
-              <input
-                type="submit"
-                name="submit"
-                value="Change"
-                style="margin: 0"
-              />
+            <div class="form-group full-width">
+              <input type="submit" name="submit" value="Change" />
             </div>
           </form>
         </div>
       </div>
     </div>
+
     <script type="module" src="./js/index.js"></script>
     <script type="module" src="./js/db.js"></script>
     <script type="module" src="./js/utils.js"></script>
