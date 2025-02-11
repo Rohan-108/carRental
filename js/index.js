@@ -16,11 +16,11 @@ function handleNavbar() {
   const registerLink = document.getElementById("registerLink");
   const profileLink = document.getElementById("profileLink");
   const chatLink = document.getElementById("chatLink");
+  const adminLink = document.getElementById("adminLink");
   if (currentUser) {
     if (currentUser.role == "admin") dashboardLink.style.display = "block";
     if (currentUser.role == "super-admin") {
-      dashboardLink.style.display = "block";
-      dashboardLink.childNodes[1].href = "pages/super-admin/admin.html";
+      adminLink.style.display = "block";
     }
     profileLink.style.display = "block";
     chatLink.style.display = "block";
