@@ -20,7 +20,7 @@ function handleNavbar() {
     if (currentUser.role == "admin") dashboardLink.style.display = "block";
     if (currentUser.role == "super-admin") {
       dashboardLink.style.display = "block";
-      dashboardLink.childNodes[1].href = "admin.html";
+      dashboardLink.childNodes[1].href = "pages/super-admin/admin.html";
     }
     profileLink.style.display = "block";
     chatLink.style.display = "block";
@@ -48,7 +48,36 @@ rentitButton?.addEventListener("click", () => {
   goToPage("cars");
 });
 function goToPage(page) {
-  window.location.href = `/${page}.html`;
+  let p = "";
+  switch (page) {
+    case "login":
+      p = `/pages/login/login.html`;
+      break;
+    case "register":
+      p = `/pages/register/register.html`;
+      break;
+    case "dashboard":
+      p = `/pages/profile/dashboard.html`;
+      break;
+    case "admin":
+      p = `/pages/super-admin/admin.html`;
+      break;
+    case "carAdmin":
+      p = `/pages/car-admin/carAdmin.html`;
+      break;
+    case "cars":
+      p = `/pages/cars/cars.html`;
+      break;
+    case "carDetail":
+      p = `/pages/car-detail/carDetail.html`;
+      break;
+    case "chat":
+      p = `/pages/chat/chat.html`;
+      break;
+    default:
+      p = `/${page}.html`;
+  }
+  window.location.href = p;
 }
 
 function toast(type, message, duration) {

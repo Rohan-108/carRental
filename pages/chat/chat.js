@@ -1,6 +1,6 @@
-import { toast, getCurrentUser } from "./index.js";
-import { getFileFromInput } from "./utils.js";
-import DbService from "./db.js";
+import { toast, getCurrentUser } from "../../js/index.js";
+import { getFileFromInput } from "../../js/utils.js";
+import DbService from "../../js/db.js";
 const messageBox = document.getElementById("messageBox");
 const sendBtn = document.getElementById("send");
 const closeModal = document.getElementById("closeButton");

@@ -1,9 +1,9 @@
-import { goToPage, toast, setCurrentCarId } from "./index.js";
-import { cities, debounce } from "./utils.js";
-import DbService from "./db.js";
+import { goToPage, toast, setCurrentCarId } from "../../js/index.js";
+import { cities, debounce } from "../../js/utils.js";
+import DbService from "../../js/db.js";
 
 let currentPage = 1;
-const pageSize = 10;
+const pageSize = 3;
 
 const applyFiltersBtn = document.getElementById("applyFilters");
 const clearFiltersBtn = document.getElementById("clearFilters");
@@ -11,6 +11,17 @@ const city = document.getElementById("city");
 const carType = document.getElementById("carType");
 const transmission = document.getElementById("transmission");
 const fuelType = document.getElementById("fuelType");
+function showLoader() {
+  const mainContainer = document.getElementById("carContainer");
+  const loader = document.createElement("div");
+  loader.className = "loader-overlay";
+  loader.innerHTML = "<div class='loader'></div>";
+  mainContainer.appendChild(loader);
+}
+function hideLoader() {
+  const loader = document.querySelector(".loader-overlay");
+  if (loader) loader.remove();
+}
 window.addEventListener("load", async () => {
   setFilter();
   await setCars();
@@ -25,6 +36,7 @@ function setFilter() {
     city.appendChild(option);
   });
   applyFiltersBtn.addEventListener("click", async function () {
+    showLoader();
     currentPage = 1;
     try {
       const cars = await getCars();
@@ -32,25 +44,79 @@ function setFilter() {
     } catch (error) {
       console.log(error);
       toast("error", "Failed to apply filters").showToast();
+    } finally {
+      hideLoader();
     }
   });
   clearFiltersBtn.addEventListener("click", async function () {
+    showLoader();
     try {
       city.value = "All";
       carType.value = "All";
       transmission.value = "All";
       fuelType.value = "All";
       currentPage = 1;
+      const rangeInput = document.querySelectorAll(".range-input input");
+      const rangePrice = document.querySelectorAll(".range-price input");
+      rangeInput[0].value = 0;
+      rangeInput[1].value = 10000;
+      rangePrice[0].value = 0;
+      rangePrice[1].value = 10000;
       const cars = await getCars();
       renderCars(cars, "carContainer");
     } catch (error) {
       console.log(error);
       toast("error", "Failed to clear filters").showToast();
+    } finally {
+      hideLoader();
     }
+  });
+  //range slider logic
+  let rangeMin = 500;
+  const range = document.querySelector(".range-selected");
+  const rangeInput = document.querySelectorAll(".range-input input");
+  const rangePrice = document.querySelectorAll(".range-price input");
+
+  rangeInput.forEach((input) => {
+    input.addEventListener("input", (e) => {
+      let minRange = parseInt(rangeInput[0].value);
+      let maxRange = parseInt(rangeInput[1].value);
+      if (maxRange - minRange < rangeMin) {
+        if (e.target.className === "min") {
+          rangeInput[0].value = maxRange - rangeMin;
+        } else {
+          rangeInput[1].value = minRange + rangeMin;
+        }
+      } else {
+        rangePrice[0].value = minRange;
+        rangePrice[1].value = maxRange;
+        range.style.left = (minRange / rangeInput[0].max) * 100 + "%";
+        range.style.right = 100 - (maxRange / rangeInput[1].max) * 100 + "%";
+      }
+    });
+  });
+
+  rangePrice.forEach((input) => {
+    input.addEventListener("input", (e) => {
+      let minPrice = rangePrice[0].value;
+      let maxPrice = rangePrice[1].value;
+      if (maxPrice - minPrice >= rangeMin && maxPrice <= rangeInput[1].max) {
+        if (e.target.className === "min") {
+          rangePrice[0].value = minPrice;
+          rangeInput[0].value = minPrice;
+          range.style.left = (minPrice / rangeInput[0].max) * 100 + "%";
+        } else {
+          rangePrice[1].value = maxPrice;
+          rangeInput[1].value = maxPrice;
+          range.style.right = 100 - (maxPrice / rangeInput[1].max) * 100 + "%";
+        }
+      }
+    });
   });
 }
 
 async function setCars() {
+  showLoader();
   try {
     const cars = await getCars();
     if (cars && cars.length !== 0) {
@@ -59,18 +125,25 @@ async function setCars() {
   } catch (error) {
     console.error(error);
     toast("error", "Failed to set car details").showToast();
+  } finally {
+    hideLoader();
   }
 }
 
 async function getCars(query) {
   try {
     let cars;
+    const rangeInput = document.querySelectorAll(".range-input input");
+    const minPrice = parseInt(rangeInput[0].value);
+    const maxPrice = parseInt(rangeInput[1].value);
     if (
       city.value === "All" &&
       carType.value === "All" &&
       transmission.value === "All" &&
       fuelType.value === "All" &&
-      (!query || query === "")
+      (!query || query === "") &&
+      minPrice === 0 &&
+      maxPrice === 100000
     ) {
       const result = await DbService.getPaginatedItems("cars", {
         page: currentPage,
@@ -99,6 +172,9 @@ async function getCars(query) {
           car.name.toLowerCase().includes(query.toLowerCase())
         );
       }
+      cars = cars.filter(
+        (car) => car.rentalPrice >= minPrice && car.rentalPrice <= maxPrice
+      );
       const totalItems = cars.length;
       const totalPages = Math.ceil(totalItems / pageSize);
       if (currentPage > totalPages) currentPage = totalPages;
@@ -118,6 +194,10 @@ async function getCars(query) {
 function renderCars(cars, id) {
   const carsContainer = document.getElementById(id);
   carsContainer.innerHTML = "";
+  if (cars.length === 0) {
+    carsContainer.innerHTML = `<div>No cars found</div>`;
+    return;
+  }
   carsContainer.innerHTML = cars
     .map((car) => {
       let imgUrl = "https://picsum.photos/200/300";
@@ -156,9 +236,16 @@ function renderPagination(totalPages, current) {
   prevButton.textContent = "Previous";
   prevButton.disabled = current <= 1;
   prevButton.addEventListener("click", async () => {
-    currentPage = current - 1;
-    const cars = await getCars();
-    renderCars(cars, "carContainer");
+    showLoader();
+    try {
+      currentPage = current - 1;
+      const cars = await getCars();
+      renderCars(cars, "carContainer");
+    } catch (error) {
+      toast("error", "Failed to load previous page").showToast();
+    } finally {
+      hideLoader();
+    }
   });
   const pageIndicator = document.createElement("span");
   pageIndicator.textContent = `Page ${current} of ${totalPages}`;
@@ -166,9 +253,16 @@ function renderPagination(totalPages, current) {
   nextButton.textContent = "Next";
   nextButton.disabled = current >= totalPages;
   nextButton.addEventListener("click", async () => {
-    currentPage = current + 1;
-    const cars = await getCars();
-    renderCars(cars, "carContainer");
+    showLoader();
+    try {
+      currentPage = current + 1;
+      const cars = await getCars();
+      renderCars(cars, "carContainer");
+    } catch (error) {
+      toast("error", "Failed to load next page").showToast();
+    } finally {
+      hideLoader();
+    }
   });
   paginationDiv.appendChild(prevButton);
   paginationDiv.appendChild(pageIndicator);
@@ -190,10 +284,17 @@ function addEventListeners() {
     searchInput.addEventListener(
       "input",
       debounce(async (event) => {
-        currentPage = 1;
-        const query = event.target.value?.trim();
-        const cars = await getCars(query);
-        renderCars(cars, "carContainer");
+        try {
+          showLoader();
+          currentPage = 1;
+          const query = event.target.value?.trim();
+          const cars = await getCars(query);
+          renderCars(cars, "carContainer");
+        } catch (error) {
+          toast("error", "Failed to search").showToast();
+        } finally {
+          hideLoader();
+        }
       }, 300)
     );
   }

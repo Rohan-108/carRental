@@ -8,17 +8,17 @@
       type="text/css"
       href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
     />
-    <link rel="stylesheet" href="./css/carDetail.css" />
-    <link rel="stylesheet" href="./css/index.css" />
-    <link rel="stylesheet" href="css/chat.css" />
-    <link rel="stylesheet" href="css/form.css" />
+    <link rel="stylesheet" href="./carDetail.css" />
+    <link rel="stylesheet" href="../../css/index.css" />
+    <link rel="stylesheet" href="../../css/chat.css" />
+    <link rel="stylesheet" href="../../css/form.css" />
     <script src="https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.umd.min.js"></script>
     <title>RENT-IT - Car Details</title>
   </head>
   <body>
     <div class="navbar">
       <div class="container">
-        <a class="logo" href="index.html">RENT <span>IT</span></a>
+        <a class="logo" href="../../index.html">RENT <span>IT</span></a>
         <img
           id="mobile-cta"
           class="mobile-menu"
@@ -33,20 +33,22 @@
             alt="close navigation"
           />
           <ul class="primary-nav">
-            <li class="current"><a href="index.html">Home</a></li>
-            <li><a href="cars.html">Cars</a></li>
-            <li><a href="dashboard.html" id="profileLink">Profile</a></li>
-            <li><a href="chat.html" id="chatLink">Chat</a></li>
+            <li class="current"><a href="../../index.html">Home</a></li>
+            <li><a href="../cars/cars.html">Cars</a></li>
+            <li>
+              <a href="../profile/dashboard.html" id="profileLink">Profile</a>
+            </li>
+            <li><a href="../chat/chat.html" id="chatLink">Chat</a></li>
           </ul>
           <ul class="secondary-nav">
             <li class="go-premium-cta" style="display: block" id="registerLink">
-              <a href="login.html">Login</a>
+              <a href="../login/login.html">Login</a>
             </li>
             <li class="go-premium-cta" style="display: none" id="dashboardLink">
-              <a href="carAdmin.html">Dashboard</a>
+              <a href="../car-admin/carAdmin.html">Dashboard</a>
             </li>
             <li class="go-premium-cta" style="display: none" id="logoutLink">
-              <a href="index.html">Logout</a>
+              <a href="../../index.html">Logout</a>
             </li>
           </ul>
         </nav>
@@ -120,7 +122,7 @@
             <p>min:<span id="minRentalPeriod"></span> days</p>
             <p>max:<span id="maxRentalPeriod"></span> days</p>
           </div>
-          <label for="amount" style="margin: 0">Pick your price:</label>
+          <label for="amount" style="margin: 0">Pick your price per day:</label>
           <input
             id="amount"
             type="number"
@@ -198,11 +200,11 @@
       type="text/javascript"
       src="https://cdn.jsdelivr.net/npm/toastify-js"
     ></script>
-    <script type="module" src="./js/index.js"></script>
-    <script type="module" src="./js/utils.js"></script>
-    <script type="module" src="./js/db.js"></script>
-    <script type="module" src="./js/carDetail.js"></script>
-    <script type="module" src="./js/carChat.js"></script>
-    <script type="module" src="./js/rental.js"></script>
+    <script type="module" src="../../js/index.js"></script>
+    <script type="module" src="../../js/utils.js"></script>
+    <script type="module" src="../../js/db.js"></script>
+    <script type="module" src="./carDetail.js"></script>
+    <script type="module" src="./carChat.js"></script>
+    <script type="module" src="./rental.js"></script>
   </body>
 </html>

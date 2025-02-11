@@ -1,6 +1,6 @@
-import { toast } from "./index.js";
-import DbService from "./db.js";
-import { getDaysDiff, formatNumber } from "./utils.js";
+import { toast } from "../../js/index.js";
+import DbService from "../../js/db.js";
+import { getDaysDiff, formatNumber } from "../../js/utils.js";
 const dashboardContainer = document.querySelector(".dashboardPage");
 const biddingCount = document.getElementById("biddingCount");
 const bookingCount = document.getElementById("bookingCount");
@@ -17,9 +17,13 @@ const bookingFilter = document.getElementById("bookingFilter");
 const revenueFilter = document.getElementById("revenueFilter");
 const revenueChartType = document.getElementById("revenueChartType");
 const commissionRate = 0.25;
+let currentPage = 1;
+let pageSize = 5;
 let carschart = null;
 let bookingsChart = null;
 let revenueCharts = null;
+let dailyRevenueChart = null;
+let compChart = null;
 function showLoader() {
   const main = document.querySelector(".dashboard-main");
   const loader = document.createElement("div");
@@ -55,7 +59,18 @@ dashboardContainer.addEventListener("click", (e) => {
       break;
     case "analytics":
       document.getElementById("revenueChart").style.display = "flex";
+      document.getElementById("dailyRevenueChartSection").style.display =
+        "flex";
+      document.getElementById("comparisonChart").style.display = "flex ";
+      const today = new Date();
+      const endDate = today.toISOString().split("T")[0];
+      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const startDate = startOfMonth.toISOString().split("T")[0];
+      document.getElementById("startDate").value = startDate;
+      document.getElementById("endDate").value = endDate;
       revenueChart();
+      loadDailyRevenueChart();
+      loadComparisonChart();
       break;
     case "approvals":
       document.getElementById("approvals").style.display = "flex";
@@ -102,8 +117,11 @@ function addEventListeners() {
     revenueChart();
   });
 }
-window.addEventListener("load", () => {
+async function setup() {
   loadStat();
+}
+window.addEventListener("load", () => {
+  setup();
   addEventListeners();
 });
 async function loadApprovals() {
@@ -129,6 +147,13 @@ async function loadApprovals() {
       approvalBody.innerHTML = `<tr><td colspan="5" class="no-data">There is no data</td></tr>`;
       return;
     }
+    const totalItems = approvals.length;
+    const totalPages = Math.ceil(totalItems / pageSize);
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+    const start = (currentPage - 1) * pageSize;
+    approvals = approvals.slice(start, start + pageSize);
+    renderPagination(totalPages, currentPage, loadApprovals, "approvals");
     approvalBody.innerHTML = "";
     for (const app of approvals) {
       const tr = document.createElement("tr");
@@ -143,8 +168,10 @@ async function loadApprovals() {
         ${
           app.status === "pending"
             ? `<td data-label="Actions">
-                <button class="btn-approve" data-id="${app.id}">Approve</button>
-                <button class="btn-deny" data-id="${app.id}">Cancel</button>
+                <button class="btn-approve" style="background-color:green;
+                color:#fff;border-radius:1rem;" data-id="${app.id}">Approve</button>
+                <button class="btn-deny" style="background-color:red;
+                color:#fff;border-radius:1rem;"  data-id="${app.id}">Cancel</button>
               </td>`
             : `<td data-label="Status">${app.status}</td>`
         }
@@ -200,6 +227,8 @@ async function loadStat() {
 }
 async function approveRequest(id) {
   try {
+    const prompt = confirm("Do you want to approve this request?");
+    if (!prompt) return;
     const approval = await DbService.getItem("approvals", id);
     await DbService.updateItem("approvals", { id, status: "approved" });
     await DbService.updateItem("users", { id: approval.userId, role: "admin" });
@@ -211,6 +240,8 @@ async function approveRequest(id) {
 }
 async function denyRequest(id) {
   try {
+    const prompt = confirm("Do you want to reject this request?");
+    if (!prompt) return;
     await DbService.updateItem("approvals", { id, status: "rejected" });
     toast("success", "Request rejected").showToast();
     loadApprovals();
@@ -391,6 +422,9 @@ function loadChart(data, chartType, id, isAmount = false) {
   if (id === "chartRevenue" && revenueCharts) {
     revenueCharts.destroy();
   }
+  if (id === "chartComparison" && compChart) {
+    compChart.destroy();
+  }
   const yAxisTicksCallback = isAmount
     ? (value) => "Rs. " + formatNumber(value)
     : (value) => (value % 1 === 0 ? value : "");
@@ -443,6 +477,9 @@ function loadChart(data, chartType, id, isAmount = false) {
   if (id === "chartRevenue") {
     revenueCharts = chartInstance;
   }
+  if (id === "chartComparison") {
+    compChart = chartInstance;
+  }
 }
 function generateRandomColors(count, opacity) {
   const colors = [];
@@ -454,3 +491,211 @@ function generateRandomColors(count, opacity) {
   }
   return colors;
 }
+function renderPagination(totalPages, current, fn, sectionId) {
+  const paginationDiv = document.querySelector(`#${sectionId} .pagination`);
+  paginationDiv.innerHTML = "";
+  // if (totalPages <= 1) return;
+  const prevButton = document.createElement("button");
+  prevButton.classList.add("pagination-button");
+  prevButton.textContent = "Previous";
+  prevButton.disabled = current <= 1;
+  prevButton.addEventListener("click", async () => {
+    currentPage = current - 1;
+    await fn();
+  });
+  const pageIndicator = document.createElement("span");
+  pageIndicator.textContent = `Page ${current} of ${totalPages}`;
+  const nextButton = document.createElement("button");
+  nextButton.textContent = "Next";
+  nextButton.classList.add("pagination-button");
+  nextButton.disabled = current >= totalPages;
+  nextButton.addEventListener("click", async () => {
+    currentPage = current + 1;
+    await fn();
+  });
+  paginationDiv.appendChild(prevButton);
+  paginationDiv.appendChild(pageIndicator);
+  paginationDiv.appendChild(nextButton);
+}
+
+async function loadDailyRevenueChart() {
+  try {
+    const startDateInput = document.getElementById("startDate").value;
+    const endDateInput = document.getElementById("endDate").value;
+    if (!startDateInput || !endDateInput) {
+      toast("error", "Please select both start and end dates").showToast();
+      return;
+    }
+    if (startDateInput > endDateInput) {
+      toast("error", "Start date should be less than end date").showToast();
+      return;
+    }
+    let bids = await DbService.getAllItems("bids");
+    bids = bids.filter((bid) => bid.status == "approved");
+    const filteredBids = bids.filter((bid) => {
+      const createdDate = new Date(bid.createdAt).toISOString().split("T")[0];
+      return createdDate >= startDateInput && createdDate <= endDateInput;
+    });
+
+    const revenuePerDay = {};
+    filteredBids.forEach((bid) => {
+      const dateKey = new Date(bid.createdAt).toISOString().split("T")[0];
+      const days = getDaysDiff(bid.startDate, bid.endDate);
+      const revenue = Number(bid.amount) * days * commissionRate;
+      revenuePerDay[dateKey] = (revenuePerDay[dateKey] || 0) + revenue;
+    });
+    const labels = Object.keys(revenuePerDay).sort();
+    const dataValues = labels.map((label) => revenuePerDay[label]);
+    const data = {
+      labels: labels,
+      datasets: [
+        {
+          label: "Daily Revenue",
+          data: dataValues,
+          borderColor: "rgba(26, 188, 156, 1)",
+          backgroundColor: "rgba(26, 188, 156, 0.2)",
+          fill: true,
+          tension: 0.3,
+        },
+      ],
+    };
+    loadLineChart(data, "dailyRevenueChart");
+  } catch (error) {
+    console.log(error);
+    toast("error", "Error loading daily revenue chart").showToast();
+  }
+}
+
+function loadLineChart(data, canvasId) {
+  const ctx = document.getElementById(canvasId).getContext("2d");
+  if (dailyRevenueChart) {
+    dailyRevenueChart.destroy();
+  }
+  dailyRevenueChart = new Chart(ctx, {
+    type: "line",
+    data: data,
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: data.datasets[0].label,
+          font: { size: 20, weight: "bold" },
+          color: "#333",
+        },
+        legend: {
+          labels: {
+            font: { size: 14, weight: "bold" },
+            color: "#555",
+          },
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            font: { size: 14, weight: "bold" },
+            color: "#333",
+            callback: (value) => "Rs. " + formatNumber(value),
+          },
+        },
+        x: {
+          ticks: {
+            font: { size: 14, weight: "bold" },
+            color: "#333",
+          },
+        },
+      },
+    },
+  });
+}
+
+document
+  .getElementById("applyDateRange")
+  .addEventListener("click", loadDailyRevenueChart);
+
+//comparison chart
+async function loadComparisonChart() {
+  try {
+    const period = document.getElementById("comparisonPeriod").value;
+    let bids = await DbService.getAllItems("bids");
+    bids = bids.filter((bid) => bid.status === "approved");
+    const commission = 0.25;
+    let x;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (period === "day") {
+      x = 1;
+    } else if (period === "week") {
+      x = 7;
+    } else if (period === "month") {
+      x = 30;
+    }
+    const currentStart = new Date(
+      today.getTime() - (x - 1) * 24 * 60 * 60 * 1000
+    );
+    const currentEnd = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+    const prevStart = new Date(
+      currentStart.getTime() - x * 24 * 60 * 60 * 1000
+    );
+    const prevEnd = new Date(currentStart.getTime());
+    const currentData = new Array(x).fill(0);
+    const previousData = new Array(x).fill(0);
+    const labels = [];
+    for (let i = 0; i < x; i++) {
+      const date = new Date(currentStart.getTime() + i * 24 * 60 * 60 * 1000);
+      labels.push(
+        date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+      );
+    }
+    bids.forEach((bid) => {
+      const bidDate = new Date(bid.createdAt);
+      const days = getDaysDiff(bid.startDate, bid.endDate);
+      const revenue = Number(bid.amount) * days * commission;
+      if (bidDate >= currentStart && bidDate < currentEnd) {
+        const index = Math.floor(
+          (bidDate.getTime() - currentStart.getTime()) / (24 * 60 * 60 * 1000)
+        );
+        if (index >= 0 && index < x) {
+          currentData[index] += revenue;
+        }
+      } else if (bidDate >= prevStart && bidDate < prevEnd) {
+        const index = Math.floor(
+          (bidDate.getTime() - prevStart.getTime()) / (24 * 60 * 60 * 1000)
+        );
+        if (index >= 0 && index < x) {
+          previousData[index] += revenue;
+        }
+      }
+    });
+    const data = {
+      labels,
+      datasets: [
+        {
+          label: "Previous Revenue (Rs)",
+          data: previousData,
+          fill: false,
+          borderColor: "rgba(255, 99, 132, 1)",
+          backgroundColor: "rgba(255, 99, 132, 0.2)",
+          tension: 0.1,
+        },
+        {
+          label: "Current Revenue (Rs)",
+          data: currentData,
+          fill: false,
+          borderColor: "rgba(54, 162, 235, 1)",
+          backgroundColor: "rgba(54, 162, 235, 0.2)",
+          tension: 0.1,
+        },
+      ],
+    };
+    loadChart(data, "line", "chartComparison", true);
+  } catch (error) {
+    console.log(error);
+    toast("error", "Error loading comparison chart").showToast();
+  }
+}
+
+document
+  .getElementById("comparisonPeriod")
+  .addEventListener("change", loadComparisonChart);

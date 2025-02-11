@@ -4,17 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RENT IT - Cars</title>
-    <link rel="stylesheet" href="./css/index.css" />
-    <link rel="stylesheet" href="./css/cars.css" />
-    <link rel="stylesheet" href="./css/table.css" />
+    <link rel="stylesheet" href="../../css/index.css" />
+    <link rel="stylesheet" href="./cars.css" />
+    <link rel="stylesheet" href="../../css/table.css" />
     <link
       rel="stylesheet"
       type="text/css"
       href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
     />
-    <script type="module" src="./js/index.js"></script>
-    <script type="module" src="./js/db.js"></script>
-    <script type="module" src="./js/car.js"></script>
+    <script type="module" src="../../js/index.js"></script>
+    <script type="module" src="../../js/db.js"></script>
+    <script type="module" src="./car.js"></script>
   </head>
   <body>
     <div class="navbar">
@@ -34,20 +34,22 @@
             alt="Close navigation"
           />
           <ul class="primary-nav">
-            <li><a href="index.html">Home</a></li>
+            <li><a href="../../index.html">Home</a></li>
             <li class="current"><a href="cars.html">Cars</a></li>
-            <li><a href="dashboard.html" id="profileLink">Profile</a></li>
-            <li><a href="chat.html" id="chatLink">Chat</a></li>
+            <li>
+              <a href="../profile/dashboard.html" id="profileLink">Profile</a>
+            </li>
+            <li><a href="../chat/chat.html" id="chatLink">Chat</a></li>
           </ul>
           <ul class="secondary-nav">
             <li class="go-premium-cta" id="registerLink" style="display: block">
-              <a href="login.html">Login</a>
+              <a href="../login/login.html">Login</a>
             </li>
             <li class="go-premium-cta" id="dashboardLink" style="display: none">
-              <a href="carAdmin.html">Dashboard</a>
+              <a href="../car-admin/carAdmin.html">Dashboard</a>
             </li>
             <li class="go-premium-cta" id="logoutLink" style="display: none">
-              <a href="index.html">Logout</a>
+              <a href="../../index.html">Logout</a>
             </li>
           </ul>
         </nav>
@@ -98,6 +100,36 @@
               <option value="Automatic">Automatic</option>
               <option value="Manual">Manual</option>
             </select>
+          </div>
+          <div class="range">
+            <label for="price" style="font-size: 1rem">Price</label>
+            <div class="range-slider">
+              <span class="range-selected"></span>
+            </div>
+            <div class="range-input">
+              <input
+                type="range"
+                class="min"
+                min="0"
+                max="10000"
+                value="0"
+                step="500"
+              />
+              <input
+                type="range"
+                class="max"
+                min="0"
+                max="10000"
+                value="10000"
+                step="500"
+              />
+            </div>
+            <div class="range-price">
+              <label for="min">Min</label>
+              <input type="number" name="min" value="0" disabled />
+              <label for="max">Max</label>
+              <input type="number" name="max" value="10000" disabled />
+            </div>
           </div>
           <button id="applyFilters" class="btn apply-btn">Apply Filters</button>
           <button id="clearFilters" class="btn clear-btn">Clear Filters</button>

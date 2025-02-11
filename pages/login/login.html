@@ -8,17 +8,18 @@
       type="text/css"
       href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
     />
-    <link rel="stylesheet" href="../css/index.css" />
-    <link rel="stylesheet" href="./css/form.css" />
-    <script type="module" src="./js/db.js"></script>
-    <script type="module" src="./js/index.js"></script>
-    <script type="module" src="./js/login.js"></script>
+    <link rel="stylesheet" href="../../css/index.css" />
+    <link rel="stylesheet" href="../../css/form.css" />
+    <script type="module" src="../../js/db.js"></script>
+    <script type="module" src="../../js/index.js"></script>
+    <script type="module" src="../../js/utils.js"></script>
+    <script type="module" src="./login.js"></script>
     <title>Login - Rent IT</title>
   </head>
   <body>
     <div class="navbar">
       <div class="container">
-        <a class="logo" href="index.html">RENT <span>IT</span></a>
+        <a class="logo" href="../../index.html">RENT <span>IT</span></a>
         <img
           id="mobile-cta"
           class="mobile-menu"
@@ -33,20 +34,22 @@
             alt="close navigation"
           />
           <ul class="primary-nav">
-            <li class="current"><a href="index.html">Home</a></li>
-            <li><a href="cars.html">Cars</a></li>
-            <li><a href="dashboard.html" id="profileLink">Profile</a></li>
-            <li><a href="chat.html" id="chatLink">Chat</a></li>
+            <li class="current"><a href="../../index.html">Home</a></li>
+            <li><a href="../cars/cars.html">Cars</a></li>
+            <li>
+              <a href="../profile/dashboard.html" id="profileLink">Profile</a>
+            </li>
+            <li><a href="../chat/chat.html" id="chatLink">Chat</a></li>
           </ul>
           <ul class="secondary-nav">
             <li class="go-premium-cta" style="display: block" id="registerLink">
-              <a href="login.html">Login</a>
+              <a href="../login/login.html">Login</a>
             </li>
             <li class="go-premium-cta" style="display: none" id="dashboardLink">
-              <a href="carAdmin.html">Admin-Dashboard</a>
+              <a href="../car-admin/carAdmin.html">Dashboard</a>
             </li>
             <li class="go-premium-cta" style="display: none" id="logoutLink">
-              <a href="index.html">Logout</a>
+              <a href="../../index.html">Logout</a>
             </li>
           </ul>
         </nav>
@@ -102,7 +105,7 @@
               <div>
                 Don't have an account?
                 <a
-                  href="register.html"
+                  href="../register/register.html"
                   style="color: blue"
                   aria-label="Go to Register page"
                   >Register</a

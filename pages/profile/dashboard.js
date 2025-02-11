@@ -1,10 +1,24 @@
-import { getCurrentUser, toast, setCurrentUser, goToPage } from "./index.js";
-import { getFileFromInput, getDaysDiff } from "./utils.js";
-import DbService from "./db.js";
+import {
+  getCurrentUser,
+  toast,
+  setCurrentUser,
+  goToPage,
+} from "../../js/index.js";
+import {
+  getFileFromInput,
+  getDaysDiff,
+  hashPassword,
+  isPasswordStrong,
+} from "../../js/utils.js";
+import DbService from "../../js/db.js";
 const dashboardContainer = document.querySelector(".dashboardPage");
 const seekApprovalBtn = document.getElementById("seekApprovalBtn");
 const editProfileBtn = document.getElementById("editProfileBtn");
 const editCloseBtn = document.getElementById("editCloseButton");
+const changePasswordBtn = document.getElementById("changePasswordBtn");
+const changePasswordModal = document.getElementById("changePasswordModal");
+const passCloseButton = document.getElementById("passCloseButton");
+const passForm = document.getElementById("changePasswordForm");
 const profileModal = document.getElementById("profileModal");
 const editProfileForm = document.getElementById("editProfileForm");
 const mainContainer = document.querySelector(".dashboard-main");
@@ -13,6 +27,8 @@ const sortFilterBidding = document.getElementById("sortFilterBidding");
 const sortFilterBooking = document.getElementById("sortFilterBooking");
 const sortOrderBidding = document.getElementById("sortOrderBidding");
 const sortOrderBooking = document.getElementById("sortOrderBooking");
+let currentPage = 1;
+let pageSize = 5;
 window.addEventListener("load", async () => {
   try {
     showLoader();
@@ -79,7 +95,57 @@ async function addEventListeners() {
   sortOrderBidding.addEventListener("change", loadBiddings);
   sortOrderBooking.addEventListener("change", loadBookings);
   statusFilterForBidding.addEventListener("change", loadBiddings);
+  passCloseButton.addEventListener("click", () => {
+    changePasswordModal.style.display = "none";
+  });
+  changePasswordBtn.addEventListener("click", () => {
+    changePasswordModal.style.display = "flex";
+  });
 }
+passForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  try {
+    const currentUser = getCurrentUser();
+    const user = await DbService.getItem("users", currentUser.id);
+    const oldPassword = passForm.elements["oldPassword"].value.trim();
+    const newPassword = passForm.elements["newPassword"].value.trim();
+    const confirmPassword = passForm.elements["confirmPassword"].value.trim();
+    if (isPasswordStrong(newPassword) === false) {
+      toast(
+        "error",
+        "Password must contain at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character"
+      ).showToast();
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast(
+        "error",
+        "New password and confirm password do not match"
+      ).showToast();
+      return;
+    }
+    if (user.password !== (await hashPassword(oldPassword))) {
+      toast("error", "Old password is incorrect").showToast();
+      return;
+    }
+    if (user.password === (await hashPassword(newPassword))) {
+      toast("error", "New password cannot be same as old password").showToast();
+      return;
+    }
+    const hashedPassword = await hashPassword(newPassword);
+    await DbService.updateItem("users", {
+      id: currentUser.id,
+      password: hashedPassword,
+    });
+    toast("success", "Password changed successfully").showToast();
+    passForm.reset();
+    changePasswordModal.style.display = "none";
+  } catch (error) {
+    console.error(error);
+    toast("error", "Failed to change password").showToast();
+  }
+});
+
 seekApprovalBtn.addEventListener("click", async () => {
   const currentUser = getCurrentUser();
   try {
@@ -177,6 +243,8 @@ async function loadApprovals() {
           "Your approval request has been approved. You are now an admin.";
         seekApprovalBtn.disabled = true;
         seekApprovalBtn.textContent = "Approved";
+        seekApprovalBtn.style.background = "green";
+        seekApprovalBtn.style.cursor = "not-allowed";
       }
     } else {
       approvalSection.style.display = "flex";
@@ -184,6 +252,7 @@ async function loadApprovals() {
         "Your approval request has been approved. You are now an admin.";
       seekApprovalBtn.disabled = true;
       seekApprovalBtn.textContent = "Approved";
+      seekApprovalBtn.style.cursor = "not-allowed";
     }
   } catch (error) {
     console.log(error);
@@ -244,6 +313,19 @@ async function loadBiddings() {
     if (order === "desc") {
       biddings.reverse();
     }
+    const totalItems = biddings.length;
+    const totalPages = Math.ceil(totalItems / pageSize);
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+    const start = (currentPage - 1) * pageSize;
+    biddings = biddings.slice(start, start + pageSize);
+    if (biddings.length !== 0)
+      renderPagination(
+        totalPages,
+        currentPage,
+        loadBookings,
+        "profileBiddings"
+      );
     const biddingTableBody = document.getElementById("biddingContainer");
     biddingTableBody.innerHTML = "";
     if (biddings.length === 0) {
@@ -294,6 +376,19 @@ async function loadBookings() {
     if (order === "desc") {
       bookings.reverse();
     }
+    const totalItems = bookings.length;
+    const totalPages = Math.ceil(totalItems / pageSize);
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+    const start = (currentPage - 1) * pageSize;
+    bookings = bookings.slice(start, start + pageSize);
+    if (bookings.length !== 0)
+      renderPagination(
+        totalPages,
+        currentPage,
+        loadBookings,
+        "profileBookings"
+      );
     const bookingTableBody = document.getElementById("bookingContainer");
     bookingTableBody.innerHTML = "";
     if (bookings.length === 0) {
@@ -333,4 +428,30 @@ function showLoader() {
 function hideLoader() {
   const loader = document.querySelector(".loader-overlay");
   if (loader) loader.remove();
+}
+function renderPagination(totalPages, current, fn, sectionId) {
+  const paginationDiv = document.querySelector(`#${sectionId} .pagination`);
+  paginationDiv.innerHTML = "";
+  // if (totalPages <= 1) return;
+  const prevButton = document.createElement("button");
+  prevButton.classList.add("pagination-button");
+  prevButton.textContent = "Previous";
+  prevButton.disabled = current <= 1;
+  prevButton.addEventListener("click", async () => {
+    currentPage = current - 1;
+    await fn();
+  });
+  const pageIndicator = document.createElement("span");
+  pageIndicator.textContent = `Page ${current} of ${totalPages}`;
+  const nextButton = document.createElement("button");
+  nextButton.textContent = "Next";
+  nextButton.classList.add("pagination-button");
+  nextButton.disabled = current >= totalPages;
+  nextButton.addEventListener("click", async () => {
+    currentPage = current + 1;
+    await fn();
+  });
+  paginationDiv.appendChild(prevButton);
+  paginationDiv.appendChild(pageIndicator);
+  paginationDiv.appendChild(nextButton);
 }

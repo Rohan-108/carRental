@@ -1,5 +1,5 @@
-import DbService from "./db.js";
-import { getCurrentCarId, toast } from "./index.js";
+import DbService from "../../js/db.js";
+import { getCurrentCarId, toast } from "../../js/index.js";
 
 window.addEventListener("load", () => {
   setCarDetails();

@@ -1,17 +1,17 @@
-import DbService from "./db.js";
-import { getCurrentUser, toast } from "./index.js";
-import {
-  isValidPlateNumber,
-  getDaysDiff,
-  getFileFromInput,
-  cities,
-  formatNumber,
-} from "./utils.js";
+import DbService from "../../js/db.js";
+import { getCurrentUser, toast } from "../../js/index.js";
+import { getDaysDiff, cities, formatNumber } from "../../js/utils.js";
 const commissionRate = 0.25;
 const closeButton = document.getElementById("closeButton");
 const editCloseButton = document.getElementById("editCloseButton");
 const modal = document.getElementById("carModal");
 const editModal = document.getElementById("editModal");
+const approveBidModal = document.getElementById("approveBidModal");
+const cancelBidModal = document.getElementById("cancelBidModal");
+const approveBidForm = document.getElementById("approveBidForm");
+const cancelBidForm = document.getElementById("cancelBidForm");
+const closeApproveBidModal = document.getElementById("closeButtonApprove");
+const closeCancelBidModal = document.getElementById("closeButtonCancel");
 const addCarButton = document.getElementById("addCar");
 const addCarForm = document.getElementById("addCarForm");
 const editCarForm = document.getElementById("editCarForm");
@@ -35,6 +35,8 @@ const sortOrderBidding = document.getElementById("sortOrderBidding");
 const sortOrderBooking = document.getElementById("sortOrderBooking");
 let bookchart = null;
 let revChart = null;
+let dailyRevenueChart = null;
+let compChart = null;
 let currentPage = 1;
 let pageSize = 5;
 dashboardContainer.addEventListener("click", (e) => {
@@ -69,8 +71,19 @@ dashboardContainer.addEventListener("click", (e) => {
     case "analytics":
       document.getElementById("revenue-chart").style.display = "flex";
       document.getElementById("booking-chart").style.display = "flex";
+      document.getElementById("comparisonChart").style.display = "flex";
+      document.getElementById("dailyRevenueChartSection").style.display =
+        "flex";
+      const today = new Date();
+      const endDate = today.toISOString().split("T")[0];
+      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const startDate = startOfMonth.toISOString().split("T")[0];
+      document.getElementById("startDate").value = startDate;
+      document.getElementById("endDate").value = endDate;
       revenueChart();
       bookingChart();
+      loadComparisonChart();
+      loadDailyRevenueChart();
       break;
   }
 });
@@ -131,7 +144,7 @@ async function loadStat() {
         noOfRejectedBids++;
       } else {
         noOfApprovedBids++;
-        revenue += Number(bid.amount) * days * (1 - commissionRate);
+        revenue += Number(bid.amount) * days;
       }
       totalDay += days;
       noOfBids++;
@@ -139,7 +152,9 @@ async function loadStat() {
     biddingCount.textContent = formatNumber(noOfBids);
     bookingCount.textContent = formatNumber(noOfApprovedBids);
     nOfCars.textContent = nCars;
-    totalRevenue.textContent = `Rs.${formatNumber(revenue)}`;
+    totalRevenue.textContent = `Rs.${formatNumber(
+      revenue * (1 - commissionRate)
+    )}`;
     rejectedBids.textContent = formatNumber(noOfRejectedBids);
     averageRentDay.textContent = `${formatNumber(
       Math.floor(totalDay / noOfBids)
@@ -184,7 +199,7 @@ async function loadCars(status = "true") {
           <p class="car-plate">Plate Number: ${car.plateNumber}</p>
           <div class="car-actions">
             <button class="editCarBtn" data-id="${car.id}">Edit</button>
-            <button class="deleteCarBtn" data-id="${car.id}">Delete</button>
+            <button class="deleteCarBtn" data-id="${car.id}">Hide</button>
           </div>
         </div>
       `;
@@ -401,134 +416,21 @@ async function cancelBid(bidId) {
     toast("error", error.message).showToast();
   }
 }
-editCarForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  try {
-    const carId = editCarForm.dataset.id;
-    const car = await DbService.getItem("cars", carId);
-    const rentalPrice = editCarForm.elements["rentalPrice"].value.trim();
-    const minRentalPeriod = editCarForm.elements["minRental"].value.trim();
-    const maxRentalPeriod = editCarForm.elements["maxRental"].value.trim();
-    const location = editCarForm.elements["location"].value.trim();
-    const fileInput = editCarForm.elements["carImage"];
-    if (Number(minRentalPeriod) > Number(maxRentalPeriod)) {
-      toast(
-        "error",
-        "Minimum rental period cannot be greater than maximum rental period"
-      ).showToast();
-      return;
-    }
-    if (fileInput) {
-      const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
-      const maxSizeInBytes = 500 * 1024;
-      for (const file of fileInput.files) {
-        if (file.size > maxSizeInBytes) {
-          toast("error", "Image must be less than 500KB").showToast();
-          return;
-        }
-        if (!allowedTypes.includes(file.type)) {
-          toast("error", "Image must be of type PNG, JPEG, or JPG").showToast();
-          return;
-        }
-      }
-    }
-    let imagesBuffer = [];
-    for (let i = 0; i < fileInput.files.length; i++) {
-      const buffer = await getFileFromInput(fileInput, i);
-      imagesBuffer.push(buffer);
-    }
-    await DbService.updateItem("cars", {
-      id: carId,
-      rentalPrice,
-      maxRentalPeriod,
-      minRentalPeriod,
-      location,
-      images: imagesBuffer.length ? imagesBuffer : car.images,
-    });
-    toast("success", "Updated Successfully").showToast();
-    editModal.style.display = "none";
-    loadCars();
-  } catch (error) {
-    toast("error", "Something went wrong").showToast();
-  }
-});
-addCarForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  try {
-    const currentUser = getCurrentUser();
-    const name = addCarForm.elements["carName"].value.trim();
-    const vehicleType = addCarForm.elements["vehicleType"].value.trim();
-    const nseats = addCarForm.elements["seats"].value.trim();
-    const fuelType = addCarForm.elements["fuelType"].value.trim();
-    const transmission = addCarForm.elements["transmission"].value.trim();
-    const rentalPrice = addCarForm.elements["rentalPrice"].value.trim();
-    const minRentalPeriod = addCarForm.elements["minRental"].value.trim();
-    const maxRentalPeriod = addCarForm.elements["maxRental"].value.trim();
-    const plateNumber = addCarForm.elements["plateNumber"].value.trim();
-    const location = addCarForm.elements["location"].value.trim();
-    const fileInput = addCarForm.elements["carImage"];
-    if (!isValidPlateNumber(plateNumber)) {
-      toast("error", "Invalid plate number").showToast();
-      return;
-    }
-    if (Number(minRentalPeriod) > Number(maxRentalPeriod)) {
-      toast(
-        "error",
-        "Minimum rental period cannot be greater than maximum rental period"
-      ).showToast();
-      return;
-    }
-    if (fileInput) {
-      const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
-      if (fileInput.files.length < 1 || fileInput.files.length > 3) {
-        toast(
-          "error",
-          "Please select at least one or less than 3 image"
-        ).showToast();
-        return;
-      }
-      const maxSizeInBytes = 500 * 1024;
-      for (const file of fileInput.files) {
-        if (file.size > maxSizeInBytes) {
-          toast("error", "Image must be less than 500KB").showToast();
-          return;
-        }
-        if (!allowedTypes.includes(file.type)) {
-          toast("error", "Image must be of type PNG, JPEG, or JPG").showToast();
-          return;
-        }
-      }
-    }
-    let imagesBuffer = [];
-    for (let i = 0; i < fileInput.files.length; i++) {
-      const buffer = await getFileFromInput(fileInput, i);
-      imagesBuffer.push(buffer);
-    }
-    await DbService.addItem("cars", {
-      userId: currentUser.id,
-      name,
-      plateNumber,
-      vehicleType,
-      seats: nseats,
-      fuelType,
-      transmission,
-      rentalPrice,
-      minRentalPeriod,
-      maxRentalPeriod,
-      location,
-      show: "true",
-      images: imagesBuffer,
-      createdAt: Date.now(),
-    });
-    toast("success", "Car added successfully").showToast();
-    loadCars();
-    modal.style.display = "none";
-  } catch (error) {
-    toast("error", "Failed to add car").showToast();
-  }
-});
+
 async function deleteCar(carId) {
   try {
+    const prompt = confirm(
+      `Are you sure you want to remove this car from listing?
+      All pending bids will be rejected`
+    );
+    if (!prompt) return;
+    const bids = await DbService.searchAllByIndex("bids", "carId", carId);
+    // reject all pending bids
+    bids.forEach(async (bid) => {
+      if (bid.status == "pending") {
+        await DbService.updateItem("bids", { id: bid.id, status: "rejected" });
+      }
+    });
     await DbService.updateItem("cars", { id: carId, show: "false" });
     toast("success", "Car deleted successfully").showToast();
     loadCars();
@@ -556,19 +458,35 @@ function addEventListeners() {
     const approveButton = e.target.closest(".approveBid");
     const cancelButton = e.target.closest(".cancelBid");
     if (cancelButton && cancelButton.dataset.id) {
-      const carId = cancelButton.dataset.id;
-      cancelBid(carId);
+      cancelBidModal.style.display = "flex";
+      cancelBidForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const bidId = cancelButton.dataset.id;
+        await cancelBid(bidId);
+        cancelBidModal.style.display = "none";
+      });
     }
     if (approveButton && approveButton.dataset.id) {
       const bidId = approveButton.dataset.id;
       const carId = approveButton.dataset.car;
       const start = approveButton.dataset.start;
       const end = approveButton.dataset.end;
-      approveBid(bidId, carId, start, end);
+      approveBidModal.style.display = "flex";
+      approveBidForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await approveBid(bidId, carId, start, end);
+        approveBidModal.style.display = "none";
+      });
     }
   });
   closeButton.addEventListener("click", () => {
     modal.style.display = "none";
+  });
+  closeApproveBidModal.addEventListener("click", () => {
+    approveBidModal.style.display = "none";
+  });
+  closeCancelBidModal.addEventListener("click", () => {
+    cancelBidModal.style.display = "none";
   });
   addCarButton.addEventListener("click", () => {
     modal.style.display = "block";
@@ -798,6 +716,7 @@ function loadChart(data, chartType, id, isAmount = false) {
   const ctx = document.getElementById(id).getContext("2d");
   if (id == "bookChart" && bookchart) bookchart.destroy();
   if (id == "revenueChart" && revChart) revChart.destroy();
+  if (id === "chartComparison" && compChart) compChart.destroy();
   const chart = new Chart(ctx, {
     type: chartType,
     data: data,
@@ -840,6 +759,7 @@ function loadChart(data, chartType, id, isAmount = false) {
   });
   if (id == "bookChart") bookchart = chart;
   if (id == "revenueChart") revChart = chart;
+  if (id === "chartComparison") compChart = chart;
 }
 function generateRandomColors(count, opacity) {
   const colors = [];
@@ -888,3 +808,187 @@ function renderPagination(totalPages, current, fn, sectionId) {
   paginationDiv.appendChild(pageIndicator);
   paginationDiv.appendChild(nextButton);
 }
+
+async function loadDailyRevenueChart() {
+  try {
+    const startDateInput = document.getElementById("startDate").value;
+    const endDateInput = document.getElementById("endDate").value;
+    if (!startDateInput || !endDateInput) {
+      toast("error", "Please select both start and end dates").showToast();
+      return;
+    }
+    let bids = await DbService.searchAllByIndex(
+      "bids",
+      "ownerId",
+      getCurrentUser().id
+    );
+    bids = bids.filter((bid) => bid.status == "approved");
+    const filteredBids = bids.filter((bid) => {
+      const createdDate = new Date(bid.createdAt).toISOString().split("T")[0];
+      return createdDate >= startDateInput && createdDate <= endDateInput;
+    });
+
+    const revenuePerDay = {};
+    filteredBids.forEach((bid) => {
+      const dateKey = new Date(bid.createdAt).toISOString().split("T")[0];
+      const days = getDaysDiff(bid.startDate, bid.endDate);
+      const revenue = Number(bid.amount) * days * (1 - commissionRate);
+      revenuePerDay[dateKey] = (revenuePerDay[dateKey] || 0) + revenue;
+    });
+    const labels = Object.keys(revenuePerDay).sort();
+    const dataValues = labels.map((label) => revenuePerDay[label]);
+    const data = {
+      labels: labels,
+      datasets: [
+        {
+          label: "Daily Revenue",
+          data: dataValues,
+          borderColor: "rgba(26, 188, 156, 1)",
+          backgroundColor: "rgba(26, 188, 156, 0.2)",
+          fill: true,
+          tension: 0.3,
+        },
+      ],
+    };
+    loadLineChart(data, "dailyRevenueChart");
+  } catch (error) {
+    console.log(error);
+    toast("error", "Error loading daily revenue chart").showToast();
+  }
+}
+async function loadComparisonChart() {
+  try {
+    const period = document.getElementById("comparisonPeriod").value;
+    let bids = await DbService.searchAllByIndex(
+      "bids",
+      "ownerId",
+      getCurrentUser().id
+    );
+    bids = bids.filter((bid) => bid.status === "approved");
+    const commission = 0.25;
+    let x;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (period === "day") {
+      x = 1;
+    } else if (period === "week") {
+      x = 7;
+    } else if (period === "month") {
+      x = 30;
+    }
+    const currentStart = new Date(
+      today.getTime() - (x - 1) * 24 * 60 * 60 * 1000
+    );
+    const currentEnd = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+    const prevStart = new Date(
+      currentStart.getTime() - x * 24 * 60 * 60 * 1000
+    );
+    const prevEnd = new Date(currentStart.getTime());
+    const currentData = new Array(x).fill(0);
+    const previousData = new Array(x).fill(0);
+    const labels = [];
+    for (let i = 0; i < x; i++) {
+      const date = new Date(currentStart.getTime() + i * 24 * 60 * 60 * 1000);
+      labels.push(
+        date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+      );
+    }
+    bids.forEach((bid) => {
+      const bidDate = new Date(bid.createdAt);
+      const days = getDaysDiff(bid.startDate, bid.endDate);
+      const revenue = Number(bid.amount) * days * (1 - commission);
+      if (bidDate >= currentStart && bidDate < currentEnd) {
+        const index = Math.floor(
+          (bidDate.getTime() - currentStart.getTime()) / (24 * 60 * 60 * 1000)
+        );
+        if (index >= 0 && index < x) {
+          currentData[index] += revenue;
+        }
+      } else if (bidDate >= prevStart && bidDate < prevEnd) {
+        const index = Math.floor(
+          (bidDate.getTime() - prevStart.getTime()) / (24 * 60 * 60 * 1000)
+        );
+        if (index >= 0 && index < x) {
+          previousData[index] += revenue;
+        }
+      }
+    });
+    const data = {
+      labels,
+      datasets: [
+        {
+          label: "Previous Revenue (Rs)",
+          data: previousData,
+          fill: false,
+          borderColor: "rgba(255, 99, 132, 1)",
+          backgroundColor: "rgba(255, 99, 132, 0.2)",
+          tension: 0.1,
+        },
+        {
+          label: "Current Revenue (Rs)",
+          data: currentData,
+          fill: false,
+          borderColor: "rgba(54, 162, 235, 1)",
+          backgroundColor: "rgba(54, 162, 235, 0.2)",
+          tension: 0.1,
+        },
+      ],
+    };
+    loadChart(data, "line", "chartComparison", true);
+  } catch (error) {
+    console.log(error);
+    toast("error", "Error loading comparison chart").showToast();
+  }
+}
+function loadLineChart(data, canvasId) {
+  const ctx = document.getElementById(canvasId).getContext("2d");
+  if (dailyRevenueChart) {
+    dailyRevenueChart.destroy();
+  }
+  dailyRevenueChart = new Chart(ctx, {
+    type: "line",
+    data: data,
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: data.datasets[0].label,
+          font: { size: 20, weight: "bold" },
+          color: "#333",
+        },
+        legend: {
+          labels: {
+            font: { size: 14, weight: "bold" },
+            color: "#555",
+          },
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            font: { size: 14, weight: "bold" },
+            color: "#333",
+            callback: (value) => "Rs. " + formatNumber(value),
+          },
+        },
+        x: {
+          ticks: {
+            font: { size: 14, weight: "bold" },
+            color: "#333",
+          },
+        },
+      },
+    },
+  });
+}
+
+document
+  .getElementById("applyDateRange")
+  .addEventListener("click", loadDailyRevenueChart);
+document
+  .getElementById("comparisonPeriod")
+  .addEventListener("change", loadComparisonChart);
+
+export { loadCars };

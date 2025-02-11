@@ -1,6 +1,6 @@
-import { getCurrentUser, getCurrentCarId, toast } from "./index.js";
-import DbService from "./db.js";
-import { getFileFromInput } from "./utils.js";
+import { getCurrentUser, getCurrentCarId, toast } from "../../js/index.js";
+import DbService from "../../js/db.js";
+import { getFileFromInput } from "../../js/utils.js";
 const closeModal = document.getElementById("closeButton");
 const modal = document.getElementById("modal");
 const openImageModal = document.getElementById("openImageModal");

@@ -1,5 +1,5 @@
-import DbService from "./db.js";
-import { getCurrentCarId, getCurrentUser, toast } from "./index.js";
+import DbService from "../../js/db.js";
+import { getCurrentCarId, getCurrentUser, toast } from "../../js/index.js";
 import { loadUserChat } from "./carChat.js";
 const amountInput = document.getElementById("amount");
 const minRentalPeriod = document.getElementById("minRentalPeriod");

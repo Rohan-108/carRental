@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Rent IT - Profile</title>
-    <link rel="stylesheet" href="css/index.css" />
-    <link rel="stylesheet" href="css/dashboard.css" />
-    <link rel="stylesheet" href="css/form.css" />
-    <link rel="stylesheet" href="css/table.css" />
+    <link rel="stylesheet" href="../../css/index.css" />
+    <link rel="stylesheet" href="./dashboard.css" />
+    <link rel="stylesheet" href="../../css/form.css" />
+    <link rel="stylesheet" href="../../css/table.css" />
     <link
       rel="stylesheet"
       type="text/css"
@@ -17,7 +17,7 @@
   <body>
     <div class="navbar">
       <div class="container">
-        <a class="logo" href="index.html">RENT <span>IT</span></a>
+        <a class="logo" href="../../index.html">RENT <span>IT</span></a>
         <img
           id="mobile-cta"
           class="mobile-menu"
@@ -32,22 +32,22 @@
             alt="Close navigation"
           />
           <ul class="primary-nav">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="cars.html">Cars</a></li>
+            <li><a href="../../index.html">Home</a></li>
+            <li><a href="../cars/cars.html">Cars</a></li>
             <li class="current">
-              <a href="profile.html" id="profileLink">Profile</a>
+              <a href="../profile/dashboard.html" id="profileLink">Profile</a>
             </li>
-            <li><a href="chat.html" id="chatLink">Chat</a></li>
+            <li><a href="../chat/chat.html" id="chatLink">Chat</a></li>
           </ul>
           <ul class="secondary-nav">
             <li class="go-premium-cta" id="registerLink" style="display: block">
-              <a href="login.html">Login</a>
+              <a href="../login/login.html">Login</a>
             </li>
             <li class="go-premium-cta" id="dashboardLink" style="display: none">
-              <a href="carAdmin.html">Dashboard</a>
+              <a href="../car-admin/carAdmin.html">Dashboard</a>
             </li>
             <li class="go-premium-cta" id="logoutLink" style="display: none">
-              <a href="index.html">Logout</a>
+              <a href="../../index.html">Logout</a>
             </li>
           </ul>
         </nav>
@@ -98,7 +98,9 @@
                   <span id="adhaar">loading...</span>
                 </li>
               </ul>
-              <button class="change-password-btn">🔒 Change Password</button>
+              <button class="change-password-btn" id="changePasswordBtn">
+                🔒 Change Password
+              </button>
             </div>
           </div>
         </section>
@@ -143,6 +145,7 @@
               <!-- Bidding rows will be dynamically populated -->
             </tbody>
           </table>
+          <div class="pagination"></div>
         </section>
         <section
           id="profileBiddings"
@@ -190,6 +193,7 @@
             </thead>
             <tbody id="biddingContainer"></tbody>
           </table>
+          <div class="pagination"></div>
         </section>
         <section
           id="approvalSection"
@@ -265,10 +269,71 @@
         </div>
       </div>
     </div>
-    <script type="module" src="js/index.js"></script>
-    <script type="module" src="js/utils.js"></script>
-    <script type="module" src="js/db.js"></script>
-    <script type="module" src="./js/dashboard.js"></script>
+    <div class="custom-modal" id="changePasswordModal" style="display: none">
+      <div class="custom-modal-inner">
+        <div class="custom-modal-header">
+          <button class="custom-modal-close" id="passCloseButton">
+            <img src="./images/exit.svg" alt="Close" />
+          </button>
+        </div>
+        <div class="custom-modal-body">
+          <p class="custom-modal-title">Update Profile</p>
+          <form
+            id="changePasswordForm"
+            class="custom-form"
+            style="height: auto"
+          >
+            <div class="form-group">
+              <label for="oldPassword"
+                >Old Password<span class="required">*</span></label
+              >
+              <input
+                type="password"
+                name="oldPassword"
+                id="oldPassword"
+                placeholder="Enter your old password"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="newPassword"
+                >New Password<span class="required">*</span></label
+              >
+              <input
+                type="password"
+                name="newPassword"
+                id="newPassword"
+                placeholder="Enter your new password"
+                minlength="8"
+                title="Password must be at least 8 characters long."
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="confirmPassword"
+                >Confirm Password<span class="required">*</span></label
+              >
+              <input
+                type="password"
+                name="confirmPassword"
+                id="confirmPassword"
+                placeholder="Enter your new password"
+                minlength="8"
+                title="Password must be at least 8 characters long."
+                required
+              />
+            </div>
+            <div class="form-group full-width">
+              <input type="submit" name="submit" value="Change" />
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="../../js/index.js"></script>
+    <script type="module" src="../../js/utils.js"></script>
+    <script type="module" src="../../js/db.js"></script>
+    <script type="module" src="./dashboard.js"></script>
     <script
       type="text/javascript"
       src="https://cdn.jsdelivr.net/npm/toastify-js"

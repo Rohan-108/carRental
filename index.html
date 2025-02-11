@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="./css/index.css" />
-    <script type="module" src="./js/index.js"></script>
     <link
       rel="stylesheet"
       type="text/css"
       href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
     />
+    <link rel="stylesheet" href="./css/index.css" />
+    <script type="module" src="./js/index.js"></script>
     <script type="module" src="./js/db.js"></script>
     <title>Car Rental</title>
   </head>
@@ -32,16 +32,20 @@
           />
           <ul class="primary-nav">
             <li class="current"><a href="index.html">Home</a></li>
-            <li><a href="cars.html">Cars</a></li>
-            <li><a href="dashboard.html" id="profileLink">Profile</a></li>
-            <li><a href="chat.html" id="chatLink">Chat</a></li>
+            <li><a href="pages/cars/cars.html">Cars</a></li>
+            <li>
+              <a href="pages/profile/dashboard.html" id="profileLink"
+                >Profile</a
+              >
+            </li>
+            <li><a href="pages/chat/chat.html" id="chatLink">Chat</a></li>
           </ul>
           <ul class="secondary-nav">
             <li class="go-premium-cta" style="display: block" id="registerLink">
-              <a href="login.html">Login</a>
+              <a href="pages/login/login.html">Login</a>
             </li>
             <li class="go-premium-cta" style="display: none" id="dashboardLink">
-              <a href="carAdmin.html">Dashboard</a>
+              <a href="pages/car-admin/carAdmin.html">Dashboard</a>
             </li>
             <li class="go-premium-cta" style="display: none" id="logoutLink">
               <a href="index.html">Logout</a>
