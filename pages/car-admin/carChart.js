@@ -1,5 +1,5 @@
 import { getCurrentUser, toast } from "../../js/index.js";
-import { getDaysDiff, formatNumber } from "../../js/utils.js";
+import { formatNumber } from "../../js/utils.js";
 import BidService from "../../js/services/BidService.js";
 import { showLoader, hideLoader } from "./carAdmin.js";
 const commissionRate = 0.25;
@@ -130,8 +130,7 @@ async function loadDailyRevenueChart() {
     const revenuePerDay = {};
     filteredBids.forEach((bid) => {
       const dateKey = new Date(bid.createdAt).toISOString().split("T")[0];
-      const days = getDaysDiff(bid.startDate, bid.endDate);
-      const revenue = Number(bid.amount) * days * (1 - commissionRate);
+      const revenue = Number(bid.amount) * (1 - commissionRate);
       revenuePerDay[dateKey] = (revenuePerDay[dateKey] || 0) + revenue;
     });
     const labels = Object.keys(revenuePerDay).sort();
@@ -193,8 +192,7 @@ async function loadComparisonChart() {
     }
     bids.forEach((bid) => {
       const bidDate = new Date(bid.createdAt);
-      const days = getDaysDiff(bid.startDate, bid.endDate);
-      const revenue = Number(bid.amount) * days * (1 - commission);
+      const revenue = Number(bid.amount) * (1 - commission);
       if (bidDate >= currentStart && bidDate < currentEnd) {
         const index = Math.floor(
           (bidDate.getTime() - currentStart.getTime()) / (24 * 60 * 60 * 1000)
@@ -277,7 +275,7 @@ function groupData(items, keyAccessor, options = {}) {
       } else {
         val = item.status == status ? Number(item[summationField]) : 0;
       }
-      val *= getDaysDiff(item.startDate, item.endDate) * (1 - commissionRate);
+      val *= 1 - commissionRate;
       grouped[key] = (grouped[key] || 0) + val;
     } else {
       grouped[key] = (grouped[key] || 0) + 1;

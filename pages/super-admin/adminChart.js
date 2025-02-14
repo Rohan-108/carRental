@@ -174,8 +174,7 @@ async function loadDailyRevenueChart() {
     const revenuePerDay = {};
     filteredBids.forEach((bid) => {
       const dateKey = new Date(bid.createdAt).toISOString().split("T")[0];
-      const days = getDaysDiff(bid.startDate, bid.endDate);
-      const revenue = Number(bid.amount) * days * commissionRate;
+      const revenue = Number(bid.amount) * commissionRate;
       revenuePerDay[dateKey] = (revenuePerDay[dateKey] || 0) + revenue;
     });
     const labels = Object.keys(revenuePerDay).sort();
@@ -215,9 +214,7 @@ function groupData(items, keyAccessor, options = {}) {
       } else {
         val = item.status === status ? Number(item[summationField]) : 0;
       }
-      val *=
-        getDaysDiff(item.startDate, item.endDate) *
-        (key === "email" ? 1 - commissionRate : commissionRate);
+      val *= key === "email" ? 1 - commissionRate : commissionRate;
       grouped[key] = (grouped[key] || 0) + val;
     } else {
       grouped[key] = (grouped[key] || 0) + 1;
@@ -437,8 +434,7 @@ async function loadComparisonChart() {
     }
     bids.forEach((bid) => {
       const bidDate = new Date(bid.createdAt);
-      const days = getDaysDiff(bid.startDate, bid.endDate);
-      const revenue = Number(bid.amount) * days * commission;
+      const revenue = Number(bid.amount) * commission;
       if (bidDate >= currentStart && bidDate < currentEnd) {
         const index = Math.floor(
           (bidDate.getTime() - currentStart.getTime()) / (24 * 60 * 60 * 1000)

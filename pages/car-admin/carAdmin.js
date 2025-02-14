@@ -20,8 +20,13 @@ const approveBidModal = document.getElementById("approveBidModal");
 const cancelBidModal = document.getElementById("cancelBidModal");
 const approveBidForm = document.getElementById("approveBidForm");
 const cancelBidForm = document.getElementById("cancelBidForm");
+const changeAmountForm = document.getElementById("changeAmountForm");
 const closeApproveBidModal = document.getElementById("closeButtonApprove");
 const closeCancelBidModal = document.getElementById("closeButtonCancel");
+const changeAmountModal = document.getElementById("changeAmountModal");
+const closeChangeAmountModal = document.getElementById(
+  "closeChangeAmountModal"
+);
 const addCarButton = document.getElementById("addCar");
 const addCarForm = document.getElementById("addCarForm");
 const editCarForm = document.getElementById("editCarForm");
@@ -39,6 +44,7 @@ const sortFilterBidding = document.getElementById("sortFilterBidding");
 const sortFilterBooking = document.getElementById("sortFilterBooking");
 const sortOrderBidding = document.getElementById("sortOrderBidding");
 const sortOrderBooking = document.getElementById("sortOrderBooking");
+const filterByTripStatus = document.getElementById("filterByTripStatus");
 let currentPage = 1;
 let pageSize = 5;
 window.addEventListener("load", async () => {
@@ -46,6 +52,7 @@ window.addEventListener("load", async () => {
   try {
     await Promise.all[(setup(), loadStat(), addEventListeners())];
   } catch (error) {
+    console.log(error);
     toast("error", "Error loading page").showToast();
   } finally {
     hideLoader();
@@ -149,7 +156,7 @@ async function loadStat() {
         noOfRejectedBids++;
       } else {
         noOfApprovedBids++;
-        revenue += Number(bid.amount) * days;
+        revenue += Number(bid.amount);
       }
       totalDay += days;
       noOfBids++;
@@ -204,7 +211,6 @@ async function loadCars(status = "true") {
         <div class="car-details">
           <h3 class="car-name">${car.name}</h3>
           <p class="car-price">Price per day: Rs ${car.rentalPrice}</p>
-          <p class="car-id">Car ID: ${car.id}</p>
           <p class="car-plate">Plate Number: ${car.plateNumber}</p>
           <div class="car-actions">
             <button class="editCarBtn" data-id="${car.id}">Edit</button>
@@ -236,10 +242,6 @@ async function loadBiddings() {
     const statusValue = statusFilterForBidding.value;
     const filterValue = carFilterForBidding.value;
     let biddings = await BidService.getBidsByOwnerId(getCurrentUser().id);
-    biddings = biddings.map((bid) => ({
-      ...bid,
-      amount: bid.amount * getDaysDiff(bid.startDate, bid.endDate),
-    }));
     if (statusValue !== "all") {
       biddings = biddings.filter((bid) => bid.status === statusValue);
     }
@@ -282,8 +284,10 @@ async function loadBiddings() {
           ${
             bid.status === "pending"
               ? `<td data-label="Actions">
-            <button class="approveBid" data-id="${bid.id}" data-car="${bid.carId}" data-start="${bid.startDate}" data-end="${bid.endDate}">Approve</button>
-            <button class="cancelBid" data-id="${bid.id}">Cancel</button>
+            <button class="approveBid" style="background-color:green;
+            color:#fff;border-radius:1rem;cursor:pointer" data-id="${bid.id}" data-car="${bid.carId}" data-start="${bid.startDate}" data-end="${bid.endDate}">Approve</button>
+            <button class="cancelBid" style="background-color:red;
+            color:#fff;border-radius:1rem;cursor:pointer" data-id="${bid.id}">Cancel</button>
           </td>`
               : `<td data-label="Status">${bid.status}</td>`
           }
@@ -311,21 +315,23 @@ async function loadBookings() {
   showLoader();
   try {
     let bookings = await BidService.getBookingsByOwnerId(getCurrentUser().id);
-    bookings = bookings.map((book) => ({
-      ...book,
-      amount: book.amount * getDaysDiff(book.startDate, book.endDate),
-    }));
     const filterValue = carFilterForBooking.value;
     if (filterValue !== "all") {
       bookings = bookings.filter((booking) => booking.carId == filterValue);
     }
     const sortValue = sortFilterBooking.value;
+    const order = sortOrderBooking.value;
+    const tripStatus = filterByTripStatus.value;
     if (sortValue === "date") {
       bookings.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     } else if (sortValue === "amount") {
       bookings.sort((a, b) => Number(a.amount) - Number(b.amount));
     }
-    const order = sortOrderBooking.value;
+    if (tripStatus !== "all") {
+      bookings = bookings.filter(
+        (booking) => booking.tripCompleted === Boolean(tripStatus)
+      );
+    }
     if (order === "desc") {
       bookings.reverse();
     }
@@ -345,6 +351,8 @@ async function loadBookings() {
         const tr = document.createElement("tr");
         const car = booking.car;
         const user = booking.user;
+        const currentDate = new Date();
+        const endDate = new Date(booking.endDate);
         tr.innerHTML = `
           <td data-label="Car Name">${car.name}</td>
           <td data-label="Renter">${user.name}</td>
@@ -352,9 +360,15 @@ async function loadBookings() {
           <td data-label="Start Date">${booking.startDate}</td>
           <td data-label="End Date">${booking.endDate}</td>
           <td data-label="Amount">Rs.${booking.amount}</td>
-          <td data-label="Confirmed At">${new Date(
-            booking.createdAt
-          ).toLocaleString()}</td>
+          <td data-label="Trip Status">${
+            booking.tripCompleted
+              ? "Trip Completed"
+              : endDate < currentDate
+              ? ` <button class="changeAmount" style="background-color:green;
+          color:#fff;border-radius:1rem;cursor:pointer" data-id="${booking.id}">Update Service Charges</button>
+          `
+              : "Not Completed"
+          }</td>
         `;
         bookingTableBody.appendChild(tr);
       }
@@ -470,12 +484,47 @@ async function deleteCar(carId) {
     toast("error", "Error deleting car").showToast();
   }
 }
+async function updateAmount(bookingId) {
+  try {
+    const kilometer = changeAmountForm.elements["kilometer"].value;
+    const booking = await BidService.getBidById(bookingId);
+    const user = await userService.getUserById(getCurrentUser().id);
+    const newAmount =
+      Number(booking.amount) +
+      Math.max(Number(kilometer) - booking.car.fixedKilometer, 0) *
+        booking.car.ratePerKm;
+    await BidService.updateBid({
+      id: bookingId,
+      amount: newAmount,
+      tripCompleted: true,
+    });
+    const convs = await ChatService.getConversationsByCarId(booking.carId);
+    let convId = convs.filter((conv) =>
+      conv.members.some((member) => member.id === user.id)
+    );
+    if (convId.length && convId[0].id) {
+      await ChatService.addChat({
+        id: "",
+        message: `Your have to pay Rs.${newAmount} for the extra kilometer you have driven plus the original amount of per day rent`,
+        conversationId: convId[0].id,
+        image: null,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        sender: user.id,
+        user: user,
+      });
+    }
+  } catch (error) {
+    toast("error", error.message).showToast();
+  }
+}
 /**
  * @description Event listeners for the dashboard
  */
 function addEventListeners() {
   const carContainer = document.getElementById("carCardsGrid");
   const biddingContainer = document.getElementById("biddingContainer");
+  const bookingContainer = document.getElementById("bookingContainer");
   carContainer.addEventListener("click", (event) => {
     const editbutton = event.target.closest(".editCarBtn");
     const deleteCarBtn = event.target.closest(".deleteCarBtn");
@@ -488,6 +537,19 @@ function addEventListeners() {
       deleteCar(carId);
     }
   });
+  bookingContainer.addEventListener("click", (e) => {
+    const changeAmount = e.target.closest(".changeAmount");
+    if (changeAmount && changeAmount.dataset.id) {
+      const bookingId = changeAmount.dataset.id;
+      changeAmountModal.style.display = "flex";
+      changeAmountForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await updateAmount(bookingId);
+        changeAmountModal.style.display = "none";
+        loadBookings();
+      });
+    }
+  });
   biddingContainer.addEventListener("click", (e) => {
     const approveButton = e.target.closest(".approveBid");
     const cancelButton = e.target.closest(".cancelBid");
@@ -498,6 +560,7 @@ function addEventListeners() {
         const bidId = cancelButton.dataset.id;
         await cancelBid(bidId);
         cancelBidModal.style.display = "none";
+        loadBiddings();
       });
     }
     if (approveButton && approveButton.dataset.id) {
@@ -510,6 +573,7 @@ function addEventListeners() {
         e.preventDefault();
         await approveBid(bidId, carId, start, end);
         approveBidModal.style.display = "none";
+        loadBiddings();
       });
     }
   });
@@ -521,6 +585,9 @@ function addEventListeners() {
   });
   closeCancelBidModal.addEventListener("click", () => {
     cancelBidModal.style.display = "none";
+  });
+  closeChangeAmountModal.addEventListener("click", () => {
+    changeAmountModal.style.display = "none";
   });
   addCarButton.addEventListener("click", () => {
     modal.style.display = "block";
@@ -553,6 +620,9 @@ function addEventListeners() {
   sortOrderBooking.addEventListener("change", () => {
     loadBookings();
   });
+  filterByTripStatus.addEventListener("change", () => {
+    loadBookings();
+  });
   editCloseButton.addEventListener("click", () => {
     editModal.style.display = "none";
   });
@@ -575,6 +645,11 @@ async function editCar(carId) {
     editCarForm.elements["location"].value = car.location;
     editCarForm.elements["minRental"].value = Number(car.minRentalPeriod);
     editCarForm.elements["maxRental"].value = Number(car.maxRentalPeriod);
+    editCarForm.elements["ratePerKm"].value = Number(car.ratePerKm);
+    editCarForm.elements["fixedKilometer"].value = Number(car.fixedKilometer);
+    editCarForm.elements["rentalPriceOutStation"].value = Number(
+      car.rentalPriceOutStation
+    );
     editCarForm.setAttribute("data-id", carId);
     editModal.style.display = "flex";
   } catch (error) {

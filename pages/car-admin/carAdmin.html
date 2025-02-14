@@ -155,8 +155,8 @@
               <div>
                 <label for="sortOrderBidding">Order:</label>
                 <select id="sortOrderBidding">
-                  <option value="asc" selected>Ascending &#9650;</option>
-                  <option value="desc">Descending &#9660;</option>
+                  <option value="asc">Ascending &#9650;</option>
+                  <option value="desc" selected>Descending &#9660;</option>
                 </select>
               </div>
             </div>
@@ -192,6 +192,15 @@
                 </select>
               </div>
               <div>
+                <label for="filterByTripStatus">Filter by Trip Status:</label>
+                <select id="filterByTripStatus">
+                  <option value="all">All Trips</option>
+                  <option value="true">Trip Completed</option>
+                  <option value="false">Not Completed</option>
+                  <!-- Car filter options will be dynamically populated -->
+                </select>
+              </div>
+              <div>
                 <label for="sortFilterBooking">Sort by:</label>
                 <select id="sortFilterBooking">
                   <option value="date" selected>Date Created</option>
@@ -201,8 +210,8 @@
               <div>
                 <label for="sortOrderBooking">Order:</label>
                 <select id="sortOrderBooking">
-                  <option value="asc" selected>Ascending &#9650;</option>
-                  <option value="desc">Descending &#9660;</option>
+                  <option value="asc">Ascending &#9650;</option>
+                  <option value="desc" selected>Descending &#9660;</option>
                 </select>
               </div>
             </div>
@@ -216,7 +225,7 @@
                 <th scope="col">Start Date</th>
                 <th scope="col">End Date</th>
                 <th scope="col">Amount</th>
-                <th scope="col">Confirmed At</th>
+                <th scope="col">Trip Status</th>
               </tr>
             </thead>
             <tbody id="bookingContainer">
@@ -445,7 +454,7 @@
               />
             </div>
             <div class="form-group">
-              <label for="rentalPrice">Base Rental Price (Rs/day)</label>
+              <label for="rentalPrice">Base Rental Price (Rs/day)(Local)</label>
               <input
                 type="number"
                 name="rentalPrice"
@@ -454,6 +463,49 @@
                 min="100"
                 max="100000"
                 title="Rental price should be between 100 and 100000"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="rentalPriceOutStation"
+                >Base Rental Price (Rs/day)(OutStation)</label
+              >
+              <input
+                type="number"
+                name="rentalPriceOutStation"
+                id="rentalPriceOutStation"
+                placeholder="Enter rental price per day"
+                min="100"
+                max="100000"
+                title="Rental price should be between 100 and 100000"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="ratePerKm"
+                >Rate per Kilometer (Rs/Km) (Service Charges)</label
+              >
+              <input
+                type="number"
+                name="ratePerKm"
+                id="ratePerKm"
+                placeholder="Enter per kilometer rate"
+                min="1"
+                max="10"
+                title="you can charge between 1 to 10 Rs/km"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="fixedKilometer">Fixed Kilometer</label>
+              <input
+                type="number"
+                name="fixedKilometer"
+                id="fixedKilometer"
+                placeholder="Enter Kilometer after which additional charges will be applied"
+                min="200"
+                max="1000"
+                title="You can charge additional service charges after 200km"
                 required
               />
             </div>
@@ -524,7 +576,7 @@
             style="height: auto"
           >
             <div class="form-group">
-              <label for="rentalPrice">Base Rental Price (Rs/day)</label>
+              <label for="rentalPrice">Base Rental Price (Rs/day)(Local)</label>
               <input
                 type="number"
                 name="rentalPrice"
@@ -533,6 +585,49 @@
                 min="100"
                 max="100000"
                 title="Rental price should be between 100 and 100000"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="rentalPriceOutStation"
+                >Base Rental Price (Rs/day)(OutStation)</label
+              >
+              <input
+                type="number"
+                name="rentalPriceOutStation"
+                id="rentalPriceOutStation"
+                placeholder="Enter rental price per day"
+                min="100"
+                max="100000"
+                title="Rental price should be between 100 and 100000"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="ratePerKm"
+                >Rate per Kilometer (Rs/Km) (Service Charges)</label
+              >
+              <input
+                type="number"
+                name="ratePerKm"
+                id="ratePerKm"
+                placeholder="Enter per kilometer rate"
+                min="1"
+                max="10"
+                title="you can charge between 1 to 10 Rs/km"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="fixedKilometer">Fixed Kilometer</label>
+              <input
+                type="number"
+                name="fixedKilometer"
+                id="fixedKilometer"
+                placeholder="Enter Kilometer after which additional charges will be applied"
+                min="200"
+                max="1000"
+                title="You can charge additional service charges after 200km"
                 required
               />
             </div>
@@ -631,6 +726,41 @@
           >
             <div class="form-group full-width">
               <input type="submit" name="submit" value="Cancel" />
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="custom-modal" id="changeAmountModal" style="display: none">
+      <div class="custom-modal-inner">
+        <div class="custom-modal-header">
+          <button class="custom-modal-close" id="closeChangeAmountModal">
+            <img src="../../images/exit.svg" alt="Close" />
+          </button>
+        </div>
+        <div class="custom-modal-body">
+          <p class="custom-modal-title">Update Kilometer</p>
+          <form
+            id="changeAmountForm"
+            class="custom-form"
+            data-id=""
+            style="height: auto"
+          >
+            <div class="form-group">
+              <label for="kilometer">Kilometer Travelled</label>
+              <input
+                type="number"
+                name="kilometer"
+                id="kilometer"
+                placeholder="Enter Kilometer that renter travelled"
+                min="1"
+                max="3000"
+                title="You can charge additional service charges after 200km"
+                required
+              />
+            </div>
+            <div class="form-group full-width">
+              <input type="submit" name="submit" value="Submit" />
             </div>
           </form>
         </div>

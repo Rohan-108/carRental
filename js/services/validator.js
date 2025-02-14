@@ -178,7 +178,26 @@ function CarValidator() {
       `${fieldName} must be a number between 1 and 365`
     );
   };
-
+  const validateRatePerKm = (rateInput) => {
+    const value = rateInput.value.trim();
+    const numeric = Number(value);
+    const valid = /^\d+$/.test(value) && numeric >= 1 && numeric <= 10;
+    return applyValidation(
+      rateInput,
+      valid,
+      `Rate must be a number between 1 and 10`
+    );
+  };
+  const validateFixedKilometer = (fixedInput) => {
+    const value = fixedInput.value.trim();
+    const numeric = Number(value);
+    const valid = /^\d+$/.test(value) && numeric >= 200 && numeric <= 1000;
+    return applyValidation(
+      fixedInput,
+      valid,
+      `Fixed Kilometer must be a number between 200 and 1000`
+    );
+  };
   return {
     validateCarName,
     validateRentalPrice,
@@ -187,6 +206,8 @@ function CarValidator() {
     validateSeats,
     validateCarImage,
     validateRentalPeriod,
+    validateFixedKilometer,
+    validateRatePerKm,
   };
 }
 

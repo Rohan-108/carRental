@@ -121,12 +121,15 @@ async function loadSidebar() {
     for (const conv of myconversations) {
       const car = conv.car;
       const otherMemeber = conv.members.find((member) => member.id !== user.id);
+      if (!otherMemeber) continue;
       const convDiv = document.createElement("div");
       convDiv.classList.add("conversation");
       if (currentConvId && currentConvId === conv.id) {
         convDiv.classList.add("active");
       }
       convDiv.dataset.convId = conv.id;
+      console.log(otherMemeber);
+      console.log(conv);
       let imgUrl = otherMemeber.avatar;
       if (imgUrl instanceof ArrayBuffer) {
         const blob = new Blob([imgUrl]);
@@ -150,6 +153,7 @@ async function loadSidebar() {
       sidebar.appendChild(convDiv);
     }
   } catch (error) {
+    console.error(error);
     toast("error", "Error loading sidebar").showToast();
   }
 }

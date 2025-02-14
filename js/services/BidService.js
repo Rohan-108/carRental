@@ -4,8 +4,6 @@ import { USER_SCHEMA } from "./userService.js";
 import { CAR_SCHEMA } from "./carService.js";
 
 const APPROVED = "approved";
-const PENDING = "pending";
-const REJECTED = "rejected";
 export const BID_SCHEMA = {
   id: "string",
   carId: "string",
@@ -16,7 +14,9 @@ export const BID_SCHEMA = {
   amount: "number",
   startDate: "string",
   endDate: "string",
+  isOutStation: "boolean",
   status: "string",
+  tripCompleted: "boolean",
   createdAt: "number",
   updatedAt: "number",
 };

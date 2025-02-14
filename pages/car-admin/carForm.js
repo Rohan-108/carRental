@@ -34,6 +34,15 @@ addCarForm.elements["carName"].addEventListener("change", (e) =>
 addCarForm.elements["rentalPrice"].addEventListener("change", (e) =>
   validator.validateRentalPrice(e.target)
 );
+addCarForm.elements["rentalPriceOutStation"].addEventListener("change", (e) =>
+  validator.validateRentalPrice(e.target)
+);
+addCarForm.elements["fixedKilometer"].addEventListener("change", (e) =>
+  validator.validateFixedKilometer(e.target)
+);
+addCarForm.elements["ratePerKm"].addEventListener("change", (e) =>
+  validator.validateRatePerKm(e.target)
+);
 addCarForm.elements["plateNumber"].addEventListener("change", (e) =>
   validator.validatePlateNumberField(e.target)
 );
@@ -69,6 +78,9 @@ addCarForm.addEventListener("submit", async (e) => {
     const formData = new FormData(addCarForm);
     const carName = (formData.get("carName") || "").trim();
     const rentalPrice = Number((formData.get("rentalPrice") || "").trim());
+    const rentalPriceOutStation = Number(
+      (formData.get("rentalPriceOutStation") || "").trim()
+    );
     const plateNumber = (formData.get("plateNumber") || "").trim();
     const vehicleType = (formData.get("vehicleType") || "").trim();
     const seats = (formData.get("seats") || "").trim();
@@ -77,6 +89,10 @@ addCarForm.addEventListener("submit", async (e) => {
     const location = (formData.get("location") || "").trim();
     const minRental = Number((formData.get("minRental") || "").trim());
     const maxRental = Number((formData.get("maxRental") || "").trim());
+    const ratePerKm = Number((formData.get("ratePerKm") || "").trim());
+    const fixedKilometer = Number(
+      (formData.get("fixedKilometer") || "").trim()
+    );
     const carImageInput = addCarForm.elements["carImage"];
 
     // Ensure required fields are not empty
@@ -92,6 +108,9 @@ addCarForm.addEventListener("submit", async (e) => {
         location,
         minRental,
         maxRental,
+        fixedKilometer,
+        ratePerKm,
+        rentalPriceOutStation,
       ].some((field) => field === "")
     ) {
       toast("error", "All fields are required").showToast();
@@ -102,6 +121,9 @@ addCarForm.addEventListener("submit", async (e) => {
     if (
       !validator.validateCarName(addCarForm.elements["carName"]) ||
       !validator.validateRentalPrice(addCarForm.elements["rentalPrice"]) ||
+      !validator.validateRentalPrice(
+        addCarForm.elements["rentalPriceOutStation"]
+      ) ||
       !validator.validatePlateNumberField(addCarForm.elements["plateNumber"]) ||
       !validator.validateDropdown(
         addCarForm.elements["vehicleType"],
@@ -128,7 +150,11 @@ addCarForm.addEventListener("submit", async (e) => {
         addCarForm.elements["maxRental"],
         "Maximum Rental Period"
       ) ||
-      !validator.validateCarImage(carImageInput)
+      !validator.validateCarImage(carImageInput) ||
+      !validator.validateFixedKilometer(
+        addCarForm.elements["fixedKilometer"]
+      ) ||
+      !validator.validateRatePerKm(addCarForm.elements["ratePerKm"])
     ) {
       toast("error", "Please correct the highlighted fields").showToast();
       return;
@@ -161,6 +187,10 @@ addCarForm.addEventListener("submit", async (e) => {
       ownerId: owner.id,
       show: "true",
       images: imagesBuffer,
+      ratePerKm,
+      fixedKilometer,
+      //isForOutStation: true,
+      rentalPriceOutStation,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
@@ -180,6 +210,15 @@ addCarForm.addEventListener("submit", async (e) => {
 editCarForm.elements["rentalPrice"].addEventListener("change", (e) =>
   validator.validateRentalPrice(e.target)
 );
+editCarForm.elements["rentalPriceOutStation"].addEventListener("change", (e) =>
+  validator.validateRentalPrice(e.target)
+);
+editCarForm.elements["fixedKilometer"].addEventListener("change", (e) =>
+  validator.validateFixedKilometer(e.target)
+);
+editCarForm.elements["ratePerKm"].addEventListener("change", (e) =>
+  validator.validateRatePerKm(e.target)
+);
 editCarForm.elements["minRental"].addEventListener("change", (e) =>
   validator.validateRentalPeriod(e.target, "Minimum Rental Period")
 );
@@ -198,9 +237,16 @@ editCarForm.addEventListener("submit", async (e) => {
   try {
     const formData = new FormData(editCarForm);
     const rentalPrice = Number((formData.get("rentalPrice") || "").trim());
+    const rentalPriceOutStation = Number(
+      (formData.get("rentalPriceOutStation") || "").trim()
+    );
     const minRental = Number((formData.get("minRental") || "").trim());
     const maxRental = Number((formData.get("maxRental") || "").trim());
     const location = (formData.get("location") || "").trim();
+    const ratePerKm = Number((formData.get("ratePerKm") || "").trim());
+    const fixedKilometer = Number(
+      (formData.get("fixedKilometer") || "").trim()
+    );
     const carImageInput = editCarForm.elements["carImage"];
 
     // Validate required fields via validator functions
@@ -214,7 +260,17 @@ editCarForm.addEventListener("submit", async (e) => {
         editCarForm.elements["maxRental"],
         "Maximum Rental Period"
       ) ||
-      !validator.validateDropdown(editCarForm.elements["location"], "Location")
+      !validator.validateDropdown(
+        editCarForm.elements["location"],
+        "Location"
+      ) ||
+      !validator.validateRatePerKm(editCarForm.elements["ratePerKm"]) ||
+      !validator.validateFixedKilometer(
+        editCarForm.elements["fixedKilometer"]
+      ) ||
+      !validator.validateRentalPrice(
+        editCarForm.elements["rentalPriceOutStation"]
+      )
     ) {
       toast("error", "Please correct the highlighted fields").showToast();
       return;
@@ -246,6 +302,9 @@ editCarForm.addEventListener("submit", async (e) => {
       rentalPrice,
       minRentalPeriod: minRental,
       maxRentalPeriod: maxRental,
+      ratePerKm,
+      fixedKilometer,
+      rentalPriceOutStation,
       location,
       images: newImages.length ? newImages : existingCar.images,
       updatedAt: Date.now(),
