@@ -1,8 +1,14 @@
 import carService from "../../js/services/carService.js";
 import { getCurrentCarId, toast } from "../../js/index.js";
 
-window.addEventListener("load", () => {
-  setCarDetails();
+window.addEventListener("load", async () => {
+  try {
+    showLoader();
+    await setCarDetails();
+  } catch (error) {
+  } finally {
+    setTimeout(() => hideLoader(), 500);
+  }
 });
 
 /**
@@ -74,3 +80,15 @@ async function setCarDetails() {
     toast("error", "Error fetching car details").showToast();
   }
 }
+function showLoader() {
+  const main = document.querySelector(".carDetailContainer");
+  const loader = document.createElement("div");
+  loader.className = "loader-overlay";
+  loader.innerHTML = "<div class='loader'></div>";
+  main.appendChild(loader);
+}
+function hideLoader() {
+  const loader = document.querySelector(".loader-overlay");
+  if (loader) loader.remove();
+}
+export { showLoader, hideLoader };
