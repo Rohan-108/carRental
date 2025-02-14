@@ -1,19 +1,20 @@
-import DbService from "../../js/db.js";
+import ChatService from "../../js/services/ChatService.js";
+import carService from "../../js/services/carService.js";
+import BidService from "../../js/services/BidService.js";
 import { getCurrentCarId, getCurrentUser, toast } from "../../js/index.js";
 import { loadUserChat } from "./carChat.js";
+import userService from "../../js/services/userService.js";
+import { getDaysDiff } from "../../js/utils.js";
 const amountInput = document.getElementById("amount");
 const minRentalPeriod = document.getElementById("minRentalPeriod");
 const maxRentalPeriod = document.getElementById("maxRentalPeriod");
+// Get booked dates for the car
 async function getBookedDates() {
   const carId = getCurrentCarId();
   if (!carId) return [];
 
   try {
-    const bookings = await DbService.searchAllByIndex(
-      "bookings",
-      "carId",
-      carId
-    );
+    const bookings = await BidService.getBookingsByCarId(carId);
     return bookings.flatMap((booking) =>
       getDatesInRange(booking.startDate, booking.endDate)
     );
@@ -23,24 +24,12 @@ async function getBookedDates() {
     return [];
   }
 }
-
-function getDatesInRange(startDate, endDate) {
-  const dates = [];
-  let currentDate = new Date(startDate);
-  const end = new Date(endDate);
-
-  while (currentDate <= end) {
-    dates.push(currentDate.toISOString().split("T")[0]);
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-
-  return dates;
-}
+// Get dates in the range of start and end date
 let picker;
 async function setupDatePicker() {
   const carId = getCurrentCarId();
   const bookedDates = await getBookedDates();
-  const car = await DbService.getItem("cars", carId);
+  const car = await carService.getCarById(carId);
   minRentalPeriod.textContent = car.minRentalPeriod;
   maxRentalPeriod.textContent = car.maxRentalPeriod;
   amountInput.value = car.rentalPrice;
@@ -82,11 +71,14 @@ async function setupDatePicker() {
 
 setupDatePicker();
 
+// Rent button click event
+
 document.getElementById("rentButton").addEventListener("click", async () => {
   try {
-    const user = getCurrentUser();
+    const u = getCurrentUser();
     const carId = getCurrentCarId();
-    const car = await DbService.getItem("cars", carId);
+    const car = await carService.getCarById(carId);
+    const user = await userService.getUserById(u.id);
     // Retrieve selected dates
     if (user.id === car.userId) {
       toast("error", "You cannot rent your own car").showToast();
@@ -117,31 +109,43 @@ document.getElementById("rentButton").addEventListener("click", async () => {
       ).showToast();
       return;
     }
-    await DbService.addItem("bids", {
+    await BidService.addBid({
+      id: "",
       carId,
       startDate,
       endDate,
       userId: user.id,
       amount: amountInput.value,
-      ownerId: car.userId,
+      ownerId: car.ownerId,
+      car: car,
+      user: user,
       status: "pending",
       createdAt: Date.now(),
+      updatedAt: Date.now(),
     });
     const bidNow = document.getElementById("rentButton");
     let convId = bidNow.dataset.conversationId;
     if (!convId) {
-      const id = await DbService.addItem("conversations", {
+      const id = await ChatService.addConversation({
+        id: "",
         carId: carId,
-        members: [user.id, car.userId],
+        car: car,
+        members: [user, car.owner],
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
       });
       convId = id;
     }
-    await DbService.addItem("chat", {
+    await ChatService.addChat({
+      id: "",
       conversationId: convId,
-      createdAt: Date.now(),
       message: `I am interested in renting your car, I have placed a bid of Rs.${amountInput.value} for ${nOfdays} days from ${startDate} to ${endDate}.
       Please accept my bid if you are interested.`,
+      image: null,
       sender: user.id,
+      user: user,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     });
     picker.clear();
     toast("success", "Bid Placed Successfully").showToast();
@@ -152,10 +156,17 @@ document.getElementById("rentButton").addEventListener("click", async () => {
   }
 });
 
-function getDaysDiff(startDate, endDate) {
-  const start = new Date(startDate);
+// Get dates in the range of start and end date
+
+function getDatesInRange(startDate, endDate) {
+  const dates = [];
+  let currentDate = new Date(startDate);
   const end = new Date(endDate);
-  const diffInMilliseconds = end - start;
-  const diffInDays = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24)) + 1;
-  return diffInDays;
+
+  while (currentDate <= end) {
+    dates.push(currentDate.toISOString().split("T")[0]);
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return dates;
 }

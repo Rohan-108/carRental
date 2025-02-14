@@ -1,9 +1,9 @@
 import { goToPage, toast, setCurrentCarId } from "../../js/index.js";
 import { cities, debounce } from "../../js/utils.js";
-import DbService from "../../js/db.js";
+import carService from "../../js/services/carService.js";
 
 let currentPage = 1;
-const pageSize = 3;
+const pageSize = 10;
 
 const applyFiltersBtn = document.getElementById("applyFilters");
 const clearFiltersBtn = document.getElementById("clearFilters");
@@ -11,23 +11,14 @@ const city = document.getElementById("city");
 const carType = document.getElementById("carType");
 const transmission = document.getElementById("transmission");
 const fuelType = document.getElementById("fuelType");
-function showLoader() {
-  const mainContainer = document.getElementById("carContainer");
-  const loader = document.createElement("div");
-  loader.className = "loader-overlay";
-  loader.innerHTML = "<div class='loader'></div>";
-  mainContainer.appendChild(loader);
-}
-function hideLoader() {
-  const loader = document.querySelector(".loader-overlay");
-  if (loader) loader.remove();
-}
 window.addEventListener("load", async () => {
   setFilter();
   await setCars();
   addEventListeners();
 });
-
+/**
+ * @description Set filters for cars
+ */
 function setFilter() {
   cities.forEach((c) => {
     const option = document.createElement("option");
@@ -114,7 +105,9 @@ function setFilter() {
     });
   });
 }
-
+/**
+ * @description Set cars intially
+ */
 async function setCars() {
   showLoader();
   try {
@@ -130,67 +123,50 @@ async function setCars() {
   }
 }
 
+/**
+ * @description Get cars based on filters
+ * @param {*} query
+ * @returns
+ */
 async function getCars(query) {
   try {
-    let cars;
     const rangeInput = document.querySelectorAll(".range-input input");
     const minPrice = parseInt(rangeInput[0].value);
     const maxPrice = parseInt(rangeInput[1].value);
-    if (
-      city.value === "All" &&
-      carType.value === "All" &&
-      transmission.value === "All" &&
-      fuelType.value === "All" &&
-      (!query || query === "") &&
-      minPrice === 0 &&
-      maxPrice === 100000
-    ) {
-      const result = await DbService.getPaginatedItems("cars", {
-        page: currentPage,
-        pageSize,
-        indexName: "show",
-        direction: "next",
-      });
-      cars = result.data;
-      renderPagination(result.totalPages, currentPage);
-    } else {
-      cars = await DbService.searchAllByIndex("cars", "show", "true");
-      if (carType.value !== "All") {
-        cars = cars.filter((car) => car.vehicleType === carType.value);
-      }
-      if (city.value !== "All") {
-        cars = cars.filter((car) => car.location === city.value);
-      }
-      if (transmission.value !== "All") {
-        cars = cars.filter((car) => car.transmission === transmission.value);
-      }
-      if (fuelType.value !== "All") {
-        cars = cars.filter((car) => car.fuelType === fuelType.value);
-      }
-      if (query) {
-        cars = cars.filter((car) =>
-          car.name.toLowerCase().includes(query.toLowerCase())
-        );
-      }
-      cars = cars.filter(
-        (car) => car.rentalPrice >= minPrice && car.rentalPrice <= maxPrice
-      );
-      const totalItems = cars.length;
-      const totalPages = Math.ceil(totalItems / pageSize);
-      if (currentPage > totalPages) currentPage = totalPages;
-      if (currentPage < 1) currentPage = 1;
-      const start = (currentPage - 1) * pageSize;
-      const paginatedCars = cars.slice(start, start + pageSize);
-      renderPagination(totalPages, currentPage);
-      return paginatedCars;
-    }
-    return cars;
+    const filterFunction = (car) => {
+      if (city.value !== "All" && car.location !== city.value) return false;
+      if (carType.value !== "All" && car.vehicleType !== carType.value)
+        return false;
+      if (
+        transmission.value !== "All" &&
+        car.transmission !== transmission.value
+      )
+        return false;
+      if (fuelType.value !== "All" && car.fuelType !== fuelType.value)
+        return false;
+      if (car.rentalPrice < minPrice || car.rentalPrice > maxPrice)
+        return false;
+      if (query && !car.name.toLowerCase().includes(query.toLowerCase()))
+        return false;
+      return true;
+    };
+    const result = await carService.getPagedCars(
+      { page: currentPage, pageSize, indexName: "show", direction: "next" },
+      filterFunction
+    );
+    renderPagination(result.totalPages, currentPage);
+    return result.data;
   } catch (error) {
     console.error(error);
     toast("error", "Failed to set car details").showToast();
   }
 }
-
+/**
+ * @description Render cars
+ * @param {*} cars
+ * @param {*} id
+ * @returns
+ */
 function renderCars(cars, id) {
   const carsContainer = document.getElementById(id);
   carsContainer.innerHTML = "";
@@ -228,6 +204,12 @@ function renderCars(cars, id) {
     .join("");
 }
 
+/**
+ * @description Render pagination
+ * @param {*} totalPages
+ * @param {*} current
+ * @returns
+ */
 function renderPagination(totalPages, current) {
   const paginationDiv = document.getElementById("pagination");
   paginationDiv.innerHTML = "";
@@ -269,6 +251,9 @@ function renderPagination(totalPages, current) {
   paginationDiv.appendChild(nextButton);
 }
 
+/**
+ * @description Add event listeners
+ */
 function addEventListeners() {
   const carContainer = document.getElementById("carContainer");
   carContainer.addEventListener("click", (event) => {
@@ -298,4 +283,17 @@ function addEventListeners() {
       }, 300)
     );
   }
+}
+
+// Loader
+function showLoader() {
+  const mainContainer = document.getElementById("carContainer");
+  const loader = document.createElement("div");
+  loader.className = "loader-overlay";
+  loader.innerHTML = "<div class='loader'></div>";
+  mainContainer.appendChild(loader);
+}
+function hideLoader() {
+  const loader = document.querySelector(".loader-overlay");
+  if (loader) loader.remove();
 }

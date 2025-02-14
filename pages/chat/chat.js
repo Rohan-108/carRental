@@ -1,17 +1,24 @@
 import { toast, getCurrentUser } from "../../js/index.js";
 import { getFileFromInput } from "../../js/utils.js";
-import DbService from "../../js/db.js";
+import ChatService from "../../js/services/ChatService.js";
+import { UserValidator } from "../../js/services/validator.js";
+import userService from "../../js/services/userService.js";
+//dom elements
 const messageBox = document.getElementById("messageBox");
 const sendBtn = document.getElementById("send");
 const closeModal = document.getElementById("closeButton");
 const modal = document.getElementById("modal");
 const openImageModal = document.getElementById("openImageModal");
 const imageForm = document.getElementById("imageForm");
+
 window.addEventListener("load", () => {
   addEventListeners();
   loadSidebar();
   setChatBox();
 });
+/**
+ * @description Sets the chat box with the selected conversation
+ */
 async function setChatBox() {
   modal.style.display = "none";
   const convId = JSON.parse(sessionStorage.getItem("convId"))?.convId || null;
@@ -28,39 +35,34 @@ async function setChatBox() {
     sendBtn.style.pointerEvents = "none";
   }
 }
-
+/**
+ * @description sends the image from the input field
+ */
 imageForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
   try {
+    const validator = UserValidator();
     let avatarData;
     const imageInput = imageForm.elements["image"];
     const imageFile = imageInput?.files[0];
+    const user = await userService.getUserById(getCurrentUser().id);
     if (!imageFile) {
       toast("error", "Please select an image").showToast();
       return;
     }
     if (imageFile) {
-      const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
-      if (!allowedTypes.includes(imageFile.type)) {
-        toast(
-          "error",
-          "Avatar must be an image of type PNG, JPEG, or JPG"
-        ).showToast();
-        return;
-      }
-      const maxSizeInBytes = 500 * 1024;
-      if (imageFile.size > maxSizeInBytes) {
-        toast("error", "Avatar image must be less than 500KB").showToast();
-        return;
-      }
+      if (!validator.validateAvatar(imageInput)) return;
       avatarData = await getFileFromInput(imageInput);
     }
-    await DbService.addItem("chat", {
+    await ChatService.addChat({
+      id: "",
       conversationId: sendBtn.dataset.convId,
-      sender: getCurrentUser().id,
+      sender: user.id,
+      user: user,
       message: "",
       image: avatarData,
       createdAt: Date.now(),
+      updatedAt: Date.now(),
     });
     modal.style.display = "none";
     loadChat(sendBtn.dataset.convId);
@@ -69,7 +71,9 @@ imageForm?.addEventListener("submit", async (e) => {
     toast("error", "Error sending image").showToast();
   }
 });
-
+/**
+ * @description Adds event listeners to the chat box
+ */
 function addEventListeners() {
   const sidebar = document.getElementById("sidebar");
   sidebar?.addEventListener("click", (e) => {
@@ -93,21 +97,30 @@ function addEventListeners() {
     modal.style.display = "none";
   });
 }
+/**
+ * @description Loads the sidebar with the user's conversations
+ */
 async function loadSidebar() {
   try {
-    const allconv = await DbService.getAllItems("conversations");
+    const allconv = await ChatService.getAllConversations();
     const currentConvId =
       JSON.parse(sessionStorage.getItem("convId"))?.convId || null;
-    const user = getCurrentUser();
+    const user = await userService.getUserById(getCurrentUser().id);
     const myconversations = allconv.filter((conv) => {
-      return conv.members.includes(user.id);
+      let ismember = false;
+      for (const member of conv.members) {
+        if (member.id === user.id) {
+          ismember = true;
+          break;
+        }
+      }
+      return ismember;
     });
     const sidebar = document.getElementById("sidebar");
     sidebar.innerHTML = "";
     for (const conv of myconversations) {
-      const car = await DbService.getItem("cars", conv.carId);
-      const otherMemeberId = conv.members.filter((id) => id !== user.id);
-      const otherMemeber = await DbService.getItem("users", otherMemeberId[0]);
+      const car = conv.car;
+      const otherMemeber = conv.members.find((member) => member.id !== user.id);
       const convDiv = document.createElement("div");
       convDiv.classList.add("conversation");
       if (currentConvId && currentConvId === conv.id) {
@@ -140,13 +153,17 @@ async function loadSidebar() {
     toast("error", "Error loading sidebar").showToast();
   }
 }
+/**
+ * @description Loads the chat with the selected conversation
+ * @param {string} convId
+ * @returns {Promise<void>}
+ * */
 async function loadChat(convId) {
   try {
     modal.style.display = "none";
     sendBtn.dataset.convId = convId;
-    const user = getCurrentUser();
-    const avatar = (await DbService.getItem("users", user.id)).avatar;
-    let imgUrl = avatar;
+    const user = await userService.getUserById(getCurrentUser().id);
+    let imgUrl = user.avatar;
     if (imgUrl instanceof ArrayBuffer) {
       const blob = new Blob([imgUrl]);
       imgUrl = URL.createObjectURL(blob);
@@ -155,11 +172,7 @@ async function loadChat(convId) {
     sendBtn.style.cursor = "pointer";
     sendBtn.style.pointerEvents = "auto";
 
-    let carChat = await DbService.searchAllByIndex(
-      "chat",
-      "conversationId",
-      convId
-    );
+    let carChat = await ChatService.getChatsByConversationId(convId);
 
     if (carChat.length === 0) {
       messageBox.innerHTML = `
@@ -169,8 +182,9 @@ async function loadChat(convId) {
       `;
       return;
     }
-
+    //sort the chat by timestampk
     carChat.sort((a, b) => a.createdAt - b.createdAt);
+    //display the chat
     messageBox.innerHTML = "";
     for (const chat of carChat) {
       const msgDiv = document.createElement("div");
@@ -205,7 +219,7 @@ async function loadChat(convId) {
           </div>
         `;
       } else {
-        const sender = await DbService.getItem("users", chat.sender);
+        const sender = chat.user;
         let imgUrl = sender.avatar;
         if (imgUrl instanceof ArrayBuffer) {
           const blob = new Blob([imgUrl]);
@@ -244,9 +258,10 @@ async function loadChat(convId) {
   }
 }
 
+//send message
 document.getElementById("send").addEventListener("click", async () => {
   try {
-    const user = getCurrentUser();
+    const user = await userService.getUserById(getCurrentUser().id);
     const msg = document.getElementById("msg").value?.trim();
     if (!msg || msg === "") {
       toast("error", "Message cannot be empty").showToast();
@@ -256,11 +271,15 @@ document.getElementById("send").addEventListener("click", async () => {
       toast("error", "Error sending message").showToast();
       return;
     }
-    await DbService.addItem("chat", {
+    await ChatService.addChat({
+      id: "",
       conversationId: sendBtn.dataset.convId,
       sender: user.id,
+      user: user,
       message: msg,
+      image: null,
       createdAt: Date.now(),
+      updatedAt: Date.now(),
     });
     document.getElementById("msg").value = "";
   } catch (error) {

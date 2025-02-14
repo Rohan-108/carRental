@@ -1,22 +1,24 @@
-import DbService from "../../js/db.js";
+import carService from "../../js/services/carService.js";
 import { getCurrentCarId, toast } from "../../js/index.js";
 
 window.addEventListener("load", () => {
   setCarDetails();
 });
 
+/**
+ * @description Fetches car details from the database and sets the values in the DOM.
+ * @returns {Promise<void>}
+ */
 async function setCarDetails() {
-  const carId = getCurrentCarId();
-  console.log("Car ID:", carId);
-  if (!carId) {
-    console.log("No car ID found in local storage.");
-    return;
-  }
-
   try {
-    const car = await DbService.getItem("cars", carId);
+    const carId = getCurrentCarId();
+    if (!carId) {
+      toast("error", "Car not found").showToast();
+      return;
+    }
+    const car = await carService.getCarById(carId);
     if (!car) {
-      console.log("Car not found.");
+      toast("error", "Car not found").showToast();
       return;
     }
 
@@ -29,15 +31,11 @@ async function setCarDetails() {
     document.getElementById("carTransmission").textContent = car.transmission;
     document.getElementById("carType").textContent = car.vehicleType;
 
-    if (car.userId) {
-      const owner = await DbService.getItem("users", car.userId);
-      if (owner) {
-        document.getElementById("ownerName").textContent = owner.name;
-        document.getElementById("ownerEmail").textContent = owner.email;
-        document.getElementById("ownerPhone").textContent = owner.tel;
-      }
+    if (car.owner) {
+      document.getElementById("ownerName").textContent = car.owner.name;
+      document.getElementById("ownerEmail").textContent = car.owner.email;
+      document.getElementById("ownerPhone").textContent = car.owner.tel;
     }
-
     const mainImage = document.getElementById("mainImage");
     const thumbnailContainer = document.getElementById("thumbnailContainer");
     if (car.images && car.images.length > 0) {
@@ -57,6 +55,7 @@ async function setCarDetails() {
         img.src = imgUrl;
         img.classList.add("thumbnail");
         img.alt = `Car image ${index + 1}`;
+        // Change the main image when a thumbnail is clicked
         img.addEventListener("click", () => {
           mainImage.classList.remove("fade-in");
           mainImage.classList.add("fade-out");

@@ -1,6 +1,6 @@
 import { openDB } from "https://cdn.jsdelivr.net/npm/idb@8.0.1/+esm";
 import { UUID } from "https://unpkg.com/uuidjs@^5";
-import { toast } from "./index.js";
+import { toast } from "../index.js";
 
 function DbService() {
   const DB_NAME = "carRental";
@@ -17,7 +17,6 @@ function DbService() {
             users: { keyPath: "id" },
             cars: { keyPath: "id" },
             bids: { keyPath: "id" },
-            bookings: { keyPath: "id" },
             approvals: { keyPath: "id" },
             chat: { keyPath: "id" },
             conversations: { keyPath: "id" },
@@ -32,7 +31,7 @@ function DbService() {
                   store.createIndex("adhaar", "adhaar", { unique: true });
                   break;
                 case "cars":
-                  store.createIndex("userId", "userId");
+                  store.createIndex("ownerId", "ownerId");
                   store.createIndex("plateNumber", "plateNumber", {
                     unique: true,
                   });
@@ -40,11 +39,6 @@ function DbService() {
                   break;
                 case "approvals":
                   store.createIndex("userId", "userId", { unique: true });
-                  break;
-                case "bookings":
-                  store.createIndex("userId", "userId");
-                  store.createIndex("carId", "carId");
-                  store.createIndex("ownerId", "ownerId");
                   break;
                 case "bids":
                   store.createIndex("userId", "userId");
@@ -235,7 +229,10 @@ function DbService() {
         indexName = "id",
         direction = "next",
         range = null,
-      } = {}
+      } = {},
+      filterFunction = () => {
+        return true;
+      }
     ) {
       const db = await openDatabase();
       const tx = db.transaction(storeName, "readonly");
@@ -248,12 +245,11 @@ function DbService() {
 
       while (cursor) {
         if (counter >= skip && results.length < pageSize) {
-          results.push(cursor.value);
+          if (filterFunction(cursor.value)) results.push(cursor.value);
         }
         counter++;
         cursor = await cursor.continue();
       }
-
       return {
         data: results,
         total: await this.countItems(storeName, indexName),

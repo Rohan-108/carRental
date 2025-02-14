@@ -1,43 +1,35 @@
-import {
-  getCurrentUser,
-  toast,
-  setCurrentUser,
-  goToPage,
-} from "../../js/index.js";
-import {
-  getFileFromInput,
-  getDaysDiff,
-  hashPassword,
-  isPasswordStrong,
-} from "../../js/utils.js";
-import DbService from "../../js/db.js";
+import { getCurrentUser, toast, goToPage } from "../../js/index.js";
+import { getDaysDiff } from "../../js/utils.js";
+import UserService from "../../js/services/userService.js";
+import ApprovalService from "../../js/services/ApprovalService.js";
+import BidService from "../../js/services/BidService.js";
+import userService from "../../js/services/userService.js";
+
+// --------------------- DOM Elements ---------------------
 const dashboardContainer = document.querySelector(".dashboardPage");
 const seekApprovalBtn = document.getElementById("seekApprovalBtn");
-const editProfileBtn = document.getElementById("editProfileBtn");
-const editCloseBtn = document.getElementById("editCloseButton");
-const changePasswordBtn = document.getElementById("changePasswordBtn");
-const changePasswordModal = document.getElementById("changePasswordModal");
-const passCloseButton = document.getElementById("passCloseButton");
-const passForm = document.getElementById("changePasswordForm");
-const profileModal = document.getElementById("profileModal");
-const editProfileForm = document.getElementById("editProfileForm");
 const mainContainer = document.querySelector(".dashboard-main");
 const statusFilterForBidding = document.getElementById("statusFilter");
 const sortFilterBidding = document.getElementById("sortFilterBidding");
 const sortFilterBooking = document.getElementById("sortFilterBooking");
 const sortOrderBidding = document.getElementById("sortOrderBidding");
 const sortOrderBooking = document.getElementById("sortOrderBooking");
+
+// --------------------- Pagination Variables ---------------------
 let currentPage = 1;
-let pageSize = 5;
+const pageSize = 5;
+
+// --------------------- Initialization ---------------------
 window.addEventListener("load", async () => {
   try {
     showLoader();
     const currentUser = getCurrentUser();
     if (!currentUser) {
       goToPage("login");
+      return;
     }
-    setUserDetail();
-    addEventListeners();
+    await setUserDetail();
+    initEventListeners();
   } catch (error) {
     console.error(error);
     toast("error", "Failed to load profile").showToast();
@@ -45,18 +37,27 @@ window.addEventListener("load", async () => {
     hideLoader();
   }
 });
+
+// --------------------- Dashboard Navigation ---------------------
 dashboardContainer.addEventListener("click", (e) => {
   const target = e.target.closest(".dashboard-page");
   if (!target) return;
+
+  // Update active page indicator
   dashboardContainer
     .querySelectorAll(".dashboard-page")
     .forEach((page) => page.classList.remove("active"));
   target.classList.add("active");
-  const selectedId = target.dataset.id;
+
+  // Hide all hidden sections
   document
     .querySelectorAll(".dashboard-main > .hidden-section")
-    .forEach((section) => (section.style.display = "none"));
-  switch (selectedId) {
+    .forEach((section) => {
+      section.style.display = "none";
+    });
+
+  // Show selected section
+  switch (target.dataset.id) {
     case "home":
       document.getElementById("profileHome").style.display = "flex";
       setUserDetail();
@@ -73,137 +74,41 @@ dashboardContainer.addEventListener("click", (e) => {
       document.getElementById("approvalSection").style.display = "flex";
       loadApprovals();
       break;
+    default:
+      break;
   }
 });
-async function addEventListeners() {
-  editCloseBtn.addEventListener("click", () => {
-    profileModal.style.display = "none";
-  });
-  editProfileBtn.addEventListener("click", async () => {
-    try {
-      const user = getCurrentUser();
-      editProfileForm.elements["name"].value = user.name;
-      editProfileForm.elements["phone"].value = user.tel;
-      profileModal.style.display = "block";
-    } catch (error) {
-      console.error(error);
-      toast("error", "Failed to load profile data").showToast();
-    }
-  });
+
+// --------------------- Event Listeners ---------------------
+function initEventListeners() {
+  // Sorting and filtering
   sortFilterBidding.addEventListener("change", loadBiddings);
   sortFilterBooking.addEventListener("change", loadBookings);
   sortOrderBidding.addEventListener("change", loadBiddings);
   sortOrderBooking.addEventListener("change", loadBookings);
   statusFilterForBidding.addEventListener("change", loadBiddings);
-  passCloseButton.addEventListener("click", () => {
-    changePasswordModal.style.display = "none";
-  });
-  changePasswordBtn.addEventListener("click", () => {
-    changePasswordModal.style.display = "flex";
+
+  // Seek approval button
+  seekApprovalBtn.addEventListener("click", async () => {
+    try {
+      const currentUser = await userService.getUserById(getCurrentUser().id);
+      await ApprovalService.addApproval({
+        id: "",
+        userId: currentUser.id,
+        user: currentUser,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        status: "pending",
+      });
+      await loadApprovals();
+    } catch (error) {
+      console.error(error);
+      toast("error", "Failed to seek approval").showToast();
+    }
   });
 }
-passForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  try {
-    const currentUser = getCurrentUser();
-    const user = await DbService.getItem("users", currentUser.id);
-    const oldPassword = passForm.elements["oldPassword"].value.trim();
-    const newPassword = passForm.elements["newPassword"].value.trim();
-    const confirmPassword = passForm.elements["confirmPassword"].value.trim();
-    if (isPasswordStrong(newPassword) === false) {
-      toast(
-        "error",
-        "Password must contain at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character"
-      ).showToast();
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      toast(
-        "error",
-        "New password and confirm password do not match"
-      ).showToast();
-      return;
-    }
-    if (user.password !== (await hashPassword(oldPassword))) {
-      toast("error", "Old password is incorrect").showToast();
-      return;
-    }
-    if (user.password === (await hashPassword(newPassword))) {
-      toast("error", "New password cannot be same as old password").showToast();
-      return;
-    }
-    const hashedPassword = await hashPassword(newPassword);
-    await DbService.updateItem("users", {
-      id: currentUser.id,
-      password: hashedPassword,
-    });
-    toast("success", "Password changed successfully").showToast();
-    passForm.reset();
-    changePasswordModal.style.display = "none";
-  } catch (error) {
-    console.error(error);
-    toast("error", "Failed to change password").showToast();
-  }
-});
 
-seekApprovalBtn.addEventListener("click", async () => {
-  const currentUser = getCurrentUser();
-  try {
-    await DbService.addItem("approvals", {
-      userId: currentUser.id,
-      name: currentUser.name,
-      email: currentUser.email,
-      createdAt: Date.now(),
-      status: "pending",
-    });
-    await loadApprovals();
-  } catch (error) {
-    console.error(error);
-    toast("error", "Failed to seek approval").showToast();
-  }
-});
-editProfileForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  try {
-    const currentUser = getCurrentUser();
-    const user = await DbService.getItem("users", currentUser.id);
-    const name = editProfileForm.elements["name"].value.trim();
-    const phone = editProfileForm.elements["phone"].value.trim();
-    let avatarData = user.avatar;
-    const avatarInput = editProfileForm.elements["avatar"];
-    const avatarFile = avatarInput && avatarInput.files[0];
-    if (avatarFile) {
-      const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
-      if (!allowedTypes.includes(avatarFile.type)) {
-        toast(
-          "error",
-          "Avatar must be an image of type PNG, JPEG, or JPG"
-        ).showToast();
-        return;
-      }
-      const maxSize = 500 * 1024;
-      if (avatarFile.size > maxSize) {
-        toast("error", "Avatar image must be less than 500KB").showToast();
-        return;
-      }
-      avatarData = await getFileFromInput(avatarInput);
-    }
-    await DbService.updateItem("users", {
-      id: currentUser.id,
-      name,
-      tel: phone,
-      avatar: avatarData,
-    });
-    const updatedUser = await DbService.getItem("users", currentUser.id);
-    setCurrentUser(updatedUser);
-    await setUserDetail();
-    profileModal.style.display = "none";
-  } catch (error) {
-    console.error(error);
-    toast("error", "Failed to update profile").showToast();
-  }
-});
-
+// --------------------- Approval Section ---------------------
 async function loadApprovals() {
   try {
     showLoader();
@@ -211,34 +116,30 @@ async function loadApprovals() {
     const approvalSection = document.getElementById("approvalSection");
     const approvalMessage = document.getElementById("approvalMessage");
     const seekApprovalBtn = document.getElementById("seekApprovalBtn");
+
     if (currentUser.role === "general") {
-      const approvalReq = await DbService.searchItemByIndex(
-        "approvals",
-        "userId",
+      const approvalReq = await ApprovalService.getApprovalByUserId(
         currentUser.id
       );
+      console.log(approvalReq);
       if (!approvalReq) {
-        approvalSection.style.display = "flex";
         approvalMessage.textContent =
           "Your account is not approved yet. Please seek approval to become admin.";
         seekApprovalBtn.disabled = false;
         seekApprovalBtn.textContent = "Seek Approval";
         seekApprovalBtn.style.background = "";
       } else if (approvalReq.status === "pending") {
-        approvalSection.style.display = "flex";
         approvalMessage.textContent = "Your approval request is pending.";
         seekApprovalBtn.disabled = true;
         seekApprovalBtn.textContent = "Approval Pending";
         seekApprovalBtn.style.background = "grey";
       } else if (approvalReq.status === "rejected") {
-        approvalSection.style.display = "flex";
         approvalMessage.textContent =
           "Your approval request has been rejected.";
         seekApprovalBtn.disabled = true;
         seekApprovalBtn.textContent = "Rejected";
         seekApprovalBtn.style.background = "grey";
       } else if (approvalReq.status === "approved") {
-        approvalSection.style.display = "flex";
         approvalMessage.textContent =
           "Your approval request has been approved. You are now an admin.";
         seekApprovalBtn.disabled = true;
@@ -247,27 +148,28 @@ async function loadApprovals() {
         seekApprovalBtn.style.cursor = "not-allowed";
       }
     } else {
-      approvalSection.style.display = "flex";
       approvalMessage.textContent =
         "Your approval request has been approved. You are now an admin.";
       seekApprovalBtn.disabled = true;
       seekApprovalBtn.textContent = "Approved";
       seekApprovalBtn.style.cursor = "not-allowed";
     }
+    approvalSection.style.display = "flex";
   } catch (error) {
-    console.log(error);
+    console.error(error);
     toast("error", "Error loading approvals").showToast();
   } finally {
     hideLoader();
   }
 }
 
+// --------------------- User Details ---------------------
 async function setUserDetail() {
   try {
     showLoader();
     const currentUser = getCurrentUser();
-    const user = await DbService.getItem("users", currentUser.id);
-    const userAvatar = document.getElementById("userAvatar");
+    const user = await UserService.getUserById(currentUser.id);
+
     document.getElementById("name").textContent = currentUser.name || "No Name";
     document.getElementById("email").textContent =
       currentUser.email || "No Email";
@@ -275,9 +177,13 @@ async function setUserDetail() {
       currentUser.tel || "No Phone";
     document.getElementById("adhaar").textContent =
       currentUser.adhaar || "No Adhaar";
+
+    const userAvatar = document.getElementById("userAvatar");
     if (user.avatar instanceof ArrayBuffer) {
       const blob = new Blob([user.avatar]);
       userAvatar.src = URL.createObjectURL(blob);
+    } else {
+      userAvatar.src = user.avatar || "https://picsum.photos/200/300";
     }
   } catch (error) {
     console.error(error);
@@ -286,55 +192,51 @@ async function setUserDetail() {
     hideLoader();
   }
 }
+
+// --------------------- Biddings ---------------------
 async function loadBiddings() {
   showLoader();
   try {
+    let biddings = await BidService.getBidsByUserId(getCurrentUser().id);
     const statusValue = statusFilterForBidding.value;
-    let biddings = await DbService.searchAllByIndex(
-      "bids",
-      "userId",
-      getCurrentUser().id
-    );
-    biddings = biddings.map((bid) => ({
-      ...bid,
-      amount: Number(bid.amount) * getDaysDiff(bid.startDate, bid.endDate),
-    }));
-    biddings = biddings.filter((bid) => bid.status !== "approved");
+
+    // Calculate total bid amount based on rental days and filter out approved bids
+    biddings = biddings
+      .map((bid) => ({
+        ...bid,
+        amount: Number(bid.amount) * getDaysDiff(bid.startDate, bid.endDate),
+      }))
+      .filter((bid) => bid.status !== "approved");
+
     if (statusValue !== "all") {
       biddings = biddings.filter((bid) => bid.status === statusValue);
     }
+    // Sort bids by date or amount
     const sortValue = sortFilterBidding.value;
     if (sortValue === "date") {
       biddings.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     } else if (sortValue === "amount") {
       biddings.sort((a, b) => Number(a.amount) - Number(b.amount));
     }
-    const order = sortOrderBidding.value;
-    if (order === "desc") {
+    if (sortOrderBidding.value === "desc") {
       biddings.reverse();
     }
+    // Pagination
     const totalItems = biddings.length;
     const totalPages = Math.ceil(totalItems / pageSize);
-    if (currentPage > totalPages) currentPage = totalPages;
-    if (currentPage < 1) currentPage = 1;
+    currentPage = Math.max(1, Math.min(currentPage, totalPages));
     const start = (currentPage - 1) * pageSize;
-    biddings = biddings.slice(start, start + pageSize);
-    if (biddings.length !== 0)
-      renderPagination(
-        totalPages,
-        currentPage,
-        loadBookings,
-        "profileBiddings"
-      );
+    const paginatedBids = biddings.slice(start, start + pageSize);
+    // Render bidding table
     const biddingTableBody = document.getElementById("biddingContainer");
     biddingTableBody.innerHTML = "";
-    if (biddings.length === 0) {
+    if (paginatedBids.length === 0) {
       biddingTableBody.innerHTML = `<tr><td colspan="7" class="no-data">There is no data</td></tr>`;
     } else {
-      for (const bid of biddings) {
+      for (const bid of paginatedBids) {
         const tr = document.createElement("tr");
-        const car = await DbService.getItem("cars", bid.carId);
-        const owner = await DbService.getItem("users", bid.ownerId);
+        const car = bid.car;
+        const owner = bid.car.owner;
         tr.innerHTML = `
           <td data-label="Car Name">${car.name}</td>
           <td data-label="Owner">${owner.name}</td>
@@ -347,57 +249,59 @@ async function loadBiddings() {
         biddingTableBody.appendChild(tr);
       }
     }
+    // Render pagination controls if data exists
+    if (paginatedBids.length > 0) {
+      renderPagination(
+        totalPages,
+        currentPage,
+        loadBiddings,
+        "profileBiddings"
+      );
+    }
   } catch (error) {
+    console.error(error);
     toast("error", "Error loading biddings").showToast();
   } finally {
     hideLoader();
   }
 }
 
+// --------------------- Bookings ---------------------
 async function loadBookings() {
   showLoader();
   try {
-    let bookings = await DbService.searchAllByIndex(
-      "bookings",
-      "userId",
-      getCurrentUser().id
-    );
+    let bookings = await BidService.getBookingsByUserId(getCurrentUser().id);
     bookings = bookings.map((book) => ({
       ...book,
       amount: Number(book.amount) * getDaysDiff(book.startDate, book.endDate),
     }));
+
+    // Sort bookings by date or amount
     const sortValue = sortFilterBooking.value;
     if (sortValue === "date") {
       bookings.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     } else if (sortValue === "amount") {
       bookings.sort((a, b) => a.amount - b.amount);
     }
-    const order = sortOrderBooking.value;
-    if (order === "desc") {
+    if (sortOrderBooking.value === "desc") {
       bookings.reverse();
     }
+    // Pagination
     const totalItems = bookings.length;
     const totalPages = Math.ceil(totalItems / pageSize);
-    if (currentPage > totalPages) currentPage = totalPages;
-    if (currentPage < 1) currentPage = 1;
+    currentPage = Math.max(1, Math.min(currentPage, totalPages));
     const start = (currentPage - 1) * pageSize;
-    bookings = bookings.slice(start, start + pageSize);
-    if (bookings.length !== 0)
-      renderPagination(
-        totalPages,
-        currentPage,
-        loadBookings,
-        "profileBookings"
-      );
+    const paginatedBookings = bookings.slice(start, start + pageSize);
+    // Render booking table
     const bookingTableBody = document.getElementById("bookingContainer");
     bookingTableBody.innerHTML = "";
-    if (bookings.length === 0) {
+    if (paginatedBookings.length === 0) {
       bookingTableBody.innerHTML = `<tr><td colspan="7" class="no-data">There is no data</td></tr>`;
     } else {
-      for (const booking of bookings) {
+      for (const booking of paginatedBookings) {
         const tr = document.createElement("tr");
-        const car = await DbService.getItem("cars", booking.carId);
-        const owner = await DbService.getItem("users", booking.ownerId);
+        const car = booking.car;
+        const owner = booking.car.owner;
         tr.innerHTML = `
           <td data-label="Car Name">${car.name}</td>
           <td data-label="Owner">${owner.name}</td>
@@ -412,46 +316,74 @@ async function loadBookings() {
         bookingTableBody.appendChild(tr);
       }
     }
+
+    // Render pagination controls if data exists
+    if (paginatedBookings.length > 0) {
+      renderPagination(
+        totalPages,
+        currentPage,
+        loadBookings,
+        "profileBookings"
+      );
+    }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     toast("error", "Error loading bookings").showToast();
   } finally {
     hideLoader();
   }
 }
+
+// --------------------- Loader Helpers ---------------------
 function showLoader() {
   const loader = document.createElement("div");
   loader.className = "loader-overlay";
   loader.innerHTML = "<div class='loader'></div>";
   mainContainer.appendChild(loader);
 }
+
 function hideLoader() {
   const loader = document.querySelector(".loader-overlay");
   if (loader) loader.remove();
 }
-function renderPagination(totalPages, current, fn, sectionId) {
+
+// --------------------- Pagination Renderer ---------------------
+/**
+ * Renders pagination controls for the given section.
+ * @param {number} totalPages - Total pages available.
+ * @param {number} current - Current page number.
+ * @param {Function} callback - Callback to load data for the page.
+ * @param {string} sectionId - ID of the section container.
+ */
+function renderPagination(totalPages, current, callback, sectionId) {
   const paginationDiv = document.querySelector(`#${sectionId} .pagination`);
   paginationDiv.innerHTML = "";
-  // if (totalPages <= 1) return;
+
+  // Create Previous button
   const prevButton = document.createElement("button");
   prevButton.classList.add("pagination-button");
   prevButton.textContent = "Previous";
   prevButton.disabled = current <= 1;
   prevButton.addEventListener("click", async () => {
     currentPage = current - 1;
-    await fn();
+    await callback();
   });
+
+  // Create Page indicator
   const pageIndicator = document.createElement("span");
   pageIndicator.textContent = `Page ${current} of ${totalPages}`;
+
+  // Create Next button
   const nextButton = document.createElement("button");
-  nextButton.textContent = "Next";
   nextButton.classList.add("pagination-button");
+  nextButton.textContent = "Next";
   nextButton.disabled = current >= totalPages;
   nextButton.addEventListener("click", async () => {
     currentPage = current + 1;
-    await fn();
+    await callback();
   });
-  paginationDiv.appendChild(prevButton);
-  paginationDiv.appendChild(pageIndicator);
-  paginationDiv.appendChild(nextButton);
+
+  paginationDiv.append(prevButton, pageIndicator, nextButton);
 }
+
+export { setUserDetail };

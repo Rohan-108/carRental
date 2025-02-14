@@ -1,6 +1,11 @@
 import { getCurrentUser, getCurrentCarId, toast } from "../../js/index.js";
-import DbService from "../../js/db.js";
+import ChatService from "../../js/services/ChatService.js";
 import { getFileFromInput } from "../../js/utils.js";
+import UserService from "../../js/services/userService.js";
+import { UserValidator } from "../../js/services/validator.js";
+import carService from "../../js/services/carService.js";
+import userService from "../../js/services/userService.js";
+// dom elements
 const closeModal = document.getElementById("closeButton");
 const modal = document.getElementById("modal");
 const openImageModal = document.getElementById("openImageModal");
@@ -12,39 +17,34 @@ openImageModal.addEventListener("click", () => {
 closeModal.addEventListener("click", () => {
   modal.style.display = "none";
 });
+
+/**
+ * @description Send image to the user
+ */
 imageForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
   try {
     let avatarData;
+    const validator = UserValidator();
+    const user = await UserService.getUserById(getCurrentUser().id);
     const imageInput = imageForm.elements["image"];
     const imageFile = imageInput?.files[0];
-    if (!imageFile) {
-      toast("error", "Please select an image").showToast();
-      return;
-    }
     if (imageFile) {
-      const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
-      if (!allowedTypes.includes(imageFile.type)) {
-        toast(
-          "error",
-          "Avatar must be an image of type PNG, JPEG, or JPG"
-        ).showToast();
-        return;
-      }
-      const maxSizeInBytes = 500 * 1024;
-      if (imageFile.size > maxSizeInBytes) {
-        toast("error", "Avatar image must be less than 500KB").showToast();
+      if (!validator.validateAvatar(imageInput)) {
         return;
       }
       avatarData = await getFileFromInput(imageInput);
     }
-    await DbService.addItem("chat", {
+    await ChatService.addChat({
+      id: "",
       conversationId:
         document.getElementById("sendUser").dataset.conversationId,
-      sender: getCurrentUser().id,
+      sender: user.id,
       message: "",
+      user: user,
       image: avatarData,
       createdAt: Date.now(),
+      updatedAt: Date.now(),
     });
     modal.style.display = "none";
     loadUserChat();
@@ -53,16 +53,22 @@ imageForm?.addEventListener("submit", async (e) => {
     toast("error", "Error sending image").showToast();
   }
 });
+
+/**
+ * @description Load chat messages for the user
+ * @returns {Promise<void>}
+ */
 async function loadUserChat() {
   try {
     const messageBox = document.getElementById("messageBoxUser");
-    const user = getCurrentUser();
+    const u = getCurrentUser();
+    const user = await UserService.getUserById(u.id);
     const carId = getCurrentCarId();
     if (!carId) {
       toast("error", "No car selected").showToast();
       return;
     }
-    const car = await DbService.getItem("cars", carId);
+    const car = await carService.getCarById(carId);
     if (user.id === car.userId || user.role === "super-admin") {
       sendUser.setAttribute("disabled", true);
       sendUser.style.backgroundColor = "gray";
@@ -77,14 +83,18 @@ async function loadUserChat() {
     if (user.avatar instanceof ArrayBuffer) {
       const imageBlob = new Blob([user.avatar]);
       userAvatar = URL.createObjectURL(imageBlob);
+    } else {
+      userAvatar = "https://picsum.photos/200/300";
     }
-    const allcarConv = await DbService.searchAllByIndex(
-      "conversations",
-      "carId",
-      carId
-    );
+    const allcarConv = await ChatService.getConversationsByCarId(carId);
     const myconversations = allcarConv.filter((conv) => {
-      return conv.members.includes(user.id);
+      let ismyconv = false;
+      conv.members.forEach((member) => {
+        if (member.id === user.id) {
+          ismyconv = true;
+        }
+      });
+      return ismyconv;
     });
     if (myconversations.length === 0) {
       messageBox.innerHTML =
@@ -94,12 +104,11 @@ async function loadUserChat() {
     sendUser.dataset.conversationId = myconversations[0].id;
     const bidNow = document.getElementById("rentButton");
     bidNow.dataset.conversationId = myconversations[0].id;
-    const myChat = await DbService.searchAllByIndex(
-      "chat",
-      "conversationId",
+    const myChat = await ChatService.getChatsByConversationId(
       myconversations[0].id
     );
     myChat.sort((a, b) => a.createdAt - b.createdAt);
+    //clear the message box and reload the messages
     messageBox.innerHTML = "";
     for (const chat of myChat) {
       const msgDiv = document.createElement("div");
@@ -138,11 +147,13 @@ async function loadUserChat() {
                     </div>
                   `;
       } else {
-        const sender = await DbService.getItem("users", chat.sender);
+        const sender = chat.user;
         let imgUrl = sender.avatar;
         if (imgUrl instanceof ArrayBuffer) {
           const blob = new Blob([imgUrl]);
           imgUrl = URL.createObjectURL(blob);
+        } else {
+          imgUrl = "https://picsum.photos/200/300";
         }
         msgDiv.innerHTML = `
           <div class="left-msg">
@@ -171,28 +182,35 @@ async function loadUserChat() {
                   `;
       }
       messageBox.appendChild(msgDiv);
-      messageBox.scrollTop = messageBox.scrollHeight;
+      messageBox.scrollTop = messageBox.scrollHeight; //scroll to the bottom
     }
   } catch (error) {
     console.error(error);
     toast("error", "Error loading chat").showToast();
   }
 }
-
+/**
+ * @description Send message to the user
+ */
 sendUser.addEventListener("click", async (e) => {
   try {
     let convId = e.target.dataset.conversationId;
+    const user = await userService.getUserById(getCurrentUser().id);
     const carId = getCurrentCarId();
-    const car = await DbService.getItem("cars", carId);
-    const owner = await DbService.getItem("users", car.userId);
-    if (owner.id === getCurrentUser().id) {
+    const car = await carService.getCarById(carId);
+    const owner = car.owner;
+    if (owner.id === user.id) {
       toast("error", "You cannot chat with yourself").showToast();
       return;
     }
     if (!convId) {
-      const id = await DbService.addItem("conversations", {
-        carId: getCurrentCarId(),
-        members: [getCurrentUser().id, owner.id],
+      const id = await ChatService.addConversation({
+        id: "",
+        carId: carId,
+        car: car,
+        members: [user, owner],
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
       });
       convId = id;
     }
@@ -201,11 +219,15 @@ sendUser.addEventListener("click", async (e) => {
       toast("error", "Message cannot be empty").showToast();
       return;
     }
-    await DbService.addItem("chat", {
+    await ChatService.addChat({
+      id: "",
       conversationId: convId,
-      sender: getCurrentUser().id,
+      sender: user.id,
+      user: user,
       message,
+      image: null,
       createdAt: Date.now(),
+      updatedAt: Date.now(),
     });
     loadUserChat();
     document.getElementById("msgUser").value = "";
@@ -214,5 +236,6 @@ sendUser.addEventListener("click", async (e) => {
     toast("error", "Error sending message").showToast();
   }
 });
+// load chat messages
 loadUserChat();
 export { loadUserChat };

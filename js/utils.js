@@ -1,12 +1,5 @@
-function isEmailValid(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-function isPasswordStrong(str) {
-  const re = /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
-  return re.test(str);
-}
 // Function to hash the password
-
+import { toast } from "./index.js";
 async function hashPassword(password) {
   const encoder = new TextEncoder();
   const data = encoder.encode(password);
@@ -17,10 +10,7 @@ async function hashPassword(password) {
     .join("");
   return hashHex;
 }
-function isValidPlateNumber(plate) {
-  const re = /^[A-Z]{2}[ -][0-9]{1,2}(?: [A-Z])?(?: [A-Z]*)? [0-9]{4}$/;
-  return re.test(plate);
-}
+
 function getDaysDiff(startDate, endDate) {
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -38,7 +28,7 @@ function formatNumber(num) {
   } while (Math.abs(num) >= 1000 && unitIndex < units.length - 1);
   return num.toFixed(1).replace(/\.0$/, "") + units[unitIndex];
 }
-
+// Function to read file from input element
 const getFileFromInput = (input, index = 0) => {
   return new Promise((resolve, reject) => {
     const file = input.files[index];
@@ -56,6 +46,32 @@ const getFileFromInput = (input, index = 0) => {
     reader.readAsArrayBuffer(file);
   });
 };
+//validate type of schema against given data
+function validateSchema(schema, data) {
+  for (const field in schema) {
+    if (!(field in data)) {
+      toast(
+        "error",
+        `Validation Error: Field "${field}" is required`
+      ).showToast();
+      return false;
+    }
+  }
+  return true;
+}
+//partially validate schema
+function partialValidateSchema(schema, data) {
+  for (const field in data) {
+    if (!(field in schema)) {
+      toast(
+        "error",
+        `Validation Error: Field "${field}" is not allowed`
+      ).showToast();
+      return false;
+    }
+  }
+  return true;
+}
 const cities = [
   "Mumbai",
   "Delhi",
@@ -86,13 +102,12 @@ function debounce(func, wait) {
   };
 }
 export {
-  isEmailValid,
-  isPasswordStrong,
   hashPassword,
-  isValidPlateNumber,
   getDaysDiff,
   getFileFromInput,
   cities,
   formatNumber,
   debounce,
+  validateSchema,
+  partialValidateSchema,
 };
