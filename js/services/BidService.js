@@ -88,6 +88,10 @@ function BidService() {
     bids = bids.filter((bid) => bid.status === APPROVED);
     return bids;
   };
+  const updateOdometer = async (bidId, actionType, value) => {
+    const key = actionType === "current" ? "currentOdometer" : "finalOdometer";
+    await DbService.updateItem(STORE_NAME, { id: bidId, [key]: value });
+  };
   return {
     addBid,
     updateBid,
@@ -101,6 +105,7 @@ function BidService() {
     getPagedBids,
     getAllBids,
     getBidsByOwnerId,
+    updateOdometer,
   };
 }
 

@@ -106,6 +106,7 @@ async function loadSidebar() {
     const currentConvId =
       JSON.parse(sessionStorage.getItem("convId"))?.convId || null;
     const user = await userService.getUserById(getCurrentUser().id);
+    //filter the conversations to get the user's conversations
     const myconversations = allconv.filter((conv) => {
       let ismember = false;
       for (const member of conv.members) {
@@ -128,8 +129,6 @@ async function loadSidebar() {
         convDiv.classList.add("active");
       }
       convDiv.dataset.convId = conv.id;
-      console.log(otherMemeber);
-      console.log(conv);
       let imgUrl = otherMemeber.avatar;
       if (imgUrl instanceof ArrayBuffer) {
         const blob = new Blob([imgUrl]);
@@ -186,7 +185,7 @@ async function loadChat(convId) {
       `;
       return;
     }
-    //sort the chat by timestampk
+    //sort the chat by timestamp
     carChat.sort((a, b) => a.createdAt - b.createdAt);
     //display the chat
     messageBox.innerHTML = "";
@@ -275,6 +274,7 @@ document.getElementById("send").addEventListener("click", async () => {
       toast("error", "Error sending message").showToast();
       return;
     }
+    //send the message to user
     await ChatService.addChat({
       id: "",
       conversationId: sendBtn.dataset.convId,

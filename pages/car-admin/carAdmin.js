@@ -20,13 +20,8 @@ const approveBidModal = document.getElementById("approveBidModal");
 const cancelBidModal = document.getElementById("cancelBidModal");
 const approveBidForm = document.getElementById("approveBidForm");
 const cancelBidForm = document.getElementById("cancelBidForm");
-const changeAmountForm = document.getElementById("changeAmountForm");
 const closeApproveBidModal = document.getElementById("closeButtonApprove");
 const closeCancelBidModal = document.getElementById("closeButtonCancel");
-const changeAmountModal = document.getElementById("changeAmountModal");
-const closeChangeAmountModal = document.getElementById(
-  "closeChangeAmountModal"
-);
 const addCarButton = document.getElementById("addCar");
 const addCarForm = document.getElementById("addCarForm");
 const editCarForm = document.getElementById("editCarForm");
@@ -44,9 +39,10 @@ const sortFilterBidding = document.getElementById("sortFilterBidding");
 const sortFilterBooking = document.getElementById("sortFilterBooking");
 const sortOrderBidding = document.getElementById("sortOrderBidding");
 const sortOrderBooking = document.getElementById("sortOrderBooking");
-const filterByTripStatus = document.getElementById("filterByTripStatus");
 let currentPage = 1;
 let pageSize = 5;
+let currentTab = "all-bookings";
+// intialize the page
 window.addEventListener("load", async () => {
   showLoader();
   try {
@@ -308,79 +304,113 @@ async function loadBiddings() {
     hideLoader();
   }
 }
-/**
- * @description Load Bookings for the car owner
- */
+// Function to update the table header based on the current tab
+function updateTableHeader() {
+  const theadRow = document.querySelector("#bookingTable thead tr");
+  // Check if an Action column exists (by looking for a th with class "action-col")
+  const actionTh = theadRow.querySelector(".action-col");
+  if (currentTab === "active-bookings") {
+    if (!actionTh) {
+      const th = document.createElement("th");
+      th.scope = "col";
+      th.className = "action-col";
+      th.textContent = "Action";
+      theadRow.appendChild(th);
+    }
+  } else {
+    if (actionTh) {
+      theadRow.removeChild(actionTh);
+    }
+  }
+}
+// Main function to load bookings
 async function loadBookings() {
   showLoader();
   try {
-    let bookings = await BidService.getBookingsByOwnerId(getCurrentUser().id);
-    const filterValue = carFilterForBooking.value;
-    if (filterValue !== "all") {
-      bookings = bookings.filter((booking) => booking.carId == filterValue);
-    }
+    // Get filter values
+    const carFilterValue = carFilterForBooking.value;
     const sortValue = sortFilterBooking.value;
-    const order = sortOrderBooking.value;
-    const tripStatus = filterByTripStatus.value;
+    const order = sortFilterBooking.value;
+    let bookings = await BidService.getBookingsByOwnerId(getCurrentUser().id);
+    const now = new Date();
+    if (currentTab === "active-bookings") {
+      bookings = bookings.filter(
+        (booking) =>
+          new Date(booking.startDate) <= now && booking.tripCompleted === false
+      );
+    } else if (currentTab === "completed-bookings") {
+      bookings = bookings.filter(
+        (booking) =>
+          booking.tripCompleted === true || new Date(booking.endDate) < now
+      );
+    }
+    if (carFilterValue !== "all") {
+      bookings = bookings.filter((booking) => booking.carId == carFilterValue);
+    }
+
+    // Sort bookings
     if (sortValue === "date") {
       bookings.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     } else if (sortValue === "amount") {
       bookings.sort((a, b) => Number(a.amount) - Number(b.amount));
     }
-    if (tripStatus !== "all") {
-      bookings = bookings.filter(
-        (booking) => booking.tripCompleted === Boolean(tripStatus)
-      );
-    }
     if (order === "desc") {
       bookings.reverse();
     }
-    //pagination
+
+    // Pagination
     const totalItems = bookings.length;
     const totalPages = Math.ceil(totalItems / pageSize);
     if (currentPage > totalPages) currentPage = totalPages;
     if (currentPage < 1) currentPage = 1;
     const start = (currentPage - 1) * pageSize;
-    bookings = bookings.slice(start, start + pageSize);
+    const paginatedBookings = bookings.slice(start, start + pageSize);
+
+    // Update table header based on the active tab
+    updateTableHeader();
+
+    // Render table body
     const bookingTableBody = document.getElementById("bookingContainer");
     bookingTableBody.innerHTML = "";
-    if (bookings.length === 0) {
-      bookingTableBody.innerHTML = `<tr><td colspan="7" class="no-data">There is no data</td></tr>`;
+    if (paginatedBookings.length === 0) {
+      // Adjust colspan based on whether the Action column is present (7 columns for active, 6 otherwise)
+      const colspan = currentTab === "active-bookings" ? 7 : 6;
+      bookingTableBody.innerHTML = `<tr><td colspan="${colspan}" class="no-data">There is no data</td></tr>`;
     } else {
-      for (const booking of bookings) {
+      paginatedBookings.forEach((booking) => {
         const tr = document.createElement("tr");
-        const car = booking.car;
-        const user = booking.user;
-        const currentDate = new Date();
-        const endDate = new Date(booking.endDate);
-        tr.innerHTML = `
-          <td data-label="Car Name">${car.name}</td>
-          <td data-label="Renter">${user.name}</td>
-          <td data-label="Adhaar Number">${user.adhaar || ""}</td>
+        let rowHTML = `
+          <td data-label="Car Name">${booking.car.name}</td>
+          <td data-label="Renter">${booking.user.name}</td>
+          <td data-label="Adhaar Number">${booking.user.adhaar || ""}</td>
           <td data-label="Start Date">${booking.startDate}</td>
           <td data-label="End Date">${booking.endDate}</td>
           <td data-label="Amount">Rs.${booking.amount}</td>
-          <td data-label="Trip Status">${
-            booking.tripCompleted
-              ? "Trip Completed"
-              : endDate < currentDate
-              ? ` <button class="changeAmount" style="background-color:green;
-          color:#fff;border-radius:1rem;cursor:pointer" data-id="${booking.id}">Update Service Charges</button>
-          `
-              : "Not Completed"
-          }</td>
         `;
+        // For active bookings, add the Action column
+        if (currentTab === "active-bookings") {
+          let actionContent = "";
+          if (!booking.currentOdometer) {
+            actionContent = `<button class="add-odometer" data-id="${booking.id}" data-action="current">Add Current Odometer</button>`;
+          } else if (booking.currentOdometer && !booking.finalOdometer) {
+            actionContent = `<button class="add-odometer" data-id="${booking.id}" data-action="final">Add Final Odometer</button>`;
+          }
+          rowHTML += `<td data-label="Action">${actionContent}</td>`;
+        }
+        tr.innerHTML = rowHTML;
         bookingTableBody.appendChild(tr);
-      }
+      });
     }
-    if (bookings.length > 0)
+    if (paginatedBookings.length > 0) {
       renderPagination(
         totalPages,
         currentPage,
         loadBookings,
         "booking-section"
       );
+    }
   } catch (error) {
+    console.error(error);
     toast("error", "Error loading bookings").showToast();
   } finally {
     hideLoader();
@@ -400,6 +430,7 @@ async function approveBid(bidId, carId, startDate, endDate) {
     const bid = await BidService.getBidById(bidId);
     const car = bid.car;
     await BidService.updateBid({ id: bidId, status: "approved" });
+    // send a message to the user
     const convs = await ChatService.getConversationsByCarId(carId);
     let convId = convs.filter((conv) =>
       conv.members.some((member) => member.id === user.id)
@@ -484,30 +515,226 @@ async function deleteCar(carId) {
     toast("error", "Error deleting car").showToast();
   }
 }
-async function updateAmount(bookingId) {
+/**
+ * @description generate invoice for the user.
+ * @param {*} booking
+ * @param {*} odometerValue
+ * @returns
+ */
+async function generateInvoice(booking, odometerValue) {
+  //calculate the total kilometers
+  const totalKilometers = Math.max(
+    0,
+    Number(odometerValue) - Number(booking.currentOdometer)
+  );
+  const daysOfTravel = getDaysDiff(booking.startDate, booking.endDate);
+  const extraKilometers = Math.max(
+    0,
+    totalKilometers - Number(booking.car.fixedKilometer) * daysOfTravel
+  );
+  // Calculate the extra charges
+  const extraCharges =
+    extraKilometers > 0 ? extraKilometers * Number(booking.car.ratePerKm) : 0;
+  const finalAmount = booking.amount + extraCharges;
+  const baseRentalPay = booking.amount;
+  //html for the invoice
+  const invoiceHTML = `
+    <div id="invoiceContent" style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; position: relative;
+    width:100%;max-width:600px; background-color:#fff;">
+      <h2 style="text-align: center;">Invoice</h2>
+      <p><strong>Car Name:</strong> ${booking.car.name}</p>
+      <p><strong>Renter:</strong> ${booking.user.name}</p>
+      <p><strong>Start Date:</strong> ${booking.startDate}</p>
+      <p><strong>End Date:</strong> ${booking.endDate}</p>
+      <p><strong>Initial Odometer:</strong> ${booking.currentOdometer}</p>
+      <p><strong>Final Odometer:</strong> ${odometerValue}</p>
+      <p><strong>Number of Days of Travel:</strong> ${daysOfTravel}</p>
+      <p><strong>Base Rental Pay:</strong> Rs.${baseRentalPay}</p>
+      <p><strong>Rate per Km:</strong> Rs.${booking.car.ratePerKm}</p>
+      <p><strong>Free Kilometer:</strong> ${
+        booking.car.fixedKilometer
+      }*${daysOfTravel} = ${
+    Number(booking.car.fixedKilometer) * daysOfTravel
+  }km</p>
+      <p><strong>Total Kilometers Traveled:</strong> ${totalKilometers}km</p>
+      <p><strong>Extra Kilometer: </strong>${totalKilometers}-${
+    Number(booking.car.fixedKilometer) * daysOfTravel
+  } = ${extraKilometers}Km</p>
+      <p><strong>Extra Charges:</strong> Rs.${extraCharges}</p>
+      <hr/>
+      <p><strong>Final Pay:</strong> Rs.${finalAmount}</p>
+    </div>
+  `;
+  return invoiceHTML;
+}
+
+/**
+ * @description Show the invoice modal
+ * @param {*} invoiceHTML
+ */
+function showInvoiceModal(invoiceHTML) {
+  // Create a background overlay
+  const overlay = document.createElement("div");
+  overlay.id = "invoiceOverlay";
+  overlay.style.position = "fixed";
+  overlay.style.top = "0";
+  overlay.style.left = "0";
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+  overlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+  overlay.style.backdropFilter = "blur(5px)";
+  overlay.style.zIndex = "999";
+
+  // Create the modal
+  const modal = document.createElement("div");
+  modal.id = "invoiceModal";
+  modal.style.position = "fixed";
+  modal.style.top = "50%";
+  modal.style.left = "50%";
+  modal.style.transform = "translate(-50%, -50%)";
+  modal.style.zIndex = "1000";
+  modal.style.maxWidth = "600px";
+  modal.style.width = "100%";
+  modal.innerHTML = invoiceHTML;
+
+  // Append the download button to the modal
+  const downloadButton = document.createElement("button");
+  downloadButton.id = "downloadButton";
+  downloadButton.style.marginTop = "20px";
+  downloadButton.style.padding = "10px 20px";
+  downloadButton.style.backgroundColor = "#4CAF50";
+  downloadButton.style.color = "white";
+  downloadButton.style.border = "none";
+  downloadButton.style.cursor = "pointer";
+  downloadButton.innerText = "Download Invoice";
+  modal.appendChild(downloadButton);
+
+  // Append the modal and overlay to the body
+  document.body.appendChild(overlay);
+  document.body.appendChild(modal);
+
+  // Close modal when clicking the close button
+  document.getElementById("closeButton").addEventListener("click", function () {
+    overlay.remove();
+    modal.remove();
+  });
+
+  // Download invoice as image when clicking the download button
+  document
+    .getElementById("downloadButton")
+    .addEventListener("click", async function () {
+      const invoiceContent = document.getElementById("invoiceContent");
+      const dataUrl = await htmlToImage.toPng(invoiceContent);
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = "invoice.png";
+      link.click();
+    });
+
+  // Close modal when clicking outside of it
+  overlay.addEventListener("click", function () {
+    overlay.remove();
+    modal.remove();
+  });
+}
+/**
+ * @description Handle the final stage of the booking
+ * @param {*} bookingId
+ * @param {*} actionType
+ * @param {*} odometerValue
+ * @returns
+ */
+async function handleFinalStage(bookingId, actionType, odometerValue) {
   try {
-    const kilometer = changeAmountForm.elements["kilometer"].value;
     const booking = await BidService.getBidById(bookingId);
-    const user = await userService.getUserById(getCurrentUser().id);
+    if (
+      odometerValue == null ||
+      odometerValue === "" ||
+      Number(odometerValue) < 0
+    ) {
+      toast("error", "Invalid odometer reading").showToast();
+      return;
+    }
+    if (
+      booking.currentOdometer &&
+      Number(odometerValue) <= Number(booking.currentOdometer)
+    ) {
+      toast(
+        "error",
+        "Final odometer reading must be greater than the initial one"
+      ).showToast();
+      return;
+    }
+    await BidService.updateOdometer(bookingId, actionType, odometerValue);
+    toast("info", "Current odometer added successfully").showToast();
+    if (actionType === "current") {
+      await loadBookings();
+      return;
+    }
+    //new amount calculation
     const newAmount =
-      Number(booking.amount) +
-      Math.max(Number(kilometer) - booking.car.fixedKilometer, 0) *
-        booking.car.ratePerKm;
+      booking.amount +
+      booking.car.ratePerKm *
+        Math.max(
+          Number(odometerValue) -
+            Number(booking.currentOdometer) -
+            Number(booking.car.fixedKilometer) *
+              getDaysDiff(booking.startDate, booking.endDate),
+          0
+        );
+    //update the bid with the new amount and trip completed
     await BidService.updateBid({
       id: bookingId,
       amount: newAmount,
       tripCompleted: true,
     });
+    //generate invoice and send it to the user
+    const invoiceHTML = await generateInvoice(booking, odometerValue);
+    await sendInvoiceToUser(booking, invoiceHTML);
+    //show the invoice modal
+    showInvoiceModal(invoiceHTML);
+    loadBookings();
+  } catch (error) {
+    console.log(error);
+    toast("error", error.message).showToast();
+  }
+}
+/**
+ * @description Send the invoice to the user
+ * @param {*} booking
+ * @param {*} invoiceHTML
+ */
+async function sendInvoiceToUser(booking, invoiceHTML) {
+  try {
     const convs = await ChatService.getConversationsByCarId(booking.carId);
+    const user = await userService.getUserById(getCurrentUser().id);
     let convId = convs.filter((conv) =>
       conv.members.some((member) => member.id === user.id)
     );
     if (convId.length && convId[0].id) {
+      // Create a temporary element to hold the invoice HTML
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = invoiceHTML;
+      document.body.appendChild(tempDiv);
+
+      // Use html-to-image to convert the HTML to an image
+      const dataUrl = await htmlToImage.toPng(tempDiv, {
+        style: { width: "auto", height: "auto", padding: "0", margin: "0" },
+      });
+
+      // Convert the image data URL to an array buffer
+      const response = await fetch(dataUrl);
+      const arrayBuffer = await response.arrayBuffer();
+
+      // Remove the temporary element
+      document.body.removeChild(tempDiv);
+
+      // Send the array buffer as an image in the chat message
       await ChatService.addChat({
         id: "",
-        message: `Your have to pay Rs.${newAmount} for the extra kilometer you have driven plus the original amount of per day rent`,
+        message: `Invoice for ${booking.car.name} from ${booking.startDate} to ${booking.endDate} has been generated`,
         conversationId: convId[0].id,
-        image: null,
+        image: arrayBuffer,
         createdAt: Date.now(),
         updatedAt: Date.now(),
         sender: user.id,
@@ -515,8 +742,71 @@ async function updateAmount(bookingId) {
       });
     }
   } catch (error) {
+    console.log(error);
     toast("error", error.message).showToast();
   }
+}
+/**
+ * @description Show the odometer modal
+ * @param {*} bookingId
+ * @param {*} actionType
+ */
+function showOdometerModal(bookingId, actionType) {
+  const modal = document.createElement("div");
+  modal.id = "odometerModal";
+  modal.style.position = "fixed";
+  modal.style.top = "50%";
+  modal.style.left = "50%";
+  modal.style.transform = "translate(-50%, -50%)";
+  modal.style.backgroundColor = "white";
+  modal.style.padding = "20px";
+  modal.style.boxShadow = "0 0 15px rgba(0, 0, 0, 0.3)";
+  modal.style.borderRadius = "8px";
+  modal.style.zIndex = "1000";
+  modal.style.width = "300px";
+  modal.style.maxWidth = "90%";
+  modal.style.display = "flex";
+  modal.style.flexDirection = "column";
+  modal.style.alignItems = "center";
+  modal.style.gap = "15px";
+
+  const overlay = document.createElement("div");
+  overlay.id = "modalOverlay";
+  overlay.style.position = "fixed";
+  overlay.style.top = "0";
+  overlay.style.left = "0";
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+  overlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+  overlay.style.backdropFilter = "blur(5px)";
+  overlay.style.zIndex = "999";
+
+  modal.innerHTML = `
+    <div style="width: 100%; display: flex; justify-content: flex-end;">
+      <button style="background: none; border: none; font-size: 20px; cursor: pointer;" onclick="document.getElementById('odometerModal').remove(); document.getElementById('modalOverlay').remove();">&times;</button>
+    </div>
+    <h2 style="text-align: center; margin: 0;">${
+      actionType === "current"
+        ? "Enter current odometer reading:"
+        : "Enter final odometer reading:"
+    }</h2>
+    <input type="number" id="odometerInput" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" />
+    <button id="submitOdometer" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Submit</button>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.appendChild(modal);
+
+  document
+    .getElementById("submitOdometer")
+    .addEventListener("click", async function () {
+      const odometerValue = document.getElementById("odometerInput").value;
+      if (odometerValue != null && odometerValue !== "") {
+        await handleFinalStage(bookingId, actionType, odometerValue);
+        document.getElementById("odometerModal").remove();
+        document.getElementById("modalOverlay").remove();
+      }
+    });
 }
 /**
  * @description Event listeners for the dashboard
@@ -537,17 +827,27 @@ function addEventListeners() {
       deleteCar(carId);
     }
   });
-  bookingContainer.addEventListener("click", (e) => {
-    const changeAmount = e.target.closest(".changeAmount");
-    if (changeAmount && changeAmount.dataset.id) {
-      const bookingId = changeAmount.dataset.id;
-      changeAmountModal.style.display = "flex";
-      changeAmountForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        await updateAmount(bookingId);
-        changeAmountModal.style.display = "none";
-        loadBookings();
-      });
+  // Listen for tab clicks
+  document.querySelectorAll(".tab-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      // Remove active class from all tabs and add to the clicked one
+      document
+        .querySelectorAll(".tab-button")
+        .forEach((btn) => btn.classList.remove("active"));
+      button.classList.add("active");
+
+      // Set the current tab (all-bookings, active-bookings, completed-bookings)
+      currentTab = button.getAttribute("data-tab");
+      currentPage = 1; // Reset pagination on tab change
+      loadBookings();
+    });
+  });
+
+  bookingContainer.addEventListener("click", async function (e) {
+    if (e.target.classList.contains("add-odometer")) {
+      const bookingId = e.target.getAttribute("data-id");
+      const actionType = e.target.getAttribute("data-action");
+      showOdometerModal(bookingId, actionType);
     }
   });
   biddingContainer.addEventListener("click", (e) => {
@@ -586,9 +886,6 @@ function addEventListeners() {
   closeCancelBidModal.addEventListener("click", () => {
     cancelBidModal.style.display = "none";
   });
-  closeChangeAmountModal.addEventListener("click", () => {
-    changeAmountModal.style.display = "none";
-  });
   addCarButton.addEventListener("click", () => {
     modal.style.display = "block";
     addCarForm.elements["location"].innerHTML = "";
@@ -600,27 +897,31 @@ function addEventListeners() {
     });
   });
   carFilterForBidding.addEventListener("change", () => {
+    currentPage = 1;
     loadBiddings();
   });
   carFilterForBooking.addEventListener("change", () => {
+    currentPage = 1;
     loadBookings();
   });
   statusFilterForBidding.addEventListener("change", () => {
+    currentPage = 1;
     loadBiddings();
   });
   sortFilterBidding.addEventListener("change", () => {
+    currentPage = 1;
     loadBiddings();
   });
   sortFilterBooking.addEventListener("change", () => {
+    currentPage = 1;
     loadBookings();
   });
   sortOrderBidding.addEventListener("change", () => {
+    currentPage = 1;
     loadBiddings();
   });
   sortOrderBooking.addEventListener("change", () => {
-    loadBookings();
-  });
-  filterByTripStatus.addEventListener("change", () => {
+    currentPage = 1;
     loadBookings();
   });
   editCloseButton.addEventListener("click", () => {
@@ -691,6 +992,9 @@ function renderPagination(totalPages, current, fn, sectionId) {
   paginationDiv.appendChild(nextButton);
 }
 //<-------helper functions------------------------------------>
+/**
+ * @description Show loader
+ */
 function showLoader() {
   const main = document.querySelector(".dashboard-main");
   const loader = document.createElement("div");
@@ -698,6 +1002,9 @@ function showLoader() {
   loader.innerHTML = "<div class='loader'></div>";
   main.appendChild(loader);
 }
+/**
+ * @description Hide Loader
+ */
 function hideLoader() {
   const loader = document.querySelector(".loader-overlay");
   if (loader) loader.remove();

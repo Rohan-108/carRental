@@ -42,6 +42,7 @@ async function setCarDetails() {
       document.getElementById("ownerEmail").textContent = car.owner.email;
       document.getElementById("ownerPhone").textContent = car.owner.tel;
     }
+    // Set car images and thnumbnails in the DOM
     const mainImage = document.getElementById("mainImage");
     const thumbnailContainer = document.getElementById("thumbnailContainer");
     if (car.images && car.images.length > 0) {
@@ -80,6 +81,9 @@ async function setCarDetails() {
     toast("error", "Error fetching car details").showToast();
   }
 }
+/**
+ * @description Shows a loader on the page
+ */
 function showLoader() {
   const main = document.querySelector(".carDetailContainer");
   const loader = document.createElement("div");
@@ -87,6 +91,9 @@ function showLoader() {
   loader.innerHTML = "<div class='loader'></div>";
   main.appendChild(loader);
 }
+/**
+ * @description Hides the loader from the page
+ */
 function hideLoader() {
   const loader = document.querySelector(".loader-overlay");
   if (loader) loader.remove();

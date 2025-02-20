@@ -8,7 +8,7 @@ window.addEventListener("load", () => {
   handleNavbar();
   routeProtection();
 });
-
+//handle navbar
 function handleNavbar() {
   const currentUser = getCurrentUser();
   const dashboardLink = document.getElementById("dashboardLink");
@@ -47,6 +47,7 @@ mobileBtnExit?.addEventListener("click", () => {
 rentitButton?.addEventListener("click", () => {
   goToPage("cars");
 });
+//go to page
 function goToPage(page) {
   let p = "";
   switch (page) {
@@ -79,7 +80,7 @@ function goToPage(page) {
   }
   window.location.href = p;
 }
-
+//toast
 function toast(type, message, duration) {
   return Toastify({
     text: message ? message : "Something went wrong",
@@ -109,6 +110,7 @@ function getCurrentCarId() {
 function setCurrentCarId(carId) {
   sessionStorage.setItem("carId", JSON.stringify({ carId: carId }));
 }
+//route protection
 function routeProtection() {
   const currentUser = getCurrentUser();
   const currentPage = window.location.href.split("/").pop().split(".")[0];

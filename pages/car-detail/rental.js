@@ -25,8 +25,10 @@ async function getBookedDates() {
     return [];
   }
 }
-// Get dates in the range of start and end date
 let picker;
+/**
+ * @description Setup date picker & other fields for rental
+ */
 async function setupDatePicker() {
   const info = document.getElementById("info");
   const carId = getCurrentCarId();
@@ -38,9 +40,9 @@ async function setupDatePicker() {
   amountInput.setAttribute("min", car.rentalPrice);
   info.textContent = `Additional service charges will apply for more than ${
     car.fixedKilometer || 200
-  }km. Charge of
+  }km. per day, Charge of
   Rs.${car.ratePerKm || 2} per kilometer will be added.`;
-
+  // Event listener for outstation checkbox
   isOutStation.addEventListener("change", (e) => {
     const val = e.target.checked;
     console.log(val);
@@ -69,6 +71,7 @@ async function setupDatePicker() {
         other: "days",
       },
     },
+    // LockPlugin is used to lock the dates that are already booked
     LockPlugin: {
       minDate: new Date(),
       minDays: car.minRentalPeriod,
@@ -138,7 +141,7 @@ document.getElementById("rentButton").addEventListener("click", async () => {
       startDate,
       endDate,
       userId: user.id,
-      amount: Number(amountInput.value) * nOfdays,
+      amount: Number(amountInput.value) * nOfdays, // Total amount
       ownerId: car.ownerId,
       car: car,
       user: user,
@@ -168,7 +171,7 @@ document.getElementById("rentButton").addEventListener("click", async () => {
       message: `I am interested in renting your car, I have placed a bid of Rs.${
         Number(amountInput.value) * nOfdays
       } for ${nOfdays} days from ${startDate} to ${endDate} for ${
-        isOutStation ? "outstation" : "local"
+        isOutStation.checked ? "outstation" : "local"
       }.
       Please accept my bid if you are interested.`,
       image: null,

@@ -518,3 +518,44 @@ canvas {
   cursor: pointer;
   transition: background-color 0.3s;
 }
+
+/* Tabs styles */
+.tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.tab-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.tab-button:hover {
+  background-color: #e0e0e0;
+}
+
+.tab-button.active {
+  background-color: #007bff;
+  color: #fff;
+}
+
+/* Action button styles */
+.add-odometer {
+  padding: 0.5rem 1rem;
+  border: none;
+  background-color: #28a745;
+  color: #fff;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.add-odometer:hover {
+  background-color: #218838;
+}

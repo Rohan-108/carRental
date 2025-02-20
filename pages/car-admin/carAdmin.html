@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="
+https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.min.js
+"></script>
     <link
       rel="stylesheet"
       type="text/css"
@@ -183,6 +186,19 @@
         <div id="booking-section" class="hidden-section tableSection">
           <div class="chartHeader">
             <h2>Bookings</h2>
+            <!-- Tabs -->
+            <div class="tabs">
+              <button class="tab-button active" data-tab="all-bookings">
+                All Bookings
+              </button>
+              <button class="tab-button" data-tab="active-bookings">
+                Active Bookings
+              </button>
+              <button class="tab-button" data-tab="completed-bookings">
+                Completed Bookings
+              </button>
+            </div>
+            <!-- Filters -->
             <div class="analytics">
               <div>
                 <label for="carFilterBooking">Filter by Car:</label>
@@ -191,15 +207,7 @@
                   <!-- Car filter options will be dynamically populated -->
                 </select>
               </div>
-              <div>
-                <label for="filterByTripStatus">Filter by Trip Status:</label>
-                <select id="filterByTripStatus">
-                  <option value="all">All Trips</option>
-                  <option value="true">Trip Completed</option>
-                  <option value="false">Not Completed</option>
-                  <!-- Car filter options will be dynamically populated -->
-                </select>
-              </div>
+              <!-- Removed the Trip Status filter as requested -->
               <div>
                 <label for="sortFilterBooking">Sort by:</label>
                 <select id="sortFilterBooking">
@@ -225,15 +233,16 @@
                 <th scope="col">Start Date</th>
                 <th scope="col">End Date</th>
                 <th scope="col">Amount</th>
-                <th scope="col">Trip Status</th>
+                <!-- The Action column will be added only for the active bookings tab -->
               </tr>
             </thead>
             <tbody id="bookingContainer">
-              <!-- Bidding rows will be dynamically populated -->
+              <!-- Booking rows will be dynamically populated -->
             </tbody>
           </table>
           <div class="pagination"></div>
         </div>
+
         <!-- Revenue Analytics Section -->
         <div id="revenue-chart" class="hidden-section chart">
           <div class="chartHeader">
@@ -726,41 +735,6 @@
           >
             <div class="form-group full-width">
               <input type="submit" name="submit" value="Cancel" />
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-    <div class="custom-modal" id="changeAmountModal" style="display: none">
-      <div class="custom-modal-inner">
-        <div class="custom-modal-header">
-          <button class="custom-modal-close" id="closeChangeAmountModal">
-            <img src="../../images/exit.svg" alt="Close" />
-          </button>
-        </div>
-        <div class="custom-modal-body">
-          <p class="custom-modal-title">Update Kilometer</p>
-          <form
-            id="changeAmountForm"
-            class="custom-form"
-            data-id=""
-            style="height: auto"
-          >
-            <div class="form-group">
-              <label for="kilometer">Kilometer Travelled</label>
-              <input
-                type="number"
-                name="kilometer"
-                id="kilometer"
-                placeholder="Enter Kilometer that renter travelled"
-                min="1"
-                max="3000"
-                title="You can charge additional service charges after 200km"
-                required
-              />
-            </div>
-            <div class="form-group full-width">
-              <input type="submit" name="submit" value="Submit" />
             </div>
           </form>
         </div>

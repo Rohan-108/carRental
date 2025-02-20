@@ -53,6 +53,7 @@ dashboardContainer.addEventListener("click", (e) => {
       document.getElementById("dailyRevenueChartSection").style.display =
         "flex";
       document.getElementById("comparisonChart").style.display = "flex ";
+      //set the date to current month and day
       const today = new Date();
       const endDate = today.toISOString().split("T")[0];
       const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -70,7 +71,7 @@ dashboardContainer.addEventListener("click", (e) => {
   }
 });
 /**
- * @description Function to add event listeners
+ * @description Function to add event listeners for the page
  */
 function addEventListeners() {
   const approvalBody = document.getElementById("approvalsBody");
@@ -109,6 +110,7 @@ async function loadApprovals() {
     const sortFilterValue = document.getElementById("sortFilterApproval").value;
     const sortOrderValue = document.getElementById("sortOrderApproval").value;
     let approvals = await ApprovalService.getAllApprovals();
+    //filtering
     if (approvalFilterValue !== "all") {
       approvals = approvals.filter((app) => app.status === approvalFilterValue);
     }
@@ -124,6 +126,14 @@ async function loadApprovals() {
       approvalBody.innerHTML = `<tr><td colspan="5" class="no-data">There is no data</td></tr>`;
       return;
     }
+    //pagination logic
+    const totalItems = approvals.length;
+    const totalPages = Math.ceil(totalItems / pageSize);
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+    const start = (currentPage - 1) * pageSize;
+    approvals = approvals.slice(start, start + pageSize);
+    //rendering the page
     approvalBody.innerHTML = "";
     for (const app of approvals) {
       const tr = document.createElement("tr");
@@ -148,12 +158,6 @@ async function loadApprovals() {
       `;
       approvalBody.appendChild(tr);
     }
-    const totalItems = approvals.length;
-    const totalPages = Math.ceil(totalItems / pageSize);
-    if (currentPage > totalPages) currentPage = totalPages;
-    if (currentPage < 1) currentPage = 1;
-    const start = (currentPage - 1) * pageSize;
-    approvals = approvals.slice(start, start + pageSize);
     renderPagination(totalPages, currentPage, loadApprovals, "approvals");
   } catch (error) {
     toast("error", "Error loading approvals").showToast();
@@ -273,7 +277,9 @@ function renderPagination(totalPages, current, fn, sectionId) {
   paginationDiv.appendChild(pageIndicator);
   paginationDiv.appendChild(nextButton);
 }
-
+/**
+ * @description Function to show loader
+ */
 function showLoader() {
   const main = document.querySelector(".dashboard-main");
   const loader = document.createElement("div");
@@ -281,6 +287,9 @@ function showLoader() {
   loader.innerHTML = "<div class='loader'></div>";
   main.appendChild(loader);
 }
+/**
+ * @description Function to hide loader
+ */
 function hideLoader() {
   const loader = document.querySelector(".loader-overlay");
   if (loader) loader.remove();

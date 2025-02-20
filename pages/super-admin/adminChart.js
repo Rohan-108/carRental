@@ -22,6 +22,9 @@ window.addEventListener("load", () => {
   addEventListeners();
 });
 
+/**
+ * @description Add Event Listeners for the chart filters
+ */
 function addEventListeners() {
   chartType.addEventListener("change", () => {
     carChart();
@@ -202,6 +205,13 @@ async function loadDailyRevenueChart() {
 }
 
 //<--------------------------------Helper Function----------------------->
+/**
+ * @description Group data for the chart (generic)
+ * @param {*} items
+ * @param {*} keyAccessor
+ * @param {*} options
+ * @returns
+ */
 function groupData(items, keyAccessor, options = {}) {
   const grouped = {};
   const { summationField, status } = options;
@@ -222,6 +232,13 @@ function groupData(items, keyAccessor, options = {}) {
   });
   return grouped;
 }
+/**
+ * @description Group Data for Bids
+ * @param {*} bids
+ * @param {*} keyAccessor
+ * @param {*} options
+ * @returns
+ */
 function groupDataForBids(bids, keyAccessor, options = {}) {
   const approved = {};
   const all = {};
@@ -234,6 +251,12 @@ function groupDataForBids(bids, keyAccessor, options = {}) {
   });
   return { approved, all };
 }
+/**
+ * @description Build Chart Data
+ * @param {*} groupedData
+ * @param {*} datasetLabel
+ * @returns
+ */
 function buildChartData(groupedData, datasetLabel) {
   const labels = Object.keys(groupedData);
   const dataValues = Object.values(groupedData);
@@ -251,6 +274,11 @@ function buildChartData(groupedData, datasetLabel) {
     ],
   };
 }
+/**
+ * @description Build Chart Data for Bids
+ * @param {*} groupedData
+ * @returns
+ */
 function buildChartDataForBids(groupedData) {
   const labels = Object.keys(groupedData.approved);
   const dataValuesForApproved = Object.values(groupedData.approved);
@@ -344,6 +372,12 @@ function loadChart(data, chartType, id, isAmount = false) {
     compChart = chartInstance;
   }
 }
+/**
+ * @description generate Random Colors
+ * @param {*} count
+ * @param {*} opacity
+ * @returns
+ */
 function generateRandomColors(count, opacity) {
   const colors = [];
   for (let i = 0; i < count; i++) {
@@ -354,6 +388,11 @@ function generateRandomColors(count, opacity) {
   }
   return colors;
 }
+/**
+ * @description Load Line Chart
+ * @param {*} data
+ * @param {*} canvasId
+ */
 function loadLineChart(data, canvasId) {
   const ctx = document.getElementById(canvasId).getContext("2d");
   if (dailyRevenueChart) {
@@ -398,13 +437,16 @@ function loadLineChart(data, canvasId) {
   });
 }
 
-//comparison chart
+/**
+ * @description Load Comparison Chart
+ */
 async function loadComparisonChart() {
   try {
     const period = document.getElementById("comparisonPeriod").value;
     let bids = await BidService.getAllBids();
     bids = bids.filter((bid) => bid.status === "approved");
     const commission = 0.25;
+    //grouping data for comparison of x days before today and x days before that
     let x;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -432,6 +474,7 @@ async function loadComparisonChart() {
         date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
       );
     }
+    //grouping data on the basis of date
     bids.forEach((bid) => {
       const bidDate = new Date(bid.createdAt);
       const revenue = Number(bid.amount) * commission;

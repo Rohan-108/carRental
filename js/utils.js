@@ -1,5 +1,6 @@
 // Function to hash the password
 import { toast } from "./index.js";
+// Function to hash the password
 async function hashPassword(password) {
   const encoder = new TextEncoder();
   const data = encoder.encode(password);
@@ -10,7 +11,7 @@ async function hashPassword(password) {
     .join("");
   return hashHex;
 }
-
+// Function to get the difference between two dates
 function getDaysDiff(startDate, endDate) {
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -18,6 +19,7 @@ function getDaysDiff(startDate, endDate) {
   const diffInDays = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24)) + 1;
   return diffInDays;
 }
+// Function to format number
 function formatNumber(num) {
   if (Math.abs(num) < 1000) return num.toString();
   const units = ["K", "M", "B", "T"];
@@ -94,6 +96,7 @@ const cities = [
   "Vadodara",
   "Nashik",
 ];
+// Function to debounce a function
 function debounce(func, wait) {
   let timeout;
   return function (...args) {

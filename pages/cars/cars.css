@@ -15,7 +15,7 @@
 .cars-page {
   display: flex;
   width: 100%;
-  height: 100vh;
+  height: 91vh;
 }
 
 .cars-sidebar {
@@ -24,7 +24,10 @@
   color: var(--sidebar-text);
   padding: 1.5rem;
 }
-
+.cars-main {
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
 .search-section {
   display: flex;
   flex-direction: column;

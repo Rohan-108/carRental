@@ -39,6 +39,7 @@ function setFilter() {
       hideLoader();
     }
   });
+  //clear filters
   clearFiltersBtn.addEventListener("click", async function () {
     showLoader();
     try {
@@ -67,7 +68,7 @@ function setFilter() {
   const range = document.querySelector(".range-selected");
   const rangeInput = document.querySelectorAll(".range-input input");
   const rangePrice = document.querySelectorAll(".range-price input");
-
+  //setting price range values
   rangeInput.forEach((input) => {
     input.addEventListener("input", (e) => {
       let minRange = parseInt(rangeInput[0].value);
@@ -133,6 +134,7 @@ async function getCars(query) {
     const rangeInput = document.querySelectorAll(".range-input input");
     const minPrice = parseInt(rangeInput[0].value);
     const maxPrice = parseInt(rangeInput[1].value);
+    //filter function for pagination
     const filterFunction = (car) => {
       if (city.value !== "All" && car.location !== city.value) return false;
       if (carType.value !== "All" && car.vehicleType !== carType.value)

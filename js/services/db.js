@@ -21,7 +21,7 @@ function DbService() {
             chat: { keyPath: "id" },
             conversations: { keyPath: "id" },
           };
-
+          // Create object stores if they don't exist
           for (const [name, config] of Object.entries(stores)) {
             if (!db.objectStoreNames.contains(name)) {
               const store = db.createObjectStore(name, config);
@@ -61,6 +61,7 @@ function DbService() {
     }
   };
   return {
+    // Add a new item to the store
     async addItem(storeName, data) {
       const db = await openDatabase();
       const tx = db.transaction(storeName, "readwrite");
@@ -77,7 +78,7 @@ function DbService() {
         throw error;
       }
     },
-
+    // Update an existing item in the store
     async updateItem(storeName, data) {
       if (!data.id) throw new Error("Update requires item ID");
 
@@ -99,7 +100,7 @@ function DbService() {
         throw error;
       }
     },
-
+    // Get an item from the store by ID
     async getItem(storeName, id) {
       const db = await openDatabase();
       const tx = db.transaction(storeName, "readonly");
@@ -113,7 +114,7 @@ function DbService() {
         throw error;
       }
     },
-
+    // Get all items from the store
     async getAllItems(storeName) {
       const db = await openDatabase();
       const tx = db.transaction(storeName, "readonly");
@@ -127,7 +128,7 @@ function DbService() {
         throw error;
       }
     },
-
+    // Delete an item from the store by ID
     async deleteItem(storeName, id) {
       const db = await openDatabase();
       const tx = db.transaction(storeName, "readwrite");
@@ -143,7 +144,7 @@ function DbService() {
         throw error;
       }
     },
-
+    // Delete all items from the store
     async deleteByIndex(storeName, indexName, key) {
       const db = await openDatabase();
       const tx = db.transaction(storeName, "readwrite");
@@ -161,7 +162,7 @@ function DbService() {
         throw error;
       }
     },
-
+    // Search for an item in the store by index
     async searchItemByIndex(storeName, indexName, key) {
       const db = await openDatabase();
       const tx = db.transaction(storeName, "readonly");
@@ -176,7 +177,7 @@ function DbService() {
         throw error;
       }
     },
-
+    // Search for all items in the store by index
     async searchAllByIndex(storeName, indexName, key) {
       const db = await openDatabase();
       const tx = db.transaction(storeName, "readonly");
@@ -191,7 +192,7 @@ function DbService() {
         throw error;
       }
     },
-
+    // Count the number of items in the store
     async countItemByIndex(storeName, indexName, key) {
       const db = await openDatabase();
       const tx = db.transaction(storeName, "readonly");
@@ -208,6 +209,7 @@ function DbService() {
         throw error;
       }
     },
+    // Count the number of items in the store
     async countItems(storeName) {
       const db = await openDatabase();
       const tx = db.transaction(storeName, "readonly");
@@ -221,6 +223,7 @@ function DbService() {
         throw error;
       }
     },
+    // Get paginated items from the store
     async getPaginatedItems(
       storeName,
       {
@@ -242,7 +245,7 @@ function DbService() {
       const results = [];
       let counter = 0;
       const skip = (page - 1) * pageSize;
-
+      // Iterate through the cursor and add items to the results array
       while (cursor) {
         if (counter >= skip && results.length < pageSize) {
           if (filterFunction(cursor.value)) results.push(cursor.value);

@@ -15,7 +15,9 @@ let compChart = null;
 window.addEventListener("load", () => {
   addEventListeners();
 });
-
+/**
+ * @description Add Event Listeners for the charts filters
+ */
 function addEventListeners() {
   bookChartType.addEventListener("change", () => {
     bookingChart();
@@ -66,8 +68,8 @@ async function bookingChart() {
       "Number of Bookings by " +
       analyticsField.charAt(0).toUpperCase() +
       analyticsField.slice(1);
-    const data = buildChartDataForBids(groupedData, datasetLabel);
-    loadChart(data, typeOfChart, "bookChart");
+    const data = buildChartDataForBids(groupedData);
+    loadChart(data, typeOfChart, "bookChart", false, datasetLabel);
   } catch (error) {
     toast("error", "Error loading booking chart").showToast();
   } finally {
@@ -84,7 +86,7 @@ async function revenueChart() {
     const typeOfChart = revenueChartType.value;
     const bids = await BidService.getBidsByOwnerId(getCurrentUser().id);
     let groupedData, datasetLabel;
-    groupedData = groupData(
+    groupedData = groupDataForRevenue(
       bids,
       (bid) => {
         if (bid.hasOwnProperty(analyticsField)) return bid[analyticsField];
@@ -94,16 +96,16 @@ async function revenueChart() {
       },
       {
         summationField: "amount",
-        status: analyticsField !== "status" ? "approved" : "all",
       }
     );
     datasetLabel =
       "Total Amount by " +
       analyticsField.charAt(0).toUpperCase() +
       analyticsField.slice(1);
-    const data = buildChartData(groupedData, datasetLabel);
-    loadChart(data, typeOfChart, "revenueChart", true);
+    const data = buildChartDataForRevenue(groupedData);
+    loadChart(data, typeOfChart, "revenueChart", true, datasetLabel);
   } catch (error) {
+    console.log(error);
     toast("error", "Error loading booking chart").showToast();
   } finally {
     hideLoader();
@@ -163,6 +165,7 @@ async function loadComparisonChart() {
     let bids = await BidService.getBidsByOwnerId(getCurrentUser().id);
     bids = bids.filter((bid) => bid.status === "approved");
     const commission = 0.25;
+    //logic to group data per x days before today and x days before that
     let x;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -190,6 +193,7 @@ async function loadComparisonChart() {
         date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
       );
     }
+    //group data and add to respective arrays
     bids.forEach((bid) => {
       const bidDate = new Date(bid.createdAt);
       const revenue = Number(bid.amount) * (1 - commission);
@@ -257,6 +261,27 @@ function groupDataForBids(bids, keyAccessor, options = {}) {
   return { approved, all };
 }
 /**
+ * @description Group Data for Revenue
+ * @param {*} bids
+ * @param {*} keyAccessor
+ * @param {*} options
+ * @returns
+ */
+function groupDataForRevenue(bids, keyAccessor, options = {}) {
+  const outstation = {};
+  const notOutstation = {};
+  const { summationField } = options;
+  bids.forEach((bid) => {
+    const key = keyAccessor(bid) || "Unknown";
+    const val = Number(bid[summationField]) * (1 - commissionRate);
+    outstation[key] = bid.isOutStation ? (outstation[key] || 0) + val : 0;
+    notOutstation[key] = !bid.isOutStation
+      ? (notOutstation[key] || 0) + val
+      : 0;
+  });
+  return { outstation, notOutstation };
+}
+/**
  * @description Group Data for general data
  * @param {*} items
  * @param {*} keyAccessor
@@ -309,6 +334,31 @@ function buildChartDataForBids(groupedData) {
   };
 }
 /**
+ * @description Build Chart Data for revenue outstation and local
+ * @param {*} groupedData
+ * @returns
+ */
+function buildChartDataForRevenue(groupedData) {
+  const labels = Object.keys(groupedData.outstation);
+  const dataValuesForOutstation = Object.values(groupedData.outstation);
+  const dataValuesForNotOutStation = Object.values(groupedData.notOutstation);
+  return {
+    labels: labels,
+    datasets: [
+      {
+        label: "Outstation",
+        data: dataValuesForOutstation,
+        backgroundColor: "rgba(0, 255, 0, 0.5)",
+      },
+      {
+        label: "Local",
+        data: dataValuesForNotOutStation,
+        backgroundColor: "rgba(255, 0, 0, 0.5)",
+      },
+    ],
+  };
+}
+/**
  * @description Build chart data for general data
  * @param {*} groupedData
  * @param {*} datasetLabel
@@ -338,7 +388,7 @@ function buildChartData(groupedData, datasetLabel) {
  * @param {*} id
  * @param {*} isAmount
  */
-function loadChart(data, chartType, id, isAmount = false) {
+function loadChart(data, chartType, id, isAmount = false, datasetLabel = null) {
   const yAxisTicksCallback = isAmount
     ? (value) => "Rs. " + formatNumber(value)
     : (value) => (value % 1 === 0 ? formatNumber(value) : "");
@@ -354,7 +404,7 @@ function loadChart(data, chartType, id, isAmount = false) {
       plugins: {
         title: {
           display: true,
-          text: data.datasets[0].label,
+          text: datasetLabel ? datasetLabel : data.datasets[0].label,
           font: { size: 20, weight: "bold" },
           color: "#333",
         },
@@ -390,6 +440,7 @@ function loadChart(data, chartType, id, isAmount = false) {
   if (id == "revenueChart") revChart = chart;
   if (id === "chartComparison") compChart = chart;
 }
+//<------ helper functions ---------------------------------------------->
 function generateRandomColors(count, opacity) {
   const colors = [];
   for (let i = 0; i < count; i++) {

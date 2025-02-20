@@ -201,12 +201,7 @@ async function loadBiddings() {
     const statusValue = statusFilterForBidding.value;
 
     // Calculate total bid amount based on rental days and filter out approved bids
-    biddings = biddings
-      .map((bid) => ({
-        ...bid,
-        amount: Number(bid.amount) * getDaysDiff(bid.startDate, bid.endDate),
-      }))
-      .filter((bid) => bid.status !== "approved");
+    biddings = biddings.filter((bid) => bid.status !== "approved");
 
     if (statusValue !== "all") {
       biddings = biddings.filter((bid) => bid.status === statusValue);
@@ -271,11 +266,6 @@ async function loadBookings() {
   showLoader();
   try {
     let bookings = await BidService.getBookingsByUserId(getCurrentUser().id);
-    bookings = bookings.map((book) => ({
-      ...book,
-      amount: Number(book.amount) * getDaysDiff(book.startDate, book.endDate),
-    }));
-
     // Sort bookings by date or amount
     const sortValue = sortFilterBooking.value;
     if (sortValue === "date") {

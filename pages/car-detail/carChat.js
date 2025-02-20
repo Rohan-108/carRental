@@ -86,7 +86,9 @@ async function loadUserChat() {
     } else {
       userAvatar = "https://picsum.photos/200/300";
     }
+    //get all conversations for the car
     const allcarConv = await ChatService.getConversationsByCarId(carId);
+    //get the conversation that the user is part of
     const myconversations = allcarConv.filter((conv) => {
       let ismyconv = false;
       conv.members.forEach((member) => {
@@ -104,6 +106,7 @@ async function loadUserChat() {
     sendUser.dataset.conversationId = myconversations[0].id;
     const bidNow = document.getElementById("rentButton");
     bidNow.dataset.conversationId = myconversations[0].id;
+    //get all chats for the conversation
     const myChat = await ChatService.getChatsByConversationId(
       myconversations[0].id
     );
