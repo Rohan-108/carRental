@@ -1,0 +1,139 @@
+<main class="cars-page" ng-init="init()">
+  <aside class="cars-sidebar">
+    <div class="search-section">
+      <label for="search">Search</label>
+      <input
+        type="text"
+        id="search"
+        name="search"
+        placeholder="Search by car name"
+        ng-model="query"
+        ng-change="search()"
+        ng-model-options="{ debounce: 500 }"
+      />
+    </div>
+    <div class="filter-panel" id="filterPanel">
+      <div class="filter-group">
+        <label for="city">City</label>
+        <select id="city" name="city" ng-model="filter.city">
+          <option ng-repeat="city in cities" value="{{city}}">{{city}}</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="fuelType">Fuel Type</label>
+        <select name="fuelType" id="fuelType" ng-model="filter.fuelType">
+          <option ng-repeat="fuel in fuelTypes" value="{{fuel}}">
+            {{fuel}}
+          </option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="carType">Car Type</label>
+        <select id="carType" name="carType" ng-model="filter.carType">
+          <option ng-repeat="type in vehicleTypes" value="{{type}}">
+            {{type}}
+          </option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="transmission">Transmission</label>
+        <select
+          name="transmission"
+          id="transmission"
+          ng-model="filter.transmission"
+        >
+          <option
+            ng-repeat="transmission in transmissionType"
+            value="{{transmission}}"
+          >
+            {{transmission}}
+          </option>
+        </select>
+      </div>
+      <div class="range">
+        <label for="price" style="font-size: 1rem">Price</label>
+        <div class="range-slider">
+          <span class="range-selected"></span>
+        </div>
+        <div class="range-input">
+          <input
+            type="range"
+            class="min"
+            min="0"
+            max="10000"
+            value="0"
+            step="500"
+            ng-model="filter.minPrice"
+          />
+          <input
+            type="range"
+            class="max"
+            min="0"
+            max="10000"
+            value="10000"
+            step="500"
+            ng-model="filter.maxPrice"
+          />
+        </div>
+        <div class="range-price">
+          <label for="min">Min</label>
+          <input type="number" name="min" ng-value="filter.minPrice" disabled />
+          <label for="max">Max</label>
+          <input type="number" name="max" ng-value="filter.maxPrice" disabled />
+        </div>
+      </div>
+      <button id="applyFilters" class="btn apply-btn" ng-click="setCars()">
+        Apply Filters
+      </button>
+      <button id="clearFilters" class="btn clear-btn" ng-click="clearFilters()">
+        Clear Filters
+      </button>
+    </div>
+  </aside>
+  <section class="cars-main" style="display: relative">
+    <h2>Our Cars</h2>
+    <div class="loader-overlay" ng-show="isLoading">
+      <div class="loader"></div>
+    </div>
+    <div class="carContainer" id="carContainer">
+      <div class="carCard" ng-repeat="car in cars" ng-show="isLoading===false">
+        <div class="details">
+          <div class="thumb-gallery">
+            <img class="first" ng-src="{{car.imgUrl}}" alt="{{car.name}}" />
+          </div>
+          <div class="info">
+            <h3>{{car.name}}</h3>
+            <p class="car-type">{{car.vehicleType}}</p>
+            <p class="car-type">Location: {{car.location}}</p>
+            <div class="price">
+              <span>Base Price</span>
+              <h4>Rs {{car.rentalPrice}}/day</h4>
+            </div>
+            <div class="ctas">
+              <button class="btn" ng-click="changeState(car.id)">
+                More Details
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pagination" id="pagination">
+      <button
+        class="pagination-button"
+        ng-disabled="currentPage === 1"
+        ng-click="prevPage()"
+      >
+        Prev
+      </button>
+      <span>Page {{currentPage}} of {{totalPage}}</span>
+      <button
+        class="pagination-button"
+        ng-disabled="currentPage === totalPage"
+        ng-click="nextPage()"
+      >
+        Next
+      </button>
+    </div>
+  </section>
+</main>

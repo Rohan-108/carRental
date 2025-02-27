@@ -1,0 +1,45 @@
+<div class="navbar">
+  <div class="container">
+    <a class="logo" ui-sref="home">RENT <span>IT</span></a>
+    <img
+      id="mobile-cta"
+      class="mobile-menu"
+      src="../../asset/images/menu.svg"
+      alt="Open navigation"
+      ng-click="openMenu()"
+    />
+    <nav ng-class="{'menu-btn':toggleMenu && toggleMenu==true}">
+      <img
+        id="mobile-exit"
+        class="mobile-menu-exit"
+        src="../../asset/images/exit.svg"
+        alt="close navigation"
+        ng-click="closeMenu()"
+      />
+      <ul class="primary-nav">
+        <li><a ui-sref="home" ui-sref-active="active">Home</a></li>
+        <li><a ui-sref="cars" ui-sref-active="active">Cars</a></li>
+        <li ng-show="user">
+          <a ui-sref="profile" ui-sref-active="active">Profile</a>
+        </li>
+        <li ng-show="user">
+          <a ui-sref="chat" ui-sref-active="active">Chat</a>
+        </li>
+      </ul>
+      <ul class="secondary-nav">
+        <li class="go-premium-cta" ng-show="!user">
+          <a ui-sref="login">Login</a>
+        </li>
+        <li class="go-premium-cta" ng-show="user &&user.role==='admin'">
+          <a ui-sref="dashboard">Dashboard</a>
+        </li>
+        <li class="go-premium-cta" ng-show="user &&user.role==='super-admin'">
+          <a ui-sref="adminDashboard">Admin-Dashboard</a>
+        </li>
+        <li class="go-premium-cta" ng-show="user">
+          <a ng-click="logout()" href="#">Logout</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>

@@ -1,0 +1,288 @@
+/* Base styles */
+:root {
+  --primary-color: #007bff;
+  --secondary-color: #f8f8f8;
+  --text-color: #333;
+  --bg-color: #f4f4f4;
+  --white: #ffffff;
+  --border-radius: 0.5rem;
+  --transition-speed: 0.3s;
+  --box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+  --font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+.loader-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.loader {
+  border: 0.5rem solid #f3f3f3;
+  border-top: 0.5rem solid #3498db;
+  border-radius: 50%;
+  width: 3rem;
+  height: 3rem;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.no-data {
+  text-align: center;
+  padding: 1rem;
+  font-size: 1rem;
+  color: #888;
+}
+/* Main container layout */
+.carDetailContainer {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin: 1rem auto;
+  max-width: 1200px;
+}
+
+@media (min-width: 768px) {
+  .carDetailContainer {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+/* Car Details Card */
+.carDetail {
+  background: var(--white);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 1rem;
+}
+
+.details h2 {
+  grid-column: 1 / -1;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid var(--secondary-color);
+  padding-bottom: 0.5rem;
+}
+
+.infoBox {
+  background: var(--secondary-color);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.infoBox h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
+}
+
+.infoBox p {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Owner Details Card */
+.ownerDetails {
+  background: var(--secondary-color);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+.owner {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.ownerDetails h2 {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--bg-color);
+  padding-bottom: 0.5rem;
+}
+
+.ownerDetails .infoBox {
+  margin-bottom: 0.75rem;
+}
+
+/* Image Gallery */
+.carImage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.image-gallery {
+  background: var(--secondary-color);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  width: 100%;
+  max-width: 500px;
+}
+
+#mainImage {
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: var(--border-radius);
+  object-fit: cover;
+  transition: opacity 0.2s;
+  opacity: 1;
+}
+
+#mainImage.fade-out {
+  animation: fadeOut 0.1s forwards;
+}
+
+#mainImage.fade-in {
+  animation: fadeIn 0.1s forwards;
+}
+
+.thumbnail-container {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.thumbnail {
+  width: 4rem;
+  height: 3rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: transform var(--transition-speed);
+  object-fit: cover;
+}
+
+.thumbnail:hover {
+  transform: scale(1.05);
+}
+
+/* Date Picker Card */
+.date-picker-container {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+  max-height: max-content;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.date-picker-container h2 {
+  text-align: center;
+  font-size: 1.75rem;
+  color: #007bff;
+  margin-bottom: 0.5rem;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 0.5rem;
+}
+
+.date-picker-container .dateConatiner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.date-picker-container input#datepicker {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  text-align: center;
+  transition: border-color 0.3s ease;
+}
+
+.date-picker-container input#datepicker:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.date-picker-container p {
+  font-size: 0.95rem;
+  color: #555;
+  margin: 0.25rem 0;
+  text-align: center;
+  display: inline;
+}
+
+.date-picker-container p span {
+  font-weight: 600;
+  color: #333;
+}
+
+.date-picker-container input#amount {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  transition: border-color 0.3s ease;
+}
+
+.date-picker-container input#amount:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.date-picker-container button#rentButton {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  background-color: #007bff;
+  border: none;
+  color: #fff;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.date-picker-container button#rentButton:hover {
+  background-color: #0056b3;
+  transform: translateY(-0.1rem);
+}
+
+/* Keyframes for fading out and in */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

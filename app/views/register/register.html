@@ -1,0 +1,227 @@
+<!-- Register Section -->
+<div class="login-root">
+  <div
+    class="flex-flex flex-direction--column"
+    style="min-height: 100vh; flex-grow: 1"
+  >
+    <div
+      class="padding-top--24 flex-flex flex-direction--column"
+      style="flex-grow: 1; z-index: 9"
+    >
+      <div
+        class="padding-top--48 padding-bottom--24 flex-flex flex-justifyContent--center"
+      >
+        <h1 class="logo">
+          <a class="logo" href="#" aria-label="Go to Rent IT homepage">
+            RENT <span>IT</span>
+          </a>
+        </h1>
+      </div>
+      <div class="formbg-outer">
+        <div class="formbg">
+          <div class="formbg-inner padding-horizontal--48">
+            <p class="padding-bottom--15 spanText">Register your details</p>
+            <form
+              id="registerForm"
+              name="registerForm"
+              novalidate
+              ng-submit="register()"
+            >
+              <!-- Name Field -->
+              <div class="field">
+                <label for="name">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  id="name"
+                  placeholder="Enter your full name"
+                  title="Name must contain only letters and be 3-50 characters long."
+                  ng-required="true"
+                  autocomplete="name"
+                  ng-model="user.name"
+                />
+                <span
+                  style="color: red"
+                  ng-show="registerForm.name.$touched && registerForm.name.$invalid"
+                >
+                  User name is not valid
+                </span>
+              </div>
+
+              <!-- Email Field -->
+              <div class="field">
+                <label for="email">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  placeholder="Enter your email"
+                  autocomplete="email"
+                  ng-required="true"
+                  ng-model="user.email"
+                  valid-Email
+                />
+                <span
+                  style="color: red"
+                  ng-show="registerForm.email.$touched && registerForm.email.$invalid"
+                >
+                  email is not valid
+                </span>
+              </div>
+
+              <!-- Phone Number Field -->
+              <div class="field">
+                <label for="phone">Phone Number</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  id="phone"
+                  placeholder="Enter your phone number"
+                  title="Phone number must be 10 digits long"
+                  autocomplete="tel"
+                  ng-required="true"
+                  ng-model="user.phone"
+                  valid-Phone
+                />
+                <span
+                  style="color: red"
+                  ng-show="registerForm.phone.$touched && registerForm.phone.$error.validPhone"
+                >
+                  Phone number is not valid
+                </span>
+                <span
+                  style="color: red"
+                  ng-show="registerForm.phone.$touched && registerForm.phone.$error.required"
+                >
+                  Phone number is required
+                </span>
+              </div>
+              <!-- Adhaar Number Field -->
+              <div class="field">
+                <label for="adhaar">Adhaar Number</label>
+                <input
+                  type="text"
+                  name="adhaar"
+                  id="adhaar"
+                  placeholder="Enter your Adhaar number"
+                  title="Adhaar number must be 12 digits long"
+                  autocomplete="adhaar"
+                  ng-required="true"
+                  ng-model="user.adhaar"
+                  valid-Adhaar
+                />
+                <span
+                  style="color: red"
+                  ng-show="registerForm.adhaar.$touched && registerForm.adhaar.$error.validAdhaar"
+                >
+                  Adhaar number is not valid
+                </span>
+                <span
+                  style="color: red"
+                  ng-show="registerForm.adhaar.$touched && registerForm.adhaar.$error.required"
+                >
+                  Adhaar number is required
+                </span>
+              </div>
+              <!-- Avatar Field -->
+              <div class="field">
+                <label for="avatar">Avatar</label>
+                <input
+                  type="file"
+                  name="avatar"
+                  id="avatar"
+                  accept="image/png, image/jpeg, image/jpg"
+                  title="Please upload a valid image file(png, jpeg, jpg) of size less than 500Kb."
+                  ng-required="true"
+                  ng-model="user.avatar"
+                  valid-Avatar
+                />
+                <span
+                  style="color: red"
+                  ng-show="registerForm.avatar.$touched && registerForm.avatar.$error.validAvatar"
+                >
+                  Please upload a valid image file(png, jpeg, jpg) of size less
+                  than 500Kb.
+                </span>
+              </div>
+              <!-- Password Field -->
+              <div class="field">
+                <label for="password">Password</label>
+                <input
+                  type="password"
+                  name="password"
+                  id="password"
+                  placeholder="Enter your password"
+                  ng-minlength="8"
+                  title="Password must be at least 8 characters long."
+                  ng-required="true"
+                  ng-model="user.password"
+                  strong-Password
+                />
+                <span
+                  style="color: red"
+                  ng-show="registerForm.password.$touched && registerForm.password.$error.required"
+                >
+                  Password is required.
+                </span>
+                <span
+                  style="color: red"
+                  ng-show="registerForm.password.$touched && registerForm.password.$error.strongPassword"
+                >
+                  Password isn't strong.
+                </span>
+              </div>
+
+              <!-- Confirm Password Field -->
+              <div class="field">
+                <label for="ConfirmPassword">Confirm Password</label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  id="confirmPassword"
+                  placeholder="Re-enter your password"
+                  minlength="8"
+                  title="Password must match the above password."
+                  ng-required="true"
+                  ng-model="user.confirmPassword"
+                  password-Match="user.password"
+                />
+                <span
+                  style="color: red"
+                  ng-show="registerForm.confirmPassword.$touched && registerForm.confirmPassword.$error.required"
+                >
+                  Confirm Password is required.
+                </span>
+                <span
+                  style="color: red"
+                  ng-show="registerForm.confirmPassword.$touched && registerForm.confirmPassword.$error.passwordMatch"
+                >
+                  Passwords do not match.
+                </span>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="field">
+                <input
+                  type="submit"
+                  name="submit"
+                  value="Register"
+                  ng-disabled="registerForm.$invalid"
+                />
+              </div>
+            </form>
+            <div>
+              Already have an account?
+              <a
+                ui-sref="login"
+                style="color: blue"
+                aria-label="Go to Login page"
+                >Login</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

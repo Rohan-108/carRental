@@ -1,0 +1,133 @@
+<div class="msger" ng-init="init()">
+  <header class="msger-header">
+    <div class="msger-header-title">Chats</div>
+  </header>
+  <div class="chat-container">
+    <div class="sidebar" id="sidebar">
+      <div
+        class="conversation"
+        ng-repeat="conv in conversations"
+        ng-class="{'active':conv.id==convId}"
+        ng-click="changeChat(conv.id)"
+      >
+        <div class="convDetail">
+          <img ng-src="{{conv.imgUrl}}" alt="owner image" class="user-img" />
+          <div class="info">
+            <p>{{conv.otherMemeber.name}}</p>
+            <p>{{conv.car.name}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="right-col">
+      <!--Chat box showing message-->
+      <main class="msger-chat" id="messageBox">
+        <div
+          class="no-chat"
+          ng-show="{{car.ownerId!==user.id || user.role=='super-admin'}}"
+        >
+          <p>You can't Chat</p>
+        </div>
+        <div class="msg" ng-repeat="chat in messages" ng-if="messages.length>0">
+          <div class="{{chat.sender===user.id?'right-msg':'left-msg'}}">
+            <div class="msg-img">
+              <img ng-src="{{chat.user.avatar}}" alt="user" />
+            </div>
+            <div class="msg-bubble">
+              <div class="msg-info">
+                <div class="msg-info-name">{{chat.user.name}}</div>
+                <div class="msg-info-time">{{chat.createdAt | date}}</div>
+              </div>
+
+              <div class="msg-text">{{chat.message}}</div>
+              <div class="chat-img" ng-show="chat.image">
+                <img ng-src="{{chat.image}}" alt="chat image" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+      <!---Chat form to send message-->
+      <form
+        class="msger-inputarea"
+        name="chatForm"
+        novalidate
+        ng-submit="sendChat()"
+      >
+        <textarea
+          type="text"
+          class="msger-input"
+          placeholder="Enter your message..."
+          ng-model="message"
+          id="msg"
+        ></textarea>
+        <button
+          type="button"
+          style="cursor: pointer"
+          ng-click="toggleModal(true)"
+        >
+          <img
+            src="../../asset/images/attachment.svg"
+            alt="attachment"
+            style="width: 20px; height: 20px"
+          />
+        </button>
+        <button
+          type="submit"
+          class="msger-send-btn"
+          id="send"
+          style="height: max-content; margin-block: auto"
+          ng-disabled="chatForm.$invalid"
+        >
+          Send
+        </button>
+      </form>
+      <!------Image modALLLLLLLLLLLLLLLLLLL-->
+      <div class="imageModal" ng-show="imageModal==true" id="modal">
+        <div class="formbg innerModal">
+          <div class="formbg-inner" style="padding: 1rem">
+            <div class="closeButton" ng-click="toggleModal(false)">
+              <img src="../../asset/images/exit.svg" alt="Close" />
+            </div>
+            <p class="padding-bottom--15 spanText">Send Image with Message</p>
+            <form
+              id="imageForm"
+              name="imageForm"
+              novalidate
+              ng-submit="uploadImage()"
+            >
+              <div class="field">
+                <label for="image">Upload Image (500Kb)</label>
+                <input
+                  type="file"
+                  name="image"
+                  id="image"
+                  accept="image/jpg, image/jpeg, image/png"
+                  title="Upload Image (jpg, jpeg, png) only allowed and less than 500kb"
+                  ng-model="image"
+                  ng-required="true"
+                  valid-Avatar
+                />
+                <span
+                  style="color: red"
+                  ng-show="imageForm.image.$invalid && imageForm.image.$dirty"
+                >
+                  Upload Image (jpg, jpeg, png) only allowed and less than 500kb
+                </span>
+              </div>
+              <div class="field">
+                <input
+                  type="submit"
+                  name="submit"
+                  value="Send"
+                  ng-disabled="imageForm.$invalid"
+                  style="margin: 0"
+                />
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

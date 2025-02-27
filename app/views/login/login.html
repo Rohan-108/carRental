@@ -1,0 +1,83 @@
+<!-- Login Section -->
+<div class="login-root" ng-controller="loginController">
+  <div
+    class="flex-flex flex-direction--column"
+    style="min-height: 100vh; flex-grow: 1"
+  >
+    <div
+      class="padding-top--48 padding-bottom--24 flex-flex flex-justifyContent--center"
+    >
+      <h1 class="logo">
+        <a class="logo" href="#" aria-label="Go to Rent IT homepage">
+          Welcome <span>To</span> Rent <span>IT</span>
+        </a>
+      </h1>
+    </div>
+    <div class="formbg-outer">
+      <div class="formbg">
+        <div class="formbg-inner padding-horizontal--48">
+          <p class="padding-bottom--15 spanText">Sign in to your account</p>
+          <!-- Use a named form and disable browser validation with novalidate -->
+          <form name="loginForm" novalidate ng-submit="submitLogin()">
+            <!-- Email Field -->
+            <div class="field padding-bottom--24">
+              <label for="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Enter your email"
+                ng-required="true"
+                ng-pattern="/^[^\s@]+@[^\s@]+\.[^\s@]+$/"
+                ng-model="loginData.email"
+              />
+              <!-- Display an error message if email is invalid -->
+              <span
+                style="color: red"
+                ng-show="loginForm.email.$touched && loginForm.email.$invalid"
+              >
+                Please enter a valid email.
+              </span>
+            </div>
+            <!-- Password Field -->
+            <div class="field padding-bottom--24">
+              <label for="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter your password"
+                ng-required="true"
+                ng-model="loginData.password"
+              />
+              <span
+                style="color: red"
+                ng-show="loginForm.password.$touched && loginForm.password.$error.required"
+              >
+                Password is required.
+              </span>
+            </div>
+            <!-- Submit Button: disabled until the form is valid -->
+            <div class="field padding-bottom--24">
+              <input
+                type="submit"
+                name="submit"
+                value="Login"
+                ng-disabled="loginForm.$invalid"
+              />
+            </div>
+          </form>
+          <div>
+            Don't have an account?
+            <a
+              ui-sref="register"
+              style="color: blue"
+              aria-label="Go to Register page"
+              >Register</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

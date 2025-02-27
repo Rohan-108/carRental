@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <!-- //css styles addition -->
+    <link rel="stylesheet" href="./styles/index.css" />
+    <link rel="stylesheet" href="./styles/form.css" />
+    <link rel="stylesheet" href="./styles/table.css" />
+    <link rel="stylesheet" href="./styles/chat.css" />
+    <link
+      rel="stylesheet"
+      href="../node_modules/angularjs-toaster/toaster.css"
+    />
+    <!-- //script addition -->
+    <script src="../node_modules/angular/angular.js"></script>
+    <script src="
+    https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js
+    "></script>
+    <script src="../node_modules/@uirouter/angularjs/release/angular-ui-router.js"></script>
+    <script src="../node_modules/angularjs-toaster/toaster.js"></script>
+    <script src="../node_modules/angular-animate/angular-animate.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.umd.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/async/3.2.6/async.min.js"
+      integrity="sha512-Ps4UroO9GAII8QTM2IE4KcHjslTEZjoZY6OhztAFKSnnqshNnPR8PQl1usQpGiHQXnyRCwEMZAsVJgGg2z8Kog=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <title>CAR-RENTAL</title>
+  </head>
+  <body ng-app="rentIT" ng-controller="mainController">
+    <div ng-include="'app/components/navbar/navbar.html'"></div>
+    <div ui-view>
+      <!-- This is where the content of the page will be rendered -->
+    </div>
+    <toaster-container
+      toaster-options="{
+       'time-out':3000,
+       'position-class':'toast-bottom-right',
+       'close-button':true
+    }"
+    ></toaster-container>
+    <!-- //application modules -->
+    <script src="./app.js"></script>
+    <script src="./appController.js"></script>
+    <script src="./appRoutes.js"></script>
+    <!-- //services -------------------------------------->
+    <script src="./services/resourceInjectorService.js"></script>
+    <script src="./services/sessionService.js"></script>
+    <script src="./services/utilService.js"></script>
+    <script src="./services/approvalService.js"></script>
+    <script src="./services/bidBookService.js"></script>
+    <script src="./services/carService.js"></script>
+    <script src="./services/chatService.js"></script>
+    <script src="./services/userService.js"></script>
+    <script src="./services/chartService.js"></script>
+    <script type="module" src="./services/dbService.js"></script>
+    <!-- //directives -------------------------------------->
+    <script src="./directives/strongPassword.js"></script>
+    <script src="./directives/passwordMatch.js"></script>
+    <script src="./directives/validEmail.js"></script>
+    <script src="./directives/validPhone.js"></script>
+    <script src="./directives/validAdhaar.js"></script>
+    <script src="./directives/validAvatar.js"></script>
+    <script src="./directives/validPlateNumber.js"></script>
+    <script src="./directives/validImages.js"></script>
+    <script src="./directives/validNumber.js"></script>
+    <!-- //controllers -------------------------------------->
+    <script src="./views/home/homeController.js"></script>
+    <script src="./views/cars/carsController.js"></script>
+    <script src="./views/login/loginController.js"></script>
+    <script src="./views/register/registerController.js"></script>
+    <script src="./views/profile/profileController.js"></script>
+    <script src="./views/dashboard/dashboardController.js"></script>
+    <script src="./views/carDetail/carDetailController.js"></script>
+    <script src="./views/chat/chatController.js"></script>
+    <script src="./views/admin/adminController.js"></script>
+  </body>
+</html>

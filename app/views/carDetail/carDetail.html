@@ -1,0 +1,229 @@
+<main class="carDetailContainer" ng-init="init()">
+  <!---Car Detail section--------------------------------------------------------->
+  <section class="carDetail">
+    <!---Car Image section--------------------------------------------------------->
+    <div class="carImage">
+      <div class="image-gallery">
+        <img id="mainImage" ng-src="{{currentImage}}" alt="Car Image" />
+        <div class="thumbnail-container" id="thumbnailContainer">
+          <img
+            ng-repeat="image in car.images"
+            ng-src="{{image}}"
+            alt="Car Image"
+            class="thumbnail"
+            ng-click="changeImage(image)"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="details">
+      <h2>🚗 Car Details</h2>
+      <div class="infoBox">
+        <h3>Car Name</h3>
+        <p id="carName">{{car.name}}</p>
+      </div>
+      <div class="infoBox">
+        <h3>💰 Price</h3>
+        <p id="carPrice">{{car.rentalPrice}}</p>
+      </div>
+      <div class="infoBox">
+        <h3>🛑 Seats</h3>
+        <p id="carSeats">{{car.seats}}</p>
+      </div>
+      <div class="infoBox">
+        <h3>⛽ Fuel</h3>
+        <p id="carFuel">{{car.fuelType}}</p>
+      </div>
+      <div class="infoBox">
+        <h3>⚙️ Transmission</h3>
+        <p id="carTransmission">{{car.transmission}}</p>
+      </div>
+      <div class="infoBox">
+        <h3>🚘 Type</h3>
+        <p id="carType">{{car.vehicleType}}</p>
+      </div>
+    </div>
+
+    <div class="ownerDetails">
+      <h2>👤 Owner Details</h2>
+      <div class="owner">
+        <div class="infoBox">
+          <h3>🏷️ Name</h3>
+          <p id="ownerName">{{car.owner.name}}</p>
+        </div>
+        <div class="infoBox">
+          <h3>📧 Email</h3>
+          <p id="ownerEmail">{{car.owner.email}}</p>
+        </div>
+        <div class="infoBox">
+          <h3>📞 Contact</h3>
+          <p id="ownerPhone">{{car.owner.tel}}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div>
+    <!----rental section------------------------------------->
+    <section class="date-picker-container">
+      <h2>📅 Select Dates</h2>
+
+      <div class="dateContainer">
+        <input id="datepicker" placeholder="Select your dates" />
+        <p>
+          min:<span id="minRentalPeriod">{{car.minRentalPeriod}}</span> days
+        </p>
+        <p>
+          max:<span id="maxRentalPeriod">{{car.maxRentalPeriod}}</span> days
+        </p>
+      </div>
+      <label for="amount" style="margin: 0">Pick your price per day:</label>
+      <input
+        id="amount"
+        type="number"
+        name="amount"
+        min="100"
+        max="10000"
+        ng-model="rental.amount"
+        placeholder="Give the amount"
+        valid-Number
+      />
+      <p style="color: gray; margin: 0" id="info">
+        Additional service charges will apply for more than
+        {{car.fixedKilometer}}km. Charge of Rs.{{car.ratePerKm}} per 50km will
+        be added.
+      </p>
+      <div style="display: flex; gap: 1rem">
+        <label
+          for="outStation"
+          style="margin: 0; justify-self: center; align-self: center"
+          >Want to take for Outstation:</label
+        >
+        <input
+          type="checkbox"
+          id="outStation"
+          name="outStation"
+          value="outStation"
+          style="
+            width: auto;
+            margin: 0;
+            justify-self: center;
+            align-self: center;
+          "
+          ng-model="rental.isOutStation"
+          ng-change="changeBidAmount()"
+        />
+      </div>
+      <p style="color: gray; margin: 0">
+        Pick price greater than base price, to have higher chance of
+        confirmation by owner.
+      </p>
+      <button id="rentButton" class="btn" ng-click="bidNow()">Bid Now</button>
+    </section>
+    <!----car user chat section------------------------------------->
+    <div class="carUserChat">
+      <header class="msger-header">
+        <div class="msger-header-title">Chat With Owner</div>
+      </header>
+      <main class="userChat" id="messageBoxUser">
+        <div class="no-chat" ng-if="car.ownerId==user.id">
+          <p>You can't Chat</p>
+        </div>
+        <div
+          class="msg"
+          ng-repeat="chat in messages"
+          ng-if="messages.length>0 && car.ownerId!==user.id"
+        >
+          <div class="{{chat.sender===user.id?'right-msg':'left-msg'}}">
+            <div class="msg-img">
+              <img ng-src="{{chat.user.avatar}}" alt="user" />
+            </div>
+            <div class="msg-bubble">
+              <div class="msg-info">
+                <div class="msg-info-name">{{chat.user.name}}</div>
+                <div class="msg-info-time">{{chat.createdAt |date}}</div>
+              </div>
+
+              <div class="msg-text">{{chat.message}}</div>
+              <div class="chat-img" ng-show="chat.image">
+                <img ng-src="{{chat.image}}" alt="chat image" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+      <!-- //chat form -->
+      <form
+        class="msger-inputarea"
+        name="chatForm"
+        novalidate
+        ng-submit="sendChat()"
+      >
+        <textarea
+          type="text"
+          class="msger-input"
+          placeholder="Enter your message..."
+          ng-required="true"
+          ng-model="message"
+        ></textarea>
+        <button
+          type="button"
+          style="cursor: pointer"
+          ng-click="toggleModal(true)"
+          ng-disabled="car.ownerId==user.id || user.role==='super-admin'"
+        >
+          📎
+        </button>
+        <button
+          type="submit"
+          class="msger-send-btn"
+          id="sendUser"
+          style="height: max-content; margin-block: auto"
+          ng-disabled="chatForm.$invalid || car.ownerId==user.id || user.role==='super-admin'"
+        >
+          Send
+        </button>
+      </form>
+      <!-- Image Modal -->
+      <div class="imageModal" ng-show="imageModal==true">
+        <div class="formbg innerModal">
+          <div class="formbg-inner" style="padding: 1rem">
+            <div class="closeButton" ng-click="toggleModal(false)">
+              <img src="../../asset/images/exit.svg" alt="Close" />
+            </div>
+            <p class="padding-bottom--15 spanText">Send Image with Message</p>
+            <form id="imageForm" name="imageForm" ng-submit="uploadImage()">
+              <div class="field">
+                <label for="image">Upload Image (500Kb)</label>
+                <input
+                  type="file"
+                  name="image"
+                  id="image"
+                  accept="image/jpg, image/jpeg, image/png"
+                  title="Upload Image (jpg, jpeg, png) only allowed and less than 500kb"
+                  ng-required="true"
+                  ng-model="image"
+                  valid-Avatar
+                />
+                <span
+                  style="color: red"
+                  ng-show="imageForm.image.$invalid && imageForm.image.$dirty"
+                >
+                  Upload Image (jpg, jpeg, png) only allowed and less than 500kb
+                </span>
+              </div>
+              <div class="field">
+                <input
+                  type="submit"
+                  name="submit"
+                  value="Send"
+                  ng-disabled="imageForm.$invalid"
+                  style="margin: 0"
+                />
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
