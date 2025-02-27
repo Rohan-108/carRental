@@ -257,46 +257,37 @@ angular.module("rentIT").controller("carDetailController", [
         toaster.pop("error", "Error", "You cannot send message to yourself");
         return;
       }
-      if ($scope.convId === null) {
-        toaster.pop("error", "Error", "Error while sending message");
-        return;
-      }
       if ($scope.message.trim() === "") {
         toaster.pop("error", "Error", "Message cannot be empty");
         return;
       }
-      let convId = $scope.convId;
       $q.when(userService.getUserById($rootScope.user.id))
         .then((user) => {
           // if conversation id is not present create a new conversation
-          if (!convId) {
-            return $q
-              .when(carService.getCarById($scope.car.id))
-              .then((carData) => {
-                return chatService
-                  .addConversation({
-                    id: "",
-                    carId: $scope.car.id,
-                    car: carData,
-                    members: [user, $scope.car.owner],
-                    createdAt: Date.now(),
-                    updatedAt: Date.now(),
-                  })
-                  .then((id) => {
-                    convId = id;
-                    return convId;
-                  });
-              });
+          if ($scope.convId === null) {
+            return chatService
+              .addConversation({
+                id: "",
+                carId: $scope.car.id,
+                car: $scope.car,
+                members: [user, $scope.car.owner],
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+              })
+              .then((id) => {
+                $scope.convId = id;
+              })
+              .then(() => user);
           }
-          return convId;
+          return user;
         })
-        .then(() => {
+        .then((user) => {
           // add chat to the conversation
           return chatService.addChat({
             id: "",
-            conversationId: convId,
+            conversationId: $scope.convId,
             sender: $rootScope.user.id,
-            user: $rootScope.user,
+            user: user,
             message: $scope.message,
             image: null,
             createdAt: Date.now(),
@@ -309,14 +300,12 @@ angular.module("rentIT").controller("carDetailController", [
         })
         .then((chat) => {
           // set image and avatar to blob url
-          chat.image = URL.createObjectURL(new Blob([chat.image]));
           chat.user.avatar = URL.createObjectURL(new Blob([chat.user.avatar]));
-          chat.createdAt = new Date(chat.createdAt).toLocaleString();
           $scope.messages.push(chat);
           $scope.message = "";
-          $scope.convId = convId;
         })
         .catch((_) => {
+          console.log(_);
           toaster.pop("error", "Error", "Error while sending message");
         });
     };
