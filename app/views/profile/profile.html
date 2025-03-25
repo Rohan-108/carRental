@@ -37,6 +37,9 @@
     </div>
   </div>
   <main class="dashboard-main">
+    <div class="loader-overlay" ng-show="isLoading">
+      <div class="loader"></div>
+    </div>
     <!-- // profile home section -->
     <section
       id="profileHome"
@@ -45,7 +48,7 @@
     >
       <div class="profile-card">
         <div class="profile-image">
-          <img ng-src="{{avatar}}" alt="User Photo" id="userAvatar" />
+          <img ng-src="{{user.avatar}}" alt="User Photo" id="userAvatar" />
           <button ng-click="toggleChangeProfileModal(true)" class="edit-btn">
             ✏️
           </button>
@@ -56,7 +59,7 @@
           <ul>
             <li>
               <span class="icon">👤</span> <span class="label">Name:</span>
-              <span id="name">{{user.name}}</span>
+              <span id="name">{{user.username}}</span>
             </li>
             <li>
               <span class="icon">📧</span>
@@ -130,13 +133,13 @@
         </thead>
         <tbody id="bookingContainer">
           <tr ng-repeat="booking in bookings" ng-if="bookings.length > 0">
-            <td data-label="Car Name">{{booking.car.name}}</td>
-            <td data-label="Owner">{{booking.car.owner.name}}</td>
-            <td data-label="Plate Number">{{booking.car.plateNumber}}</td>
-            <td data-label="Start Date">{{booking.startDate}}</td>
-            <td data-label="End Date">{{booking.endDate}}</td>
-            <td data-label="Amount">{{booking.amount}}</td>
-            <td data-label="Confirmed At">{{booking.createdAt|date}}</td>
+            <td data-label="Car Name">{{booking.vehicle.name}}</td>
+            <td data-label="Owner">{{booking.vehicle.owner.username}}</td>
+            <td data-label="Plate Number">{{booking.vehicle.plateNumber}}</td>
+            <td data-label="Start Date">{{booking.startDate | date}}</td>
+            <td data-label="End Date">{{booking.endDate | date}}</td>
+            <td data-label="Amount">{{booking.amount | currency}}</td>
+            <td data-label="Confirmed At">{{booking.createdAt | date}}</td>
           </tr>
           <tr ng-if="bookings.length === 0">
             <td colspan="7" class="no-data">There is no data</td>
@@ -220,12 +223,12 @@
         </thead>
         <tbody id="biddingContainer">
           <tr ng-repeat="bid in bids" ng-if="bids.length > 0">
-            <td data-label="Car Name">{{bid.car.name}}</td>
-            <td data-label="Owner">{{bid.car.owner.name}}</td>
-            <td data-label="Plate Number">{{bid.car.plateNumber}}</td>
-            <td data-label="Start Date">{{bid.startDate}}</td>
-            <td data-label="End Date">{{bid.endDate}}</td>
-            <td data-label="Amount">{{bid.amount}}</td>
+            <td data-label="Car Name">{{bid.vehicle.name}}</td>
+            <td data-label="Owner">{{bid.vehicle.owner.username}}</td>
+            <td data-label="Plate Number">{{bid.vehicle.plateNumber}}</td>
+            <td data-label="Start Date">{{bid.startDate | date}}</td>
+            <td data-label="End Date">{{bid.endDate| date}}</td>
+            <td data-label="Amount">{{bid.amount | currency}}</td>
             <td data-label="Status">{{bid.status}}</td>
           </tr>
           <tr ng-if="bids.length === 0">
@@ -292,23 +295,24 @@
         style="height: auto"
         novalidate
         ng-submit="changeProfile()"
+        enctype="multipart/form-data"
       >
         <div class="form-group">
-          <label for="profileName">Name <span class="required">*</span></label>
+          <label for="username">Name <span class="required">*</span></label>
           <input
             type="text"
-            name="name"
-            id="profileName"
+            name="username"
+            id="username"
             placeholder="Enter your full name"
             title="Name must contain only letters and be 3-50 characters long."
             ng-required="true"
-            ng-model="profileFormData.name"
-            autocomplete="name"
+            ng-model="profileFormData.username"
+            autocomplete="username"
           />
           <!-- Display an error message if email is invalid -->
           <span
             style="color: red"
-            ng-show="editProfileForm.name.$touched && editProfileForm.name.$error.required"
+            ng-show="editProfileForm.username.$touched && editProfileForm.username.$error.required"
           >
             Name is required.
           </span>

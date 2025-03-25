@@ -12,26 +12,16 @@
 angular.module("rentIT").controller("chatController", [
   "$scope",
   "$rootScope",
-  "userService",
-  "utilService",
   "chatService",
   "toaster",
   "$q",
-  function (
-    $scope,
-    $rootScope,
-    userService,
-    utilService,
-    chatService,
-    toaster,
-    $q
-  ) {
+  "$timeout",
+  function ($scope, $rootScope, chatService, toaster, $q, $timeout) {
     // Initialize variables
     $scope.messages = []; // to hold the messages
     $scope.message = ""; // to hold the message
     $scope.convId = null; // current conversation id
     $scope.conversations = []; // to hold the conversations
-    $scope.user = {}; // to hold the user (needed for showing his avatar)
     $scope.imageModal = false; // to toggle the image modal
     $scope.image = null; // to hold the image
 
@@ -40,39 +30,33 @@ angular.module("rentIT").controller("chatController", [
      */
     $scope.init = function () {
       $scope.loadSidebar();
+      $scope.listenToMessageEvent();
+    };
+
+    $scope.listenToMessageEvent = function () {
+      chatService.socket.on("newMessage", (data) => {
+        $timeout(() => {
+          $scope.messages.push(data);
+        });
+      });
     };
 
     /**
      * @description load the sidebar with all the conversations
      */
     $scope.loadSidebar = function () {
-      $q.when(userService.getUserById($rootScope.user.id))
-        .then((user) => {
-          return $q.when(chatService.getAllConversations()).then((allconv) => {
-            const myconversations = allconv.filter((conv) => {
-              let isMember = false;
-              for (const member of conv.members) {
-                if (member.id === user.id) {
-                  isMember = true;
-                  break;
-                }
-              }
-              return isMember;
-            });
-            const modifiedConversations = myconversations.map((conv) => {
-              const otherMember = conv.members.find(
-                (member) => member.id !== user.id
-              );
-              const imgUrl = URL.createObjectURL(
-                new Blob([otherMember.avatar])
-              );
-              return Object.assign({}, conv, { otherMember, imgUrl });
-            });
-            $scope.conversations = modifiedConversations;
-            $scope.user = user;
+      chatService
+        .getAllConversation($rootScope.user._id)
+        .then((response) => {
+          const convs = response.data.map((conv) => {
+            conv.members = conv.members.filter(
+              (member) => member._id !== $rootScope.user._id
+            );
+            return conv;
           });
+          $scope.conversations = convs;
         })
-        .catch((_) => {
+        .catch((error) => {
           toaster.pop("error", "Error", "Error while fetching conversations");
         });
     };
@@ -82,8 +66,10 @@ angular.module("rentIT").controller("chatController", [
      * @param {*} convId - conversation id
      */
     $scope.changeChat = function (convId) {
+      chatService.leaveConversation($scope.convId);
       $scope.convId = convId;
       $scope.loadUserChat();
+      chatService.joinConversation(convId);
     };
 
     /**
@@ -94,24 +80,13 @@ angular.module("rentIT").controller("chatController", [
         toaster.pop("error", "Error", "Please select a conversation");
         return;
       }
-      $q.when(chatService.getChatsByConversationId($scope.convId))
-        .then((myChat) => {
-          myChat.sort((a, b) => a.createdAt - b.createdAt);
-          return myChat.map((chat) => {
-            if (chat.image) {
-              chat.image = URL.createObjectURL(new Blob([chat.image]));
-            }
-            chat.user.avatar = URL.createObjectURL(
-              new Blob([chat.user.avatar])
-            );
-            return chat;
-          });
+      chatService
+        .getAllChats($scope.convId)
+        .then((response) => {
+          $scope.messages = response.data.chats;
         })
-        .then((updatedChat) => {
-          $scope.messages = updatedChat;
-        })
-        .catch((_) => {
-          toaster.pop("error", "Error", "Error while fetching chat messages");
+        .catch((error) => {
+          toaster.pop("error", "Error", "Error while fetching chats");
         });
     };
 
@@ -123,28 +98,13 @@ angular.module("rentIT").controller("chatController", [
         toaster.pop("error", "Error", "Please enter a message");
         return;
       }
-      $q.when(
-        chatService.addChat({
-          id: "",
-          conversationId: $scope.convId,
-          sender: $rootScope.user.id,
-          user: $scope.user,
-          message: $scope.message,
-          image: null,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-        })
-      )
+      chatService
+        .sendMessage($scope.message, $scope.convId)
         .then(() => {
-          $scope.loadUserChat();
           $scope.message = "";
         })
         .catch((error) => {
-          toaster.pop(
-            "error",
-            "Error",
-            error.message || "Error while sending message"
-          );
+          toaster.pop("error", "Error", "Error while sending message");
         });
     };
 
@@ -164,28 +124,20 @@ angular.module("rentIT").controller("chatController", [
         toaster.pop("error", "Error", "Please select an image");
         return;
       }
-      $q.when(utilService.toArrayBuffer([$scope.image]))
-        .then((image) => {
-          return chatService.addChat({
-            id: "",
-            conversationId: $scope.convId,
-            sender: $scope.user.id,
-            message: "",
-            user: $scope.user,
-            image: image,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-          });
-        })
-        .then(() => {
+      const key = $scope.image.name + "-" + Date.now();
+      const contentType = $scope.image.type;
+      chatService
+        .uploadAttachment($scope.image, key, contentType, $scope.convId)
+        .then((response) => {
+          toaster.pop("success", "Success", "Image uploaded successfully");
           $scope.toggleModal(false);
-          $scope.loadUserChat();
+          $scope.image = null;
         })
         .catch((error) => {
           toaster.pop(
             "error",
             "Error",
-            error.message || "Error while uploading image"
+            error?.message || "Error while uploading image"
           );
         });
     };

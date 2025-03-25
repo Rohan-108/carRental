@@ -11,18 +11,8 @@ angular.module("rentIT").controller("loginController", [
   "$state",
   "toaster",
   "userService",
-  "utilService",
   "sessionService",
-  "$q",
-  function (
-    $scope,
-    $state,
-    toaster,
-    userService,
-    utilService,
-    sessionService,
-    $q
-  ) {
+  function ($scope, $state, toaster, userService, sessionService) {
     //to hold the login form data
     $scope.loginData = {
       email: "",
@@ -37,31 +27,22 @@ angular.module("rentIT").controller("loginController", [
         return;
       }
       // Check if the user exists and the password is correct
-      return $q
-        .when(userService.getByEmail($scope.loginData.email))
-        .then(function (user) {
-          if (!user) {
-            throw new Error("User not found.");
-          }
-          return user;
-        })
-        .then(function (user) {
-          return $q
-            .when(utilService.hashPassword($scope.loginData.password))
-            .then(function (hashedPassword) {
-              if (hashedPassword !== user.password) {
-                throw new Error("Invalid password.");
-              }
-              return user;
-            });
-        })
-        .then(function (user) {
-          sessionService.setUser(user);
-          toaster.pop("success", "Success", "Logged in successfully.");
+      userService
+        .login($scope.loginData.email, $scope.loginData.password)
+        .then(function (response) {
+          const user = response.data.user;
+          const accessToken = response.data.accessToken;
+          sessionService.setUser({
+            ...user,
+            accessToken,
+          });
+          toaster.pop("success", "Success", response.data.message);
           $state.go("home");
         })
-        .catch(function (error) {
-          toaster.pop("error", "Error", error.message);
+        .catch(function (response) {
+          $scope.loginData.password = "";
+          $scope.loginData.email = "";
+          toaster.pop("error", "Error", response.description);
         });
     };
   },

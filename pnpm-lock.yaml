@@ -20,6 +20,9 @@ importers:
       angularjs-toaster:
         specifier: ^3.0.0
         version: 3.0.0
+      socket.io-client:
+        specifier: ^4.8.1
+        version: 4.8.1
     devDependencies:
       lite-server:
         specifier: ^2.6.1

@@ -5,134 +5,160 @@
  */
 
 angular.module("rentIT").factory("userService", [
-  "DbService",
-  "utilService",
-  function (DbService, utilService) {
-    const STORE_NAME = "users";
-    const USER_SCHEMA = {
-      id: "string",
-      name: "string",
-      email: "string",
-      password: "string",
-      tel: "string",
-      adhaar: "string",
-      role: "string",
-      avatar: "ArrayBuffer",
-      createdAt: "number",
-      updatedAt: "number",
-    };
+  "$q",
+  "$http",
+  "$rootScope",
+  function ($q, $http, $rootScope) {
+    const BACKEND_URL = "http://localhost:5000/api/v1/users";
     /**
-     * Retrieves a user by email.
-     * @param {string} email - The email of the user.
-     * @returns {Promise<Object>} A promise that resolves to the user object.
+     * @description Get a user by email.
+     * @param {string} email The email of the user.
+     * @returns {Promise} A promise that resolves to the user object.
      */
-    const getByEmail = async (email) => {
-      const user = await DbService.searchItemByIndex(
-        STORE_NAME,
-        "email",
-        email
-      );
-      return user;
-    };
+    function login(email, password) {
+      const deffered = $q.defer();
+      $http
+        .post(`${BACKEND_URL}/login`, {
+          email: email,
+          password: password,
+        })
+        .then(
+          function successCallback(response) {
+            return deffered.resolve(response.data);
+          },
+          function errorCallback(error) {
+            return deffered.reject(error.data);
+          }
+        );
+      return deffered.promise;
+    }
+    /**
+     * @description Add a user to the database.
+     * @param {*} user - The user object to be added
+     * @returns
+     */
+    function addUser(user) {
+      const deffered = $q.defer();
+      $http
+        .post(`${BACKEND_URL}/register`, user, {
+          headers: {
+            "Content-Type": undefined,
+          },
+        })
+        .then(
+          function successCallback(response) {
+            return deffered.resolve(response.data);
+          },
+          function errorCallback(error) {
+            return deffered.reject(error.data);
+          }
+        );
+      return deffered.promise;
+    }
 
     /**
-     * Retrieves a user by ID.
-     * @param {string} id - The ID of the user.
-     * @returns {Promise<Object>} A promise that resolves to the user object.
+     * @description Update a user's password in the database.
+     * @param {*} oldPassword - The old password
+     * @param {*} newPassword - The new password
      */
-    const getUserById = async (id) => {
-      const user = await DbService.getItem(STORE_NAME, id);
-      return user;
-    };
-
+    function changePassword(oldPassword, newPassword) {
+      const deffered = $q.defer();
+      $http
+        .patch(
+          `${BACKEND_URL}/changePassword`,
+          {
+            oldPassword: oldPassword,
+            newPassword: newPassword,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${$rootScope.user.accessToken}`,
+            },
+          }
+        )
+        .then(
+          function successCallback(response) {
+            return deffered.resolve(response.data);
+          },
+          function errorCallback(error) {
+            return deffered.reject(error.data);
+          }
+        );
+      return deffered.promise;
+    }
     /**
-     * Adds a new user.
-     * @param {Object} user - The user object to be added.
-     * @returns {Promise<string>} A promise that resolves to the ID of the added user.
+     * @description Update a user's details in the database.
      */
-    const addUser = async (user) => {
-      if (!utilService.validateSchema(USER_SCHEMA, user)) {
-        return new Error("Invalid user data.");
-      }
-      const existingUser = await getByEmail(user.email);
-      if (existingUser) {
-        throw new Error("User with this email already exists.");
-      }
-      const id = await DbService.addItem(STORE_NAME, user);
-      return id;
-    };
-
+    function updateUser(formData) {
+      const deffered = $q.defer();
+      $http
+        .patch(`${BACKEND_URL}`, formData, {
+          headers: {
+            Authorization: `Bearer ${$rootScope.user.accessToken}`,
+            "Content-Type": undefined,
+          },
+        })
+        .then(
+          function successCallback(response) {
+            return deffered.resolve(response.data);
+          },
+          function errorCallback(error) {
+            return deffered.reject(error.data);
+          }
+        );
+      return deffered.promise;
+    }
     /**
-     * Updates an existing user.
-     * @param {Object} user - The updated user object.
-     * @returns {Promise<Object>} A promise that resolves to the updated user object.
+     * @description Get the stats for the owner.
+     * @returns {Promise} A promise that resolves to the user object.
      */
-    const updateUser = async (user) => {
-      if (!utilService.partialValidateSchema(USER_SCHEMA, user)) {
-        return;
-      }
-      user.updatedAt = Date.now();
-      const updatedUser = await DbService.updateItem(STORE_NAME, user);
-      return updatedUser;
-    };
-
+    function getStatsForOwner() {
+      const deffered = $q.defer();
+      $http
+        .get(`${BACKEND_URL}/stats/owner`, {
+          headers: {
+            Authorization: `Bearer ${$rootScope.user.accessToken}`,
+          },
+        })
+        .then(
+          function successCallback(response) {
+            return deffered.resolve(response.data);
+          },
+          function errorCallback(error) {
+            return deffered.reject(error.data);
+          }
+        );
+      return deffered.promise;
+    }
     /**
-     * Retrieves all users.
-     * @returns {Promise<Array<Object>>} A promise that resolves to an array of user objects.
+     * @description Get the stats for the super admin.
+     * @returns {Promise} A promise that resolves to the user object.
      */
-    const getAllUsers = async () => {
-      const users = await DbService.getAllItems(STORE_NAME);
-      return users;
-    };
-
-    /**
-     * Counts the total number of users.
-     * @returns {Promise<number>} A promise that resolves to the total number of users.
-     */
-    const countUsers = async () => {
-      const count = await DbService.countItems(STORE_NAME);
-      return count;
-    };
-
-    /**
-     * Counts the number of users with a specific email.
-     * @param {string} email - The email to search for.
-     * @returns {Promise<number>} A promise that resolves to the number of users with the specified email.
-     */
-    const countUserByEmail = async (email) => {
-      const count = await DbService.countItemByIndex(
-        STORE_NAME,
-        "email",
-        email
-      );
-      return count;
-    };
-
-    /**
-     * Retrieves a paginated list of users.
-     * @param {number} page - The page number.
-     * @param {number} pageSize - The number of users per page.
-     * @param {string} indexName - The name of the index to use for pagination.
-     * @returns {Promise<Object>} A promise that resolves to the paginated user data.
-     */
-    const getPaginatedUsers = async (page, pageSize, indexName) => {
-      const data = await DbService.getPaginatedItems(STORE_NAME, {
-        page,
-        pageSize,
-        indexName,
-      });
-      return data;
-    };
-
+    function getStatsForSuperAdmin() {
+      const deffered = $q.defer();
+      $http
+        .get(`${BACKEND_URL}/stats/superAdmin`, {
+          headers: {
+            Authorization: `Bearer ${$rootScope.user.accessToken}`,
+          },
+        })
+        .then(
+          function successCallback(response) {
+            return deffered.resolve(response.data);
+          },
+          function errorCallback(error) {
+            return deffered.reject(error.data);
+          }
+        );
+      return deffered.promise;
+    }
     return {
-      getByEmail,
+      login,
+      changePassword,
       addUser,
       updateUser,
-      getUserById,
-      getAllUsers,
-      countUsers,
-      countUserByEmail,
-      getPaginatedUsers,
+      getStatsForOwner,
+      getStatsForSuperAdmin,
     };
   },
 ]);

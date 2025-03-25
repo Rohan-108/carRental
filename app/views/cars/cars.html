@@ -14,8 +14,8 @@
     </div>
     <div class="filter-panel" id="filterPanel">
       <div class="filter-group">
-        <label for="city">City</label>
-        <select id="city" name="city" ng-model="filter.city">
+        <label for="location">City</label>
+        <select id="location" name="location" ng-model="filter.location">
           <option ng-repeat="city in cities" value="{{city}}">{{city}}</option>
         </select>
       </div>
@@ -28,8 +28,8 @@
         </select>
       </div>
       <div class="filter-group">
-        <label for="carType">Car Type</label>
-        <select id="carType" name="carType" ng-model="filter.carType">
+        <label for="vehicleType">Car Type</label>
+        <select id="vehicleType" name="carType" ng-model="filter.vehicleType">
           <option ng-repeat="type in vehicleTypes" value="{{type}}">
             {{type}}
           </option>
@@ -99,7 +99,7 @@
       <div class="carCard" ng-repeat="car in cars" ng-show="isLoading===false">
         <div class="details">
           <div class="thumb-gallery">
-            <img class="first" ng-src="{{car.imgUrl}}" alt="{{car.name}}" />
+            <img class="first" ng-src="{{car.images[0]}}" alt="{{car.name}}" />
           </div>
           <div class="info">
             <h3>{{car.name}}</h3>
@@ -110,7 +110,7 @@
               <h4>Rs {{car.rentalPrice}}/day</h4>
             </div>
             <div class="ctas">
-              <button class="btn" ng-click="changeState(car.id)">
+              <button class="btn" ng-click="changeState(car._id)">
                 More Details
               </button>
             </div>

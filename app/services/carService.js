@@ -5,112 +5,105 @@
  */
 
 angular.module("rentIT").factory("carService", [
-  "utilService",
-  "DbService",
-  function (utilService, DbService) {
-    const CAR_SCHEMA = {
-      id: "string",
-      name: "string",
-      vehicleType: "string",
-      seats: "number",
-      transmission: "string",
-      ownerId: "string",
-      owner: "object",
-      plateNumber: "string",
-      fuelType: "string",
-      rentalPrice: "number",
-      rentalPriceOutStation: "number",
-      minRentalPeriod: "number",
-      maxRentalPeriod: "number",
-      location: "string",
-      show: "boolean",
-      images: "[ArrayBuffer]",
-      ratePerKm: "number",
-      fixedKilometer: "number",
-      createdAt: "number",
-      updatedAt: "number",
-    };
-    const STORE_NAME = "cars";
-    // Add a new car to the database
-    const addCar = async (car) => {
-      if (!utilService.validateSchema(CAR_SCHEMA, car)) {
-        return new Error("Invalid car data provided");
-      }
-      const id = await DbService.addItem(STORE_NAME, car);
-      return id;
-    };
+  "$http",
+  "$q",
+  "$rootScope",
+  function ($http, $q, $rootScope) {
+    const BACKEND_URL = "http://localhost:5000/api/v1/vehicles";
 
-    // Update an existing car in the database
-    const updateCar = async (car) => {
-      if (!utilService.partialValidateSchema(CAR_SCHEMA, car)) {
-        return new Error("Invalid car data provided");
-      }
-      car.updatedAt = Date.now();
-      const updatedCar = await DbService.updateItem(STORE_NAME, car);
-      return updatedCar;
-    };
-
-    // Get a car by its ID
-    const getCarById = async (id) => {
-      const car = await DbService.getItem(STORE_NAME, id);
-      return car;
-    };
-
-    // Get all cars owned by a specific owner
-    const getCarsByOwnerId = async (ownerId) => {
-      const cars = await DbService.searchAllByIndex(
-        STORE_NAME,
-        "ownerId",
-        ownerId
+    /**
+     * @description This function is responsible for fetching the cars from the backend.
+     * @param {*} pageNumber - page number
+     * @param {*} pageSize - number of items per page
+     * @param {*} filter - filter object
+     * @param {*} sort - sort object
+     */
+    function getCars(
+      pageNumber,
+      pageSize,
+      filter = {},
+      searchText = "",
+      sort = {}
+    ) {
+      const deferred = $q.defer();
+      const filterString = JSON.stringify(filter);
+      const sortString = JSON.stringify(sort);
+      $http
+        .get(
+          `${BACKEND_URL}?pageNumber=${pageNumber}&pageSize=${pageSize}&filter=${filterString}&sort=${sortString}&searchText=${searchText}`
+        )
+        .then(
+          function successCallback(response) {
+            deferred.resolve(response.data);
+          },
+          function errorCallback(error) {
+            deferred.reject(error);
+          }
+        );
+      return deferred.promise;
+    }
+    /**
+     * @description This function is responsible for adding a new car to the backend.
+     * @param {*} formData
+     */
+    function addCar(formData) {
+      const deferred = $q.defer();
+      $http
+        .post(`${BACKEND_URL}`, formData, {
+          headers: {
+            "Content-Type": undefined,
+            Authorization: `Bearer ${$rootScope.user.accessToken}`,
+          },
+        })
+        .then(
+          function successCallback(response) {
+            return deferred.resolve(response.data);
+          },
+          function errorCallback(error) {
+            return deferred.reject(error);
+          }
+        );
+      return deferred.promise;
+    }
+    /**
+     * @description Update the car details
+     */
+    function updateCar(formData, carId) {
+      const deferred = $q.defer();
+      $http
+        .patch(`${BACKEND_URL}/${carId}`, formData, {
+          headers: {
+            "Content-Type": undefined,
+            Authorization: `Bearer ${$rootScope.user.accessToken}`,
+          },
+        })
+        .then(
+          function successCallback(response) {
+            return deferred.resolve(response.data);
+          },
+          function errorCallback(error) {
+            return deferred.reject(error);
+          }
+        );
+      return deferred.promise;
+    }
+    function getCarById(carId) {
+      const deferred = $q.defer();
+      $http.get(`${BACKEND_URL}/${carId}`).then(
+        function successCallback(response) {
+          deferred.resolve(response.data);
+        },
+        function errorCallback(error) {
+          deferred.reject(error);
+        }
       );
-      return cars;
-    };
-
-    // Get all cars that match a specific index and value
-    const getCarsByIndex = async (index, value) => {
-      const cars = await DbService.searchAllByIndex(STORE_NAME, index, value);
-      return cars;
-    };
-
-    // Get paged cars based on options and a filter function
-    const getPagedCars = async (options, filterFunction) => {
-      const data = await DbService.getPaginatedItems(
-        STORE_NAME,
-        options,
-        filterFunction
-      );
-      return data;
-    };
-
-    // Get the count of cars that match a specific index and value
-    const getCountByIndex = async (index, value) => {
-      const count = await DbService.countItemByIndex(STORE_NAME, index, value);
-      return count;
-    };
-
-    // Get a car that matches a specific index and value
-    const getCarByIndex = async (index, value) => {
-      const car = await DbService.searchItemByIndex(STORE_NAME, index, value);
-      return car;
-    };
-
-    // Get the total count of cars in the database
-    const countCars = async () => {
-      const count = await DbService.countItems(STORE_NAME);
-      return count;
-    };
-
-    // Return the public methods of the CarService
+      return deferred.promise;
+    }
     return {
+      getCars,
       addCar,
       updateCar,
       getCarById,
-      getPagedCars,
-      getCarsByOwnerId,
-      getCarsByIndex,
-      getCountByIndex,
-      getCarByIndex,
-      countCars,
     };
   },
 ]);

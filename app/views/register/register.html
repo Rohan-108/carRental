@@ -25,24 +25,25 @@
               id="registerForm"
               name="registerForm"
               novalidate
+              enctype="multipart/form-data"
               ng-submit="register()"
             >
               <!-- Name Field -->
               <div class="field">
-                <label for="name">Name</label>
+                <label for="username">Name</label>
                 <input
                   type="text"
-                  name="name"
-                  id="name"
+                  name="username"
+                  id="username"
                   placeholder="Enter your full name"
                   title="Name must contain only letters and be 3-50 characters long."
                   ng-required="true"
-                  autocomplete="name"
-                  ng-model="user.name"
+                  autocomplete="username"
+                  ng-model="user.username"
                 />
                 <span
                   style="color: red"
-                  ng-show="registerForm.name.$touched && registerForm.name.$invalid"
+                  ng-show="registerForm.username.$touched && registerForm.username.$invalid"
                 >
                   User name is not valid
                 </span>
@@ -71,21 +72,21 @@
 
               <!-- Phone Number Field -->
               <div class="field">
-                <label for="phone">Phone Number</label>
+                <label for="tel">Phone Number</label>
                 <input
                   type="tel"
-                  name="phone"
-                  id="phone"
+                  name="tel"
+                  id="tel"
                   placeholder="Enter your phone number"
                   title="Phone number must be 10 digits long"
                   autocomplete="tel"
                   ng-required="true"
-                  ng-model="user.phone"
+                  ng-model="user.tel"
                   valid-Phone
                 />
                 <span
                   style="color: red"
-                  ng-show="registerForm.phone.$touched && registerForm.phone.$error.validPhone"
+                  ng-show="registerForm.tel.$touched && registerForm.tel.$error.validPhone"
                 >
                   Phone number is not valid
                 </span>

@@ -16,24 +16,22 @@ angular.module("rentIT").controller("carDetailController", [
   "$scope",
   "$rootScope",
   "car",
-  "userService",
-  "carService",
   "bidBookService",
   "utilService",
   "chatService",
   "toaster",
   "$q",
+  "$timeout",
   function (
     $scope,
     $rootScope,
     car,
-    userService,
-    carService,
     bidBookService,
     utilService,
     chatService,
     toaster,
-    $q
+    $q,
+    $timeout
   ) {
     // Initialize variables
     $scope.car = car; // set car details that came through resolve
@@ -56,8 +54,16 @@ angular.module("rentIT").controller("carDetailController", [
     $scope.init = function () {
       $scope.setUpDatePicker();
       $scope.loadUserChat();
+      $scope.listenForChat();
     };
 
+    $scope.listenForChat = function () {
+      chatService.socket.on("newMessage", (data) => {
+        $timeout(() => {
+          $scope.messages.push(data);
+        });
+      });
+    };
     /**
      * @description Change image function
      * @param {*} image - image url to change
@@ -127,7 +133,7 @@ angular.module("rentIT").controller("carDetailController", [
      * @description Bid now function to place a bid
      */
     $scope.bidNow = function () {
-      if ($rootScope.user.id === $scope.car.ownerId) {
+      if ($rootScope.user._id === $scope.car.owner._id) {
         toaster.pop("error", "Error", "You cannot bid on your own car");
         return;
       }
@@ -174,32 +180,27 @@ angular.module("rentIT").controller("carDetailController", [
       }
       // create bid object
       const bid = {
-        id: "",
-        carId: $scope.car.id,
-        userId: $rootScope.user.id,
         amount: Number($scope.rental.amount) * ndays,
         startDate: startDate,
         endDate: endDate,
-        car: $scope.car,
-        user: $rootScope.user,
         isOutStation: $scope.rental.isOutStation,
-        ownerId: $scope.car.ownerId,
         status: "pending",
         tripCompleted: false,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
       };
-      $q.when(bidBookService.addBid(bid))
-        .then(() => {
-          $scope.picker.clear();
-          $scope.rental = {
-            amount: $scope.car.rentalPrice,
-            isOutStation: false,
-          };
+      bidBookService
+        .addBid(bid, $scope.car._id)
+        .then((response) => {
+          console.log(response);
           toaster.pop("success", "Success", "Bid placed successfully");
+          $scope.picker.clear();
         })
-        .catch((_) => {
-          toaster.pop("error", "Error", "Error while placing bid");
+        .catch((error) => {
+          console.log(error);
+          toaster.pop(
+            "error",
+            "Error",
+            error.description || "Error while placing bid"
+          );
         });
     };
 
@@ -208,40 +209,26 @@ angular.module("rentIT").controller("carDetailController", [
      */
     $scope.loadUserChat = function () {
       if ($rootScope.user.role === "super-admin") return;
-      if ($scope.car.ownerId === $rootScope.user.id) return;
-      $q.when(chatService.getConversationsByCarId($scope.car.id))
-        .then((allCarConv) => {
-          // get conversations where user is a member
-          const myconversations = allCarConv.filter((conv) => {
-            let ismyconv = false;
-            conv.members.forEach((member) => {
-              if (member.id === $scope.user.id) {
-                ismyconv = true;
-              }
-            });
-            return ismyconv;
-          });
-          // if no conversation found return
-          if (myconversations.length === 0) return;
-          return $q
-            .when(chatService.getChatsByConversationId(myconversations[0].id))
-            .then((myChat) => {
-              myChat.sort((a, b) => a.createdAt - b.createdAt);
-              myChat = myChat.map((chat) => {
-                if (chat.image) {
-                  chat.image = URL.createObjectURL(new Blob([chat.image]));
-                }
-                chat.user.avatar = URL.createObjectURL(
-                  new Blob([chat.user.avatar])
-                );
-                return chat;
-              });
-              $scope.messages = myChat;
-              $scope.convId = myconversations[0].id;
+      if ($scope.car.owner._id === $rootScope.user._id) return;
+      chatService
+        .getConversationByCarAndMember($scope.car._id, $rootScope.user._id)
+        .then((response) => {
+          console.log(response);
+          $scope.convId = response.data._id;
+          chatService.joinConversation($scope.convId);
+          chatService
+            .getAllChats($scope.convId)
+            .then((response) => {
+              $scope.messages = response.data.chats;
+            })
+            .catch((error) => {
+              console.log(error);
+              toaster.pop("error", "Error", "Error while loading chat");
             });
         })
-        .catch((_) => {
-          toaster.pop("error", "Error", "Error while loading chat messages");
+        .catch((error) => {
+          console.log(error);
+          toaster.pop("error", "Error", "Error while loading chat");
         });
     };
 
@@ -253,7 +240,7 @@ angular.module("rentIT").controller("carDetailController", [
         toaster.pop("error", "Error", "Super admin cannot send message");
         return;
       }
-      if ($scope.car.ownerId === $rootScope.user.id) {
+      if ($scope.car.owner._id === $rootScope.user._id) {
         toaster.pop("error", "Error", "You cannot send message to yourself");
         return;
       }
@@ -261,53 +248,40 @@ angular.module("rentIT").controller("carDetailController", [
         toaster.pop("error", "Error", "Message cannot be empty");
         return;
       }
-      $q.when(userService.getUserById($rootScope.user.id))
-        .then((user) => {
-          // if conversation id is not present create a new conversation
-          if ($scope.convId === null) {
-            return chatService
-              .addConversation({
-                id: "",
-                carId: $scope.car.id,
-                car: $scope.car,
-                members: [user, $scope.car.owner],
-                createdAt: Date.now(),
-                updatedAt: Date.now(),
+      if ($scope.convId === null) {
+        chatService
+          .addConversation($scope.car._id, [
+            $scope.car.owner._id,
+            $rootScope.user._id,
+          ])
+          .then((response) => {
+            console.log(response.data.conversationId);
+            $scope.convId = response.data.conversationId;
+            chatService
+              .sendMessage($scope.message, $scope.convId)
+              .then(() => {
+                $scope.message = "";
               })
-              .then((id) => {
-                $scope.convId = id;
-              })
-              .then(() => user);
-          }
-          return user;
-        })
-        .then((user) => {
-          // add chat to the conversation
-          return chatService.addChat({
-            id: "",
-            conversationId: $scope.convId,
-            sender: $rootScope.user.id,
-            user: user,
-            message: $scope.message,
-            image: null,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
+              .catch((error) => {
+                console.log(error);
+                toaster.pop("error", "Error", "Error while sending message");
+              });
+          })
+          .catch((error) => {
+            console.log(error);
+            toaster.pop("error", "Error", "Error while creating conversation");
           });
-        })
-        .then((chatId) => {
-          // get chat by id
-          return chatService.getChatById(chatId);
-        })
-        .then((chat) => {
-          // set image and avatar to blob url
-          chat.user.avatar = URL.createObjectURL(new Blob([chat.user.avatar]));
-          $scope.messages.push(chat);
-          $scope.message = "";
-        })
-        .catch((_) => {
-          console.log(_);
-          toaster.pop("error", "Error", "Error while sending message");
-        });
+      } else {
+        chatService
+          .sendMessage($scope.message, $scope.convId)
+          .then(() => {
+            $scope.message = "";
+          })
+          .catch((error) => {
+            console.log(error);
+            toaster.pop("error", "Error", "Error while sending message");
+          });
+      }
     };
 
     /**
@@ -320,43 +294,28 @@ angular.module("rentIT").controller("carDetailController", [
     };
 
     /**
-     * @description Upload image function to upload image
+     * @description upload the image to the selected conversation
      */
     $scope.uploadImage = function () {
       if ($scope.image === null) {
-        toaster.pop("error", "Error", "Please select an image to upload");
+        toaster.pop("error", "Error", "Please select an image");
         return;
       }
-      $q.when(utilService.toArrayBuffer([$scope.image]))
-        .then((image) => {
-          // add image to chat
-          return userService.getUserById($rootScope.user.id).then((user) => {
-            return chatService.addChat({
-              id: "",
-              conversationId: $scope.convId,
-              sender: $rootScope.user.id,
-              message: "",
-              user: user,
-              image: image,
-              createdAt: Date.now(),
-              updatedAt: Date.now(),
-            });
-          });
-        })
-        .then((id) => {
-          return chatService.getChatById(id);
-        })
-        .then((chat) => {
-          // set image and avatar to blob url
-          chat.image = URL.createObjectURL(new Blob([chat.image]));
-          chat.user.avatar = URL.createObjectURL(new Blob([chat.user.avatar]));
-          chat.createdAt = new Date(chat.createdAt).toLocaleString();
-          $scope.toggleModal(false);
-          $scope.messages.push(chat);
+      const key = $scope.image.name + "-" + Date.now();
+      const contentType = $scope.image.type;
+      chatService
+        .uploadAttachment($scope.image, key, contentType, $scope.convId)
+        .then((response) => {
           toaster.pop("success", "Success", "Image uploaded successfully");
+          $scope.toggleModal(false);
+          $scope.image = null;
         })
-        .catch((_) => {
-          toaster.pop("error", "Error", "Error while uploading image");
+        .catch((error) => {
+          toaster.pop(
+            "error",
+            "Error",
+            error?.message || "Error while uploading image"
+          );
         });
     };
 
@@ -381,17 +340,23 @@ angular.module("rentIT").controller("carDetailController", [
      * @returns {Promise<Array>} - booked dates
      */
     function getBookedDates() {
-      return $q
-        .when(bidBookService.getBookingsByCarId($scope.car.id))
-        .then((bookings) => {
-          return bookings.flatMap((booking) =>
+      const deferred = $q.defer();
+      bidBookService
+        .getBookedDates($scope.car._id)
+        .then((response) => {
+          console.log(response);
+          const bookings = response.data.bookedDates;
+          const flattenBookedDates = bookings.flatMap((booking) =>
             getDatesInRange(booking.startDate, booking.endDate)
           );
+          console.log(flattenBookedDates);
+          return deferred.resolve(flattenBookedDates);
         })
         .catch((_) => {
           toaster.pop("error", "Error", "Error while getting booked dates");
-          return [];
+          return deferred.resolve([]);
         });
+      return deferred.promise;
     }
   },
 ]);

@@ -7,13 +7,17 @@
       <div
         class="conversation"
         ng-repeat="conv in conversations"
-        ng-class="{'active':conv.id==convId}"
-        ng-click="changeChat(conv.id)"
+        ng-class="{'active':conv._id==convId}"
+        ng-click="changeChat(conv._id)"
       >
         <div class="convDetail">
-          <img ng-src="{{conv.imgUrl}}" alt="owner image" class="user-img" />
+          <img
+            ng-src="{{conv.members[0].avatar}}"
+            alt="owner image"
+            class="user-img"
+          />
           <div class="info">
-            <p>{{conv.otherMemeber.name}}</p>
+            <p>{{conv.members[0].username}}</p>
             <p>{{conv.car.name}}</p>
           </div>
         </div>
@@ -22,20 +26,17 @@
     <div class="right-col">
       <!--Chat box showing message-->
       <main class="msger-chat" id="messageBox">
-        <div
-          class="no-chat"
-          ng-show="{{car.ownerId!==user.id || user.role=='super-admin'}}"
-        >
+        <div class="no-chat" ng-show="{{user.role=='super-admin'}}">
           <p>You can't Chat</p>
         </div>
         <div class="msg" ng-repeat="chat in messages" ng-if="messages.length>0">
-          <div class="{{chat.sender===user.id?'right-msg':'left-msg'}}">
+          <div class="{{chat.sender._id===user._id?'right-msg':'left-msg'}}">
             <div class="msg-img">
-              <img ng-src="{{chat.user.avatar}}" alt="user" />
+              <img ng-src="{{chat.sender.avatar}}" alt="user" />
             </div>
             <div class="msg-bubble">
               <div class="msg-info">
-                <div class="msg-info-name">{{chat.user.name}}</div>
+                <div class="msg-info-name">{{chat.sender.username}}</div>
                 <div class="msg-info-time">{{chat.createdAt | date}}</div>
               </div>
 

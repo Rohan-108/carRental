@@ -5,94 +5,142 @@
  * @requires DbService
  */
 angular.module("rentIT").factory("approvalService", [
-  "utilService",
-  "DbService",
-  function (utilService, DbService) {
-    const STORE_NAME = "approvals";
-    const APPROVAL_SCHEMA = {
-      id: "string",
-      userId: "string",
-      user: "object",
-      status: "string",
-      createdAt: "number",
-      updatedAt: "number",
-    };
-    /**
-     * @description This function is used to add a new approval
-     * @param {*} approval - approval object
-     * @returns {string} - id of the approval
-     */
-    const addApproval = async (approval) => {
-      if (!utilService.validateSchema(APPROVAL_SCHEMA, approval)) {
-        return new Error("Invalid approval data");
-      }
-      const id = await DbService.addItem(STORE_NAME, approval);
-      return id;
-    };
-    /**
-     * @description This function is used to update an existing approval
-     * @param {*} approval - approval object
-     * @returns {object} - updated approval object
-     */
-    const updateApproval = async (approval) => {
-      if (!utilService.partialValidateSchema(APPROVAL_SCHEMA, approval)) {
-        return;
-      }
-      const updatedApproval = await DbService.updateItem(STORE_NAME, approval);
-      return updatedApproval;
-    };
-    /**
-     * @description This function is used to get an approval by id
-     * @param {*} id - approval id
-     * @returns {object} - approval object
-     */
-    const getApprovalById = async (id) => {
-      const approval = await DbService.getItem(STORE_NAME, id);
-      return approval;
-    };
-    /**
-     * @description This function is used to get an approval by user id
-     * @param {*} userId - user id
-     * @returns {object} - approval object
-     */
-    const getApprovalByUserId = async (userId) => {
-      const approval = await DbService.searchItemByIndex(
-        STORE_NAME,
-        "userId",
-        userId
-      );
-      return approval;
-    };
-    /**
-     * @description This function is used to get paged approvals
-     * @param {*} options - options object
-     * @param {*} filterFunction - filter function
-     * @returns {array} - array of approvals
-     */
-    const getPagedApprovals = async (options, filterFunction) => {
-      const data = await DbService.getPaginatedItems(
-        STORE_NAME,
-        options,
-        filterFunction
-      );
-      return data;
-    };
-    /**
-     * @description This function is used to get all approvals
-     * @returns {array} - array of approvals
-     */
-    const getAllApprovals = async () => {
-      const data = await DbService.getAllItems(STORE_NAME);
-      return data;
-    };
+  "$q",
+  "$http",
+  "$rootScope",
+  function ($q, $http, $rootScope) {
+    const BACKEND_URL = "http://localhost:5000/api/v1/approvals";
 
+    /**
+     * @description Add an approval request to the database.
+     */
+    function addApproval() {
+      const deffered = $q.defer();
+      $http
+        .post(
+          `${BACKEND_URL}/add`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${$rootScope.user.accessToken}`,
+            },
+          }
+        )
+        .then(
+          function successCallback(response) {
+            return deffered.resolve(response.data);
+          },
+          function errorCallback(error) {
+            return deffered.reject(error.data);
+          }
+        );
+      return deffered.promise;
+    }
+    /**
+     * @description Get all the approvals for a user.
+     */
+    function getApprovalByUserId() {
+      const deffered = $q.defer();
+      $http
+        .get(`${BACKEND_URL}/user`, {
+          headers: { Authorization: `Bearer ${$rootScope.user.accessToken}` },
+        })
+        .then(
+          function successCallback(response) {
+            return deffered.resolve(response.data);
+          },
+          function errorCallback(error) {
+            return deffered.reject(error.data);
+          }
+        );
+      return deffered.promise;
+    }
+    /**
+     * @description Get all the approvals.
+     * @param {*} pageNumber
+     * @param {*} pageSize
+     * @param {*} filter
+     * @param {*} sort
+     */
+    function getApprovals(pageNumber, pageSize, filter, sort) {
+      const deffered = $q.defer();
+      filter = JSON.stringify(filter);
+      sort = JSON.stringify(sort);
+      $http
+        .get(
+          `${BACKEND_URL}?pageNumber=${pageNumber}&pageSize=${pageSize}&filter=${filter}&sort=${sort}`,
+          {
+            headers: { Authorization: `Bearer ${$rootScope.user.accessToken}` },
+          }
+        )
+        .then(
+          function successCallback(response) {
+            return deffered.resolve(response.data);
+          },
+          function errorCallback(error) {
+            return deffered.reject(error.data);
+          }
+        );
+      return deffered.promise;
+    }
+    /**
+     * @description Approve an approval request.
+     * @param {*} approvalId
+     */
+    function approveApprovalRequest(approvalId) {
+      const deffered = $q.defer();
+      $http
+        .patch(
+          `${BACKEND_URL}/approve/${approvalId}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${$rootScope.user.accessToken}`,
+            },
+          }
+        )
+        .then(
+          function successCallback(response) {
+            return deffered.resolve(response.data);
+          },
+          function errorCallback(error) {
+            return deffered.reject(error.data);
+          }
+        );
+      return deffered.promise;
+    }
+    /**
+     * @description Reject an approval request.
+     * @param {*} approvalId
+     */
+    function rejectApprovalRequest(approvalId) {
+      const deffered = $q.defer();
+      $http
+        .patch(
+          `${BACKEND_URL}/reject/${approvalId}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${$rootScope.user.accessToken}`,
+            },
+          }
+        )
+        .then(
+          function successCallback(response) {
+            return deffered.resolve(response.data);
+          },
+          function errorCallback(error) {
+            return deffered.reject(error.data);
+          }
+        );
+      return deffered.promise;
+    }
     return {
       addApproval,
-      updateApproval,
-      getApprovalById,
       getApprovalByUserId,
-      getPagedApprovals,
-      getAllApprovals,
+      getApprovals,
+      approveApprovalRequest,
+      rejectApprovalRequest,
     };
   },
 ]);

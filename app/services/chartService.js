@@ -3,141 +3,216 @@
  */
 
 angular.module("rentIT").factory("chartService", [
-  "DbService",
-  function (DbService) {
+  "$http",
+  "$q",
+  "$rootScope",
+  function ($http, $q, $rootScope) {
+    const BACKEND_URL = "http://localhost:5000/api/v1/charts";
     /**
-     *
-     * @param {*} items - array of items to be grouped
-     * @param {*} keyAccessor - function to extract the key for grouping
-     * @param {*} options - options object
-     * @returns {Object}- grouped data
+     * @description Get the chart data for the dashboard.
+     * @returns {Promise} A promise that resolves to the chart data.
      */
-    async function groupData(
-      storeName,
-      keyAccessor,
-      indexName,
-      direction,
-      range,
-      options = {}
-    ) {
-      const data = await DbService.getChartData(
-        storeName,
-        keyAccessor,
-        indexName,
-        direction,
-        range,
-        options
-      );
-      return data;
+    function getBookingChartDataForOwner(key) {
+      const deferred = $q.defer();
+      $http
+        .get(`${BACKEND_URL}/bookings/owner?key=${key}`, {
+          headers: {
+            Authorization: `Bearer ${$rootScope.user.accessToken}`,
+          },
+        })
+        .then(
+          function successCallback(response) {
+            return deferred.resolve(response.data);
+          },
+          function errorCallback(error) {
+            return deferred.reject(error.data);
+          }
+        );
+      return deferred.promise;
     }
     /**
-     * @description Build chart data for general data
-     * @param {*} groupedData
-     * @param {*} datasetLabel
-     * @returns {object} - chart data
+     * @description Get the chart data for the dashboard.
+     * @returns {Promise} A promise that resolves to the chart data.
      */
-    function buildChartData(groupedData, datasetLabel) {
-      const labels = Object.keys(groupedData);
-      const dataValues = Object.values(groupedData);
-      const numItems = labels.length;
+    function getBookingChartDataForSuperAdmin(key) {
+      const deferred = $q.defer();
+      $http
+        .get(`${BACKEND_URL}/bookings/superAdmin?key=${key}`, {
+          headers: {
+            Authorization: `Bearer ${$rootScope.user.accessToken}`,
+          },
+        })
+        .then(
+          function successCallback(response) {
+            return deferred.resolve(response.data);
+          },
+          function errorCallback(error) {
+            return deferred.reject(error.data);
+          }
+        );
+      return deferred.promise;
+    }
+    /**
+     * @description Get the revenue chart data for the dashboard.
+     * @returns {Promise} A promise that resolves to the chart data.
+     */
+    function getRevenueChartDataForOwner(key) {
+      const deferred = $q.defer();
+      $http
+        .get(`${BACKEND_URL}/revenue/owner?key=${key}`, {
+          headers: {
+            Authorization: `Bearer ${$rootScope.user.accessToken}`,
+          },
+        })
+        .then(
+          function successCallback(response) {
+            return deferred.resolve(response.data);
+          },
+          function errorCallback(error) {
+            return deferred.reject(error.data);
+          }
+        );
+      return deferred.promise;
+    }
+    /**
+     * @description Get the revenue chart data for the dashboard.
+     * @returns {Promise} A promise that resolves to the chart data.
+     */
+    function getRevenueChartDataForSuperAdmin(key) {
+      const deferred = $q.defer();
+      $http
+        .get(`${BACKEND_URL}/revenue/superAdmin?key=${key}`, {
+          headers: {
+            Authorization: `Bearer ${$rootScope.user.accessToken}`,
+          },
+        })
+        .then(
+          function successCallback(response) {
+            return deferred.resolve(response.data);
+          },
+          function errorCallback(error) {
+            return deferred.reject(error.data);
+          }
+        );
+      return deferred.promise;
+    }
+    /**
+     * @description Get the car data for the super admin
+     * @param {*} key
+     */
+    function getCarDataForSuperAdmin(key) {
+      const deferred = $q.defer();
+      $http
+        .get(`${BACKEND_URL}/cars/superAdmin?key=${key}`, {
+          headers: {
+            Authorization: `Bearer ${$rootScope.user.accessToken}`,
+          },
+        })
+        .then(
+          function successCallback(response) {
+            return deferred.resolve(response.data);
+          },
+          function errorCallback(error) {
+            return deferred.reject(error.data);
+          }
+        );
+      return deferred.promise;
+    }
+    /**
+     * @description Build the chart data from the data object.
+     * @param {*} data
+     */
+    function buildChartDataForBooking(data) {
+      // Extract the labels from the keys of the data object.
+      const labels = Object.keys(data);
+
+      // Map through the labels to create arrays for each dataset.
+      const bookingsData = labels.map((label) => data[label].bookings);
+      const bidsData = labels.map((label) => data[label].bids);
+
+      // Return the chart configuration.
       return {
         labels: labels,
         datasets: [
           {
-            label: datasetLabel,
-            data: dataValues,
-            backgroundColor: generateRandomColors(numItems, 0.5),
-            borderColor: generateRandomColors(numItems, 1),
+            label: "Bookings",
+            data: bookingsData,
+            backgroundColor: "rgba(75, 192, 192, 0.4)",
+            borderColor: "rgba(75, 192, 192, 1)",
+            borderWidth: 1,
+          },
+          {
+            label: "Bids",
+            data: bidsData,
+            backgroundColor: "rgba(153, 102, 255, 0.4)",
+            borderColor: "rgba(153, 102, 255, 1)",
             borderWidth: 1,
           },
         ],
       };
     }
     /**
-     * @description Group data into two fields
+     * @description Build the chart data from the data object.
+     * @param {*} data
      */
-    async function groupDataBifarcate(
-      storeName,
-      keyAccessor,
-      indexName,
-      direction,
-      range,
-      options = {}
-    ) {
-      const data = await DbService.getChartDataBifarcate(
-        storeName,
-        keyAccessor,
-        indexName,
-        direction,
-        range,
-        options
-      );
-      return data;
-    }
-    /**
-     * @description build data for the bifarcate
-     * @param {Array<Object>} data
-     * @returns {Object}
-     */
-    function buildChartDataBifarcate(data, label1, label2) {
-      const labels = Object.keys(data.partTwo);
-      const dataValuesOne = Object.values(data.partOne);
-      const dataValuesTwo = Object.values(data.partTwo);
+    function buildChartDataForRevenue(data) {
+      // Extract the labels from the keys of the data object.
+      const labels = Object.keys(data);
+
+      // Map through the labels to create arrays for each dataset.
+      const outstationData = labels.map((label) => data[label].outstation);
+      const localData = labels.map((label) => data[label].local);
+
+      // Return the chart configuration.
       return {
         labels: labels,
         datasets: [
           {
-            label: label1,
-            data: dataValuesOne,
-            backgroundColor: "rgba(0, 255, 0, 0.5)",
+            label: "Outstation",
+            data: outstationData,
+            backgroundColor: "rgba(75, 192, 192, 0.4)",
+            borderColor: "rgba(75, 192, 192, 1)",
+            borderWidth: 1,
           },
           {
-            label: label2,
-            data: dataValuesTwo,
-            backgroundColor: "rgba(255, 0, 0, 0.5)",
+            label: "Local",
+            data: localData,
+            backgroundColor: "rgba(153, 102, 255, 0.4)",
+            borderColor: "rgba(153, 102, 255, 1)",
+            borderWidth: 1,
           },
         ],
       };
     }
-    // async function getComparisionData(
-    //   days,
-    //   indexName,
-    //   direction,
-    //   range,
-    //   options = {}
-    // ) {
-    //   const data = await DbService.getComparisionData(
-    //     "bids",
-    //     days,
-    //     indexName,
-    //     direction,
-    //     range,
-    //     options
-    //   );
-    //   return data;
-    // }
     /**
-     * @description Generate random colors
-     * @param {*} count - number of colors to generate
-     * @param {*} opacity - opacity value
-     * @returns {Array} - array of colors
+     * @description Build the chart data for the car data for the super admin.
+     * @param {*} data
      */
-    function generateRandomColors(count, opacity) {
-      const colors = [];
-      for (let i = 0; i < count; i++) {
-        const r = Math.floor(Math.random() * 256);
-        const g = Math.floor(Math.random() * 256);
-        const b = Math.floor(Math.random() * 256);
-        colors.push(`rgba(${r}, ${g}, ${b}, ${opacity})`);
-      }
-      return colors;
+    function buildChartDataForCar(data) {
+      const labels = Object.keys(data);
+      const carData = labels.map((label) => data[label]);
+      return {
+        labels: labels,
+        datasets: [
+          {
+            label: "Cars",
+            data: carData,
+            backgroundColor: "rgba(75, 192, 192, 0.4)",
+            borderColor: "rgba(75, 192, 192, 1)",
+            borderWidth: 1,
+          },
+        ],
+      };
     }
     return {
-      groupData,
-      buildChartData,
-      groupDataBifarcate,
-      buildChartDataBifarcate,
-      //getComparisionData,
+      getBookingChartDataForOwner,
+      buildChartDataForBooking,
+      getRevenueChartDataForOwner,
+      buildChartDataForRevenue,
+      getBookingChartDataForSuperAdmin,
+      getRevenueChartDataForSuperAdmin,
+      getCarDataForSuperAdmin,
+      buildChartDataForCar,
     };
   },
 ]);

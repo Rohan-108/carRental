@@ -46,6 +46,9 @@
     </div>
   </div>
   <main class="dashboard-main">
+    <div class="loader-overlay" ng-show="isLoading">
+      <div class="loader"></div>
+    </div>
     <!-- Home Section -->
     <div class="dataSection" id="dataSection" ng-if="currentTab==='home'">
       <h2>Your Numbers</h2>
@@ -96,7 +99,11 @@
       <div id="carCardsGrid">
         <div class="car-card" ng-repeat="car in cars">
           <div class="car-image-container">
-            <img ng-src="{{car.imgUrl}}" alt="{{car.name}}" class="car-image" />
+            <img
+              ng-src="{{car.images[0]}}"
+              alt="{{car.name}}"
+              class="car-image"
+            />
           </div>
           <div class="car-details">
             <h3 class="car-name">{{car.name}}</h3>
@@ -106,7 +113,7 @@
             <div class="car-actions">
               <button
                 class="editCarBtn"
-                ng-click="toggleEditCarModal(true,car.id)"
+                ng-click="toggleEditCarModal(true,car._id)"
               >
                 Edit
               </button>
@@ -134,7 +141,7 @@
               ng-model="bidFilter.filterByCar"
               ng-change="setBiddings()"
             >
-              <option ng-repeat="car in carsForFilter" value="{{car.id}}">
+              <option ng-repeat="car in carsForFilter" value="{{car._id}}">
                 {{car.name}}
               </option>
             </select>
@@ -193,12 +200,12 @@
             <td colspan="7" class="no-data">There is no data</td>
           </tr>
           <tr ng-repeat="bid in bids" ng-if="bids.length > 0">
-            <td data-label="Car Name">{{bid.car.name}}</td>
-            <td data-label="Renter">{{bid.user.name}}</td>
-            <td data-label="Plate Number">{{bid.car.plateNumber}}</td>
-            <td data-label="Start Date">{{bid.startDate}}</td>
-            <td data-label="End Date">{{bid.endDate}}</td>
-            <td data-label="Amount">{{bid.amount}}</td>
+            <td data-label="Car Name">{{bid.vehicle.name}}</td>
+            <td data-label="Renter">{{bid.user.username}}</td>
+            <td data-label="Plate Number">{{bid.vehicle.plateNumber}}</td>
+            <td data-label="Start Date">{{bid.startDate | date}}</td>
+            <td data-label="End Date">{{bid.endDate | date}}</td>
+            <td data-label="Amount">{{bid.amount | currency}}</td>
             <td data-label="Status" ng-if="bid.status!=='pending'">
               {{bid.status}}
             </td>
@@ -211,7 +218,7 @@
                   border-radius: 1rem;
                   cursor: pointer;
                 "
-                ng-click="toggleApproveBidModal(true, bid.id)"
+                ng-click="toggleApproveBidModal(true, bid._id)"
               >
                 Approve
               </button>
@@ -223,7 +230,7 @@
                   border-radius: 1rem;
                   cursor: pointer;
                 "
-                ng-click="toggleCancelBidModal(true, bid.id)"
+                ng-click="toggleCancelBidModal(true, bid._id)"
               >
                 Cancel
               </button>
@@ -235,7 +242,7 @@
         <button
           class="pagination-button"
           ng-disabled="currentPage === 1"
-          ng-click="prevPage(bids)"
+          ng-click="prevPage('bids')"
         >
           Prev
         </button>
@@ -243,7 +250,7 @@
         <button
           class="pagination-button"
           ng-disabled="currentPage === totalPage"
-          ng-click="nextPage(bids)"
+          ng-click="nextPage('bids')"
         >
           Next
         </button>
@@ -290,7 +297,7 @@
               ng-model="bookingFilter.filterByCar"
               ng-change="setBookings()"
             >
-              <option ng-repeat="car in carsForFilter" value="{{car.id}}">
+              <option ng-repeat="car in carsForFilter" value="{{car._id}}">
                 {{car.name}}
               </option>
             </select>
@@ -339,24 +346,24 @@
             </td>
           </tr>
           <tr ng-repeat="booking in bookings">
-            <td data-label="Car Name">{{booking.car.name}}</td>
-            <td data-label="Renter">{{booking.user.name}}</td>
+            <td data-label="Car Name">{{booking.vehicle.name}}</td>
+            <td data-label="Renter">{{booking.user.username}}</td>
             <td data-label="Adhaar Number">{{booking.user.adhaar}}</td>
-            <td data-label="Start Date">{{booking.startDate}}</td>
-            <td data-label="End Date">{{booking.endDate}}</td>
-            <td data-label="Amount">{{booking.amount}}</td>
+            <td data-label="Start Date">{{booking.startDate |date}}</td>
+            <td data-label="End Date">{{booking.endDate | date}}</td>
+            <td data-label="Amount">{{booking.amount | currency}}</td>
             <td data-label="Action" ng-if="bookingTab=='active'">
               <button
                 class="add-odometer"
                 ng-if="!booking.currentOdometer"
-                ng-click="toggleOdometerModal(true, booking.id,'current')"
+                ng-click="toggleOdometerModal(true, booking._id,'current')"
               >
                 Add Current Odometer
               </button>
               <button
                 class="add-odometer"
                 ng-if="booking.currentOdometer && !booking.finalOdometer"
-                ng-click="toggleOdometerModal(true, booking.id,'final')"
+                ng-click="toggleOdometerModal(true, booking._id,'final')"
               >
                 Add Final Odometer
               </button>
@@ -368,7 +375,7 @@
         <button
           class="pagination-button"
           ng-disabled="currentPage === 1"
-          ng-click="prevPage(bids)"
+          ng-click="prevPage('bookings')"
         >
           Prev
         </button>
@@ -376,7 +383,7 @@
         <button
           class="pagination-button"
           ng-disabled="currentPage === totalPage"
-          ng-click="nextPage(bids)"
+          ng-click="nextPage('bookings')"
         >
           Next
         </button>
@@ -394,13 +401,13 @@
               name="revenueFilter"
               id="revenueFilter"
               ng-model="revenueChartFilter.dataBy"
-              ng-click="revenueChart()"
+              ng-change="revenueChart()"
             >
-              <option value="vehicleType">By Car Type</option>
-              <option value="fuelType">By FuelType</option>
-              <option value="transmission">By Transmission Type</option>
-              <option value="location" selected>By Location</option>
-              <option value="plateNumber">By CarID</option>
+              <option value="vehicle.vehicleType">By Car Type</option>
+              <option value="vehicle.fuelType">By FuelType</option>
+              <option value="vehicle.transmission">By Transmission Type</option>
+              <option value="vehicle.location">By Location</option>
+              <option value="vehicle.plateNumber">By CarID</option>
             </select>
           </div>
           <div class="fields">
@@ -423,50 +430,11 @@
       </div>
       <div>
         <p style="text-align: center; font-size: 0.8rem">
-          *Revenue is calculated after 25% commission cut
-        </p>
-        <p style="text-align: center; font-size: 0.8rem">
           *Revenue is calculated for confirmed bokkings only.
         </p>
       </div>
     </div>
-    <!-- Comparison Chart Section -->
-    <!-- <section
-      id="comparisonChart"
-      class="chart hidden-section"
-      ng-if="currentTab==='analytics'"
-    >
-      <div class="chartHeader">
-        <h2>Revenue Comparison</h2>
-        <div class="analytics">
-          <div class="field">
-            <label for="comparisonPeriod">Comparison Period:</label>
-            <select
-              name="comparisonPeriod"
-              id="comparisonPeriod"
-              ng-model="comparisionChartFilter.days"
-              type="number"
-              ng-change="comparisonChart()"
-            >
-              <option value="1">1 Day</option>
-              <option value="7">7 Days</option>
-              <option value="30">30 Days</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="chart-container">
-        <canvas id="chartComparison"></canvas>
-      </div>
-      <div style="width: 90%; margin: auto">
-        <p style="text-align: center; font-size: 0.8rem">
-          *The revenue comparison is done by calculating the revenue from the
-          last x days (from today minus x days up to today) and comparing it
-          with the revenue from the x days immediately before that (from today
-          minus 2*x days up to today minus x days).
-        </p>
-      </div>
-    </section> -->
+
     <!-- Booking Analytics Section -->
     <div id="booking-chart" class="chart" ng-if="currentTab==='analytics'">
       <div class="chartHeader">
@@ -480,12 +448,12 @@
               ng-model="bookingChartFilter.dataBy"
               ng-change="bookingChart()"
             >
-              <option value="vehicleType">By Car Type</option>
+              <option value="vehicle.vehicleType">By Car Type</option>
               <option value="status">By Status</option>
-              <option value="fuelType">By FuelType</option>
-              <option value="transmission">By Transmission Type</option>
-              <option value="location">By Location</option>
-              <option value="plateNumber">By CarID</option>
+              <option value="vehicle.fuelType">By FuelType</option>
+              <option value="vehicle.transmission">By Transmission Type</option>
+              <option value="vehicle.location">By Location</option>
+              <option value="vehicle.plateNumber">By CarID</option>
             </select>
           </div>
           <div class="fields">
@@ -508,8 +476,7 @@
       </div>
       <div>
         <p style="text-align: center; font-size: 0.8rem">
-          *count is calculated for confirmed bookings only, that you confirmed
-          on that day.
+          *Bidding count include the bids with status 'pending' and 'rejected'.
         </p>
       </div>
     </div>
@@ -538,6 +505,7 @@
         class="custom-form grid-form"
         novalidate
         ng-submit="addCar()"
+        enctype="multipart/form-data"
       >
         <div class="form-group">
           <label for="carName">Car Name</label>
@@ -556,7 +524,7 @@
             style="color: red"
             ng-if="addCarForm.carName.$touched && addCarForm.carName.$invalid"
           >
-            User name is not valid
+            Car name is not valid
           </span>
         </div>
         <div class="form-group select-group">
@@ -914,6 +882,7 @@
         novalidate
         ng-submit="editCar()"
         style="height: auto"
+        enctype="multipart/form-data"
       >
         <div class="form-group">
           <label for="rentalPrice">Base Rental Price (Rs/day)(Local)</label>

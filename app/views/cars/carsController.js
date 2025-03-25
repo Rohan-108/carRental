@@ -23,10 +23,10 @@ angular.module("rentIT").controller("carsController", [
     $scope.totalPage = null; // Total number of pages
     // Default filter
     const defaultFilter = {
-      city: "All",
+      location: "All",
       fuelType: "All",
       transmission: "All",
-      carType: "All",
+      vehicleType: "All",
       minPrice: 0,
       maxPrice: 10000,
     };
@@ -57,59 +57,22 @@ angular.module("rentIT").controller("carsController", [
       // Filter function for the paged cars
       // Set loading state to true
       $scope.isLoading = true;
-      const filterFunction = function (car) {
-        if ($scope.filter.city !== "All" && car.location !== $scope.filter.city)
-          return false;
-        if (carType.value !== "All" && car.vehicleType !== carType.value)
-          return false;
-        if (
-          $scope.filter.transmission !== "All" &&
-          car.transmission !== $scope.filter.transmission
+
+      carService
+        .getCars(
+          $scope.currentPage,
+          $scope.pageSize,
+          $scope.filter,
+          $scope.query
         )
-          return false;
-        if (
-          $scope.filter.fuelType !== "All" &&
-          car.fuelType !== $scope.filter.fuelType
-        )
-          return false;
-        if (
-          car.rentalPrice < Number($scope.filter.minPrice) ||
-          car.rentalPrice > Number($scope.filter.maxPrice)
-        )
-          return false;
-        if (
-          $scope.query &&
-          !car.name.toLowerCase().includes($scope.query.toLowerCase())
-        )
-          return false;
-        return true;
-      };
-      $q.when(
-        carService.getPagedCars(
-          {
-            page: $scope.currentPage,
-            pageSize: $scope.pageSize,
-            indexName: "show",
-            direction: "next",
-            range: null,
-          },
-          filterFunction
-        )
-      )
-        .then(function (result) {
-          const cars = result.data.map(function (car) {
-            const blob = new Blob([car.images[0]]);
-            const imgUrl = URL.createObjectURL(blob);
-            return Object.assign({}, car, { imgUrl: imgUrl });
-          });
-          $scope.cars = [];
-          $scope.cars = cars;
-          $scope.totalPage = result.totalPages;
+        .then((response) => {
+          $scope.cars = response.data.vehicles;
+          $scope.totalPage = response.data.pages;
         })
-        .catch(function (error) {
-          toaster.pop("error", "Error", error.message);
+        .catch((error) => {
+          toaster.error("error", "error", error.description);
         })
-        .finally(function () {
+        .finally(() => {
           $scope.isLoading = false;
         });
     };
@@ -118,7 +81,14 @@ angular.module("rentIT").controller("carsController", [
      * @returns {Promise} - A promise that resolves to the list of cars
      */
     $scope.clearFilters = function () {
-      $scope.filter = defaultFilter;
+      $scope.filter = {
+        location: "All",
+        fuelType: "All",
+        transmission: "All",
+        vehicleType: "All",
+        minPrice: 0,
+        maxPrice: 10000,
+      };
       $scope.currentPage = 1;
       $scope.setCars();
     };

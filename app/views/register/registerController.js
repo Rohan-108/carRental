@@ -13,18 +13,9 @@ angular.module("rentIT").controller("registerController", [
   "toaster",
   "userService",
   "sessionService",
-  "utilService",
-  "$q",
-  function (
-    $scope,
-    $state,
-    toaster,
-    userService,
-    sessionService,
-    utilService,
-    $q
-  ) {
+  function ($scope, $state, toaster, userService, sessionService) {
     $scope.user = {}; // to hold the user form data
+
     /**
      * @description Register the user to the application.
      */
@@ -33,47 +24,26 @@ angular.module("rentIT").controller("registerController", [
         toaster.pop("error", "Error", "Invalid form data.");
         return;
       }
-
-      let newUserData = {};
-
-      return $q
-        .when(userService.getByEmail($scope.user.email))
-        .then(function (userExists) {
-          if (userExists) {
-            throw new Error("User already exists.");
-          }
-          return $q.when(utilService.hashPassword($scope.user.password));
-        })
-        .then(function (hashedPassword) {
-          newUserData.password = hashedPassword;
-          return $q.when(utilService.toArrayBuffer([$scope.user.avatar]));
-        })
-        .then(function (imageBuffer) {
-          newUserData = {
-            ...newUserData,
-            id: "",
-            name: $scope.user.name,
-            email: $scope.user.email,
-            tel: $scope.user.phone,
-            adhaar: $scope.user.adhaar,
-            role: "general",
-            avatar: imageBuffer,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-          };
-          // Add the user.
-          return $q.when(userService.addUser(newUserData));
-        })
-        .then(function () {
-          return $q.when(userService.getByEmail(newUserData.email));
-        })
-        .then(function (newUser) {
-          sessionService.setUser(newUser);
-          toaster.pop("success", "Success", "Registered successfully.");
+      const formdata = new FormData();
+      formdata.append("username", $scope.user.username);
+      formdata.append("email", $scope.user.email);
+      formdata.append("password", $scope.user.password);
+      formdata.append("avatar", $scope.user.avatar);
+      formdata.append("role", "user");
+      formdata.append("adhaar", $scope.user.adhaar);
+      formdata.append("tel", $scope.user.tel);
+      userService
+        .addUser(formdata)
+        .then(function (response) {
+          const user = response.data.user;
+          const accessToken = response.data.accessToken;
+          sessionService.setUser({ ...user, accessToken });
           $state.go("home");
+          toaster.pop("success", "Success", "User registered successfully.");
         })
-        .catch(function (error) {
-          toaster.pop("error", "Error", error.message);
+        .catch(function (response) {
+          console.log(response);
+          toaster.pop("error", "Error", response.description);
         });
     };
   },

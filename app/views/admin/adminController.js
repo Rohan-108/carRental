@@ -5,8 +5,6 @@
 angular.module("rentIT").controller("adminController", [
   "$scope",
   "userService",
-  "carService",
-  "bidBookService",
   "chartService",
   "utilService",
   "approvalService",
@@ -15,8 +13,6 @@ angular.module("rentIT").controller("adminController", [
   function (
     $scope,
     userService,
-    carService,
-    bidBookService,
     chartService,
     utilService,
     approvalService,
@@ -24,6 +20,7 @@ angular.module("rentIT").controller("adminController", [
     $q
   ) {
     // Initialize scope variables
+    $scope.isLoading = false; // Loading state
     $scope.pageSize = 5; // Number of items per page
     $scope.currentPage = 1; // Current page number
     $scope.totalPage = null; // Total number of pages
@@ -44,11 +41,11 @@ angular.module("rentIT").controller("adminController", [
       typeOfChart: "bar",
     };
     $scope.bookChartFilter = {
-      field: "location",
+      field: "vehicle.location",
       typeOfChart: "bar",
     };
     $scope.revenueChartFilter = {
-      field: "location",
+      field: "vehicle.location",
       typeOfChart: "bar",
     };
     $scope.chartInstances = {
@@ -108,44 +105,22 @@ angular.module("rentIT").controller("adminController", [
      * @description Set statistics for dashboard
      */
     $scope.setStat = function () {
-      $q.when(carService.countCars())
-        .then((nCars) => {
-          return $q.when(bidBookService.getAllBids()).then((allBids) => {
-            let revenue = 0,
-              noOfPendingBids = 0,
-              noOfRejectedBids = 0,
-              noOfApprovedBids = 0,
-              noOfBids = 0,
-              totalDay = 0;
-            // Calculate statistics
-            allBids.forEach((bid) => {
-              const days = utilService.getDaysDiff(bid.startDate, bid.endDate);
-              if (bid.status === "pending") {
-                noOfPendingBids++;
-              } else if (bid.status === "rejected") {
-                noOfRejectedBids++;
-              } else {
-                noOfApprovedBids++;
-                revenue += Number(bid.amount);
-              }
-              totalDay += days;
-              noOfBids++;
-            });
-            // Set statistics
-            $scope.stat = {
-              cars: nCars,
-              revenue: revenue * 0.25,
-              bids: noOfBids,
-              bookings: noOfApprovedBids,
-              rejectedBids: noOfRejectedBids,
-              avgRentalDay: Math.floor(totalDay / noOfBids) || 0,
-              conversionRatio:
-                Math.ceil(noOfApprovedBids / noOfBids) * 100 || 0,
-            };
-          });
+      $scope.isLoading = true;
+      userService
+        .getStatsForSuperAdmin()
+        .then((result) => {
+          $scope.stat = result.data;
         })
         .catch((error) => {
-          toaster.pop("error", "Error", error.message);
+          console.log(error);
+          toaster.pop(
+            "error",
+            "Error",
+            error.message || "Error loading statistics"
+          );
+        })
+        .finally(() => {
+          $scope.isLoading = false;
         });
     };
 
@@ -153,32 +128,30 @@ angular.module("rentIT").controller("adminController", [
      * @description Set approvals for dashboard
      */
     $scope.setApprovals = function () {
-      const filterFunction = function (approval) {
-        if ($scope.approvalFilter.status === "all") {
-          return true;
-        }
-        return approval.status === $scope.approvalFilter.status;
-      };
-      $q.when(
-        approvalService.getPagedApprovals(
-          {
-            page: $scope.currentPage,
-            pageSize: $scope.pageSize,
-            direction: "next",
-          },
-          filterFunction
-        )
-      )
+      $scope.isLoading = true;
+      const filter = {};
+      const sort = {};
+      if ($scope.approvalFilter.status !== "all") {
+        filter.status = $scope.approvalFilter.status;
+      }
+      sort["createdAt"] = $scope.approvalFilter.orderBy === "asc" ? 1 : -1;
+      approvalService
+        .getApprovals($scope.currentPage, $scope.pageSize, filter, sort)
         .then((result) => {
-          $scope.totalPage = result.totalPages;
-          result.data.sort((a, b) => a.createdAt - b.createdAt);
-          if ($scope.approvalFilter.orderBy === "desc") {
-            result.data.reverse();
-          }
-          $scope.approvals = result.data;
+          console.log(result);
+          $scope.approvals = result.data.requests;
+          $scope.totalPage = result.data.pages;
         })
         .catch((error) => {
-          toaster.pop("error", "Error", error.message);
+          console.log(error);
+          toaster.pop(
+            "error",
+            "Error",
+            error.message || "Error loading approvals"
+          );
+        })
+        .finally(() => {
+          $scope.isLoading = false;
         });
     };
 
@@ -190,18 +163,24 @@ angular.module("rentIT").controller("adminController", [
         toaster.pop("error", "Error", "Invalid request");
         return;
       }
-      $q.when(
-        approvalService.updateApproval({
-          id: $scope.approvalId,
-          status: "rejected",
-        })
-      )
+      $scope.isLoading = true;
+      approvalService
+        .rejectApprovalRequest($scope.approvalId)
         .then(() => {
           $scope.setApprovals();
-          toaster.pop("success", "Success", "Request cancelled successfully");
+          toaster.pop("success", "Success", "Request rejected successfully");
         })
         .catch((error) => {
-          toaster.pop("error", "Error", error.message);
+          console.log(error);
+          toaster.pop(
+            "error",
+            "Error",
+            error.message || "Error rejecting request"
+          );
+        })
+        .finally(() => {
+          $scope.toggleCancelApproveModal(false);
+          $scope.isLoading = false;
         });
     };
 
@@ -213,36 +192,36 @@ angular.module("rentIT").controller("adminController", [
         toaster.pop("error", "Error", "Invalid request");
         return;
       }
-      $q.when(
-        approvalService.updateApproval({
-          id: $scope.approvalId,
-          status: "approved",
-        })
-      )
+      $scope.isLoading = true;
+      approvalService
+        .approveApprovalRequest($scope.approvalId)
         .then(() => {
           $scope.setApprovals();
           toaster.pop("success", "Success", "Request approved successfully");
         })
         .catch((error) => {
-          toaster.pop("error", "Error", error.message);
+          toaster.pop(
+            "error",
+            "Error",
+            error.message || "Error approving request"
+          );
+        })
+        .finally(() => {
+          $scope.toggleApproveModal(false);
+          $scope.isLoading = false;
         });
     };
     /**
      * @description To Load car Chart showing the number of cars by analytics field
      */
     $scope.carChart = function () {
+      $scope.isLoading = true;
       const analyticsField = $scope.carChartFilter.field;
       const typeOfChart = $scope.carChartFilter.typeOfChart;
-      const keyAccessor = (item) => item[analyticsField];
-      $q.when(
-        chartService.groupData("cars", keyAccessor, "show", "next", null, {
-          filterFunction: () => {
-            return true;
-          },
-        })
-      )
-        .then((groupedData) => {
-          const chartData = chartService.buildChartData(groupedData);
+      chartService
+        .getCarDataForSuperAdmin(analyticsField)
+        .then((response) => {
+          const chartData = chartService.buildChartDataForCar(response.data);
           const datasetLabel =
             "Number of Cars by " +
             analyticsField.charAt(0).toUpperCase() +
@@ -256,7 +235,11 @@ angular.module("rentIT").controller("adminController", [
           );
         })
         .catch((error) => {
+          console.log(error);
           toaster.pop("error", "Error", error.message);
+        })
+        .finally(() => {
+          $scope.isLoading = false;
         });
     };
 
@@ -264,37 +247,17 @@ angular.module("rentIT").controller("adminController", [
      * @description To Load Chart data for bookings
      */
     $scope.bookChart = function () {
+      $scope.isLoading = true;
       const analyticsField = $scope.bookChartFilter.field;
-      const keyAccessor = (bid) => {
-        if (bid.hasOwnProperty(analyticsField)) return bid[analyticsField];
-        if (bid.car && bid.car.hasOwnProperty(analyticsField))
-          return bid.car[analyticsField];
-        return "Unknown";
-      };
-      const options = {
-        filterFunction: (item) => {
-          return item.status === "approved";
-        },
-      };
-      $q.when(
-        chartService.groupDataBifarcate(
-          "bids",
-          keyAccessor,
-          null,
-          "next",
-          null,
-          options
-        )
-      )
-        .then((groupedData) => {
+      chartService
+        .getBookingChartDataForSuperAdmin(analyticsField)
+        .then((response) => {
           const datasetLabel =
             "Number of Bookings by " +
             analyticsField.charAt(0).toUpperCase() +
             analyticsField.slice(1);
-          const chartData = chartService.buildChartDataBifarcate(
-            groupedData,
-            "Bookings",
-            "Biddings"
+          const chartData = chartService.buildChartDataForBooking(
+            response.data
           );
           $scope.loadChart(
             chartData,
@@ -304,49 +267,32 @@ angular.module("rentIT").controller("adminController", [
             datasetLabel
           );
         })
-        .catch((_) => {
-          toaster.pop("error", "Error", "Error loading Booking Chart");
+        .catch((error) => {
+          toaster.pop(
+            "error",
+            "Error",
+            error?.name || "Error loading Booking Chart"
+          );
+        })
+        .finally(() => {
+          $scope.isLoading = false;
         });
     };
     /**
      * @description To Load Chart data for revenue
      */
     $scope.revenueChart = function () {
+      $scope.isLoading = true;
       const analyticsField = $scope.revenueChartFilter.field;
-      //keyaccer function
-      const keyAccessor = (bid) => {
-        if (bid.hasOwnProperty(analyticsField)) return bid[analyticsField];
-        if (bid.car && bid.car.hasOwnProperty(analyticsField))
-          return bid.car[analyticsField];
-        return "Unknown";
-      };
-      //options object
-      const options = {
-        summationField: "amount",
-        commissionRate: 0.25,
-        filterFunction: (item) => {
-          return item.isOutStation;
-        },
-      };
-      $q.when(
-        chartService.groupDataBifarcate(
-          "bids",
-          keyAccessor,
-          null,
-          "next",
-          null,
-          options
-        )
-      )
-        .then((groupedData) => {
+      chartService
+        .getRevenueChartDataForSuperAdmin(analyticsField)
+        .then((response) => {
           const datasetLabel =
-            "Total Amount by " +
+            "Revenue by " +
             analyticsField.charAt(0).toUpperCase() +
             analyticsField.slice(1);
-          const chartData = chartService.buildChartDataBifarcate(
-            groupedData,
-            "OutStation",
-            "Local"
+          const chartData = chartService.buildChartDataForRevenue(
+            response.data
           );
           $scope.loadChart(
             chartData,
@@ -356,9 +302,16 @@ angular.module("rentIT").controller("adminController", [
             datasetLabel
           );
         })
-        .catch((_) => {
-          console.log(_);
-          toaster.pop("error", "Error", "Error loading revenue Chart");
+        .catch((error) => {
+          console.log(error);
+          toaster.pop(
+            "error",
+            "Error",
+            error?.name || "Error loading Revenue Chart"
+          );
+        })
+        .finally(() => {
+          $scope.isLoading = false;
         });
     };
     /**

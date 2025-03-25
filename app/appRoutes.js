@@ -58,16 +58,11 @@ angular.module("rentIT").config([
             "carService",
             "$stateParams",
             function (carService, $stateParams) {
-              return carService.getCarById($stateParams.carId).then((car) => {
-                let imgUrls = [];
-                car.images.forEach((image) => {
-                  let blob = new Blob([image]);
-                  let url = URL.createObjectURL(blob);
-                  imgUrls.push(url);
+              return carService
+                .getCarById($stateParams.carId)
+                .then((response) => {
+                  return response.data.vehicle;
                 });
-                car.images = imgUrls;
-                return car;
-              });
             },
           ],
         },

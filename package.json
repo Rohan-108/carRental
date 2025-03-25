@@ -14,7 +14,8 @@
     "@uirouter/angularjs": "^1.1.1",
     "angular": "1.8.3",
     "angular-animate": "^1.8.3",
-    "angularjs-toaster": "^3.0.0"
+    "angularjs-toaster": "^3.0.0",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "lite-server": "^2.6.1"

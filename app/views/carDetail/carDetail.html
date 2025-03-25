@@ -49,7 +49,7 @@
       <div class="owner">
         <div class="infoBox">
           <h3>🏷️ Name</h3>
-          <p id="ownerName">{{car.owner.name}}</p>
+          <p id="ownerName">{{car.owner.username}}</p>
         </div>
         <div class="infoBox">
           <h3>📧 Email</h3>
@@ -125,21 +125,21 @@
         <div class="msger-header-title">Chat With Owner</div>
       </header>
       <main class="userChat" id="messageBoxUser">
-        <div class="no-chat" ng-if="car.ownerId==user.id">
+        <div class="no-chat" ng-if="car.owner._id===user._id">
           <p>You can't Chat</p>
         </div>
         <div
           class="msg"
           ng-repeat="chat in messages"
-          ng-if="messages.length>0 && car.ownerId!==user.id"
+          ng-if="messages.length>0 && car.owner._id!==user._id"
         >
-          <div class="{{chat.sender===user.id?'right-msg':'left-msg'}}">
+          <div class="{{chat.sender._id===user._id?'right-msg':'left-msg'}}">
             <div class="msg-img">
-              <img ng-src="{{chat.user.avatar}}" alt="user" />
+              <img ng-src="{{chat.sender.avatar}}" alt="user" />
             </div>
             <div class="msg-bubble">
               <div class="msg-info">
-                <div class="msg-info-name">{{chat.user.name}}</div>
+                <div class="msg-info-name">{{chat.sender.username}}</div>
                 <div class="msg-info-time">{{chat.createdAt |date}}</div>
               </div>
 
@@ -170,7 +170,7 @@
           type="button"
           style="cursor: pointer"
           ng-click="toggleModal(true)"
-          ng-disabled="car.ownerId==user.id || user.role==='super-admin'"
+          ng-disabled="car.owner_id==user._id || user.role==='super-admin'"
         >
           📎
         </button>
@@ -179,7 +179,7 @@
           class="msger-send-btn"
           id="sendUser"
           style="height: max-content; margin-block: auto"
-          ng-disabled="chatForm.$invalid || car.ownerId==user.id || user.role==='super-admin'"
+          ng-disabled="chatForm.$invalid || car.owner._id==user._id || user.role==='super-admin'"
         >
           Send
         </button>
