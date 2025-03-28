@@ -17,7 +17,7 @@ angular.module("rentIT").controller("carDetailController", [
   "$rootScope",
   "car",
   "bidBookService",
-  "utilService",
+  "bidFactory",
   "chatService",
   "toaster",
   "$q",
@@ -27,7 +27,7 @@ angular.module("rentIT").controller("carDetailController", [
     $rootScope,
     car,
     bidBookService,
-    utilService,
+    bidFactory,
     chatService,
     toaster,
     $q,
@@ -52,9 +52,11 @@ angular.module("rentIT").controller("carDetailController", [
      * @description Initialize function
      */
     $scope.init = function () {
-      $scope.setUpDatePicker();
-      $scope.loadUserChat();
-      $scope.listenForChat();
+      $q.all[
+        ($scope.setUpDatePicker(),
+        $scope.loadUserChat(),
+        $scope.listenForChat())
+      ];
     };
 
     $scope.listenForChat = function () {
@@ -133,11 +135,11 @@ angular.module("rentIT").controller("carDetailController", [
      * @description Bid now function to place a bid
      */
     $scope.bidNow = function () {
-      if ($rootScope.user._id === $scope.car.owner._id) {
+      if ($scope.user._id === $scope.car.owner._id) {
         toaster.pop("error", "Error", "You cannot bid on your own car");
         return;
       }
-      if ($rootScope.user.role === "super-admin") {
+      if ($scope.user.role === "super-admin") {
         toaster.pop("error", "Error", "Super admin cannot place bid");
         return;
       }
@@ -147,59 +149,24 @@ angular.module("rentIT").controller("carDetailController", [
       const endDate = $scope.picker.getEndDate()
         ? $scope.picker.getEndDate().format("YYYY-MM-DD")
         : null;
-      if (!startDate || !endDate) {
-        toaster.pop("error", "Error", "Please select start and end date");
-        return;
-      }
-      // check if rental period is between min and max rental period
-      const ndays = utilService.getDaysDiff(startDate, endDate);
-      if (
-        ndays < Number($scope.car.minRentalPeriod) ||
-        ndays > Number($scope.car.maxRentalPeriod)
-      ) {
-        toaster.pop(
-          "error",
-          "Error",
-          `Rental period should be between ${$scope.car.minRentalPeriod} and ${$scope.car.maxRentalPeriod} days`
-        );
-        return;
-      }
-      // check if rental amount is greater than base price
-      if (
-        $scope.rental.amount <
-        ($scope.rental.isOutStation
-          ? Number($scope.car.rentalPriceOutStation)
-          : Number($scope.car.rentalPrice))
-      ) {
-        toaster.pop(
-          "error",
-          "Error",
-          "Rental amount cannot be less than the base price"
-        );
-        return;
-      }
       // create bid object
-      const bid = {
-        amount: Number($scope.rental.amount) * ndays,
-        startDate: startDate,
-        endDate: endDate,
+      const bid = bidFactory.createBid({
+        startDate,
+        endDate,
+        amount: $scope.rental.amount,
         isOutStation: $scope.rental.isOutStation,
-        status: "pending",
-        tripCompleted: false,
-      };
-      bidBookService
-        .addBid(bid, $scope.car._id)
-        .then((response) => {
-          console.log(response);
+      });
+      bid
+        .addBid($scope.car)
+        .then(() => {
           toaster.pop("success", "Success", "Bid placed successfully");
           $scope.picker.clear();
         })
         .catch((error) => {
-          console.log(error);
           toaster.pop(
             "error",
             "Error",
-            error.description || "Error while placing bid"
+            error?.description || "Error while placing bid"
           );
         });
     };
@@ -208,10 +175,10 @@ angular.module("rentIT").controller("carDetailController", [
      * @description Load user chat function
      */
     $scope.loadUserChat = function () {
-      if ($rootScope.user.role === "super-admin") return;
-      if ($scope.car.owner._id === $rootScope.user._id) return;
+      if ($scope.user.role === "super-admin") return;
+      if ($scope.car.owner._id === $scope.user._id) return;
       chatService
-        .getConversationByCarAndMember($scope.car._id, $rootScope.user._id)
+        .getConversationByCarAndMember($scope.car._id, $scope.user._id)
         .then((response) => {
           $scope.convId = response.data._id;
           chatService.joinConversation($scope.convId);
@@ -344,7 +311,6 @@ angular.module("rentIT").controller("carDetailController", [
           const flattenBookedDates = bookings.flatMap((booking) =>
             getDatesInRange(booking.startDate, booking.endDate)
           );
-          console.log(flattenBookedDates);
           return deferred.resolve(flattenBookedDates);
         })
         .catch((_) => {

@@ -3,16 +3,14 @@
  * @param {Object} $scope - The scope
  * @param {Object} $state - The state service
  * @param {Object} toaster - The toaster service
- * @param {Object} userService - The user service
- * @param {Object} sessionService - The session service
+ * @param {Object} userFactory - The user factory
  */
 angular.module("rentIT").controller("loginController", [
   "$scope",
   "$state",
   "toaster",
-  "userService",
-  "sessionService",
-  function ($scope, $state, toaster, userService, sessionService) {
+  "userFactory",
+  function ($scope, $state, toaster, userFactory) {
     //to hold the login form data
     $scope.loginData = {
       email: "",
@@ -27,22 +25,20 @@ angular.module("rentIT").controller("loginController", [
         return;
       }
       // Check if the user exists and the password is correct
-      userService
-        .login($scope.loginData.email, $scope.loginData.password)
-        .then(function (response) {
-          const user = response.data.user;
-          const accessToken = response.data.accessToken;
-          sessionService.setUser({
-            ...user,
-            accessToken,
-          });
-          toaster.pop("success", "Success", response.data.message);
+      const user = userFactory.createUser($scope.loginData);
+      user
+        .login()
+        .then(() => {
           $state.go("home");
+          toaster.pop("success", "Success", "Login successful.");
         })
-        .catch(function (response) {
-          $scope.loginData.password = "";
-          $scope.loginData.email = "";
-          toaster.pop("error", "Error", response.description);
+        .catch((error) => {
+          console.log(error);
+          toaster.pop(
+            "error",
+            "Error",
+            error?.description || "An error occurred."
+          );
         });
     };
   },

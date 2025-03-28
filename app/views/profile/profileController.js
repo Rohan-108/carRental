@@ -2,9 +2,6 @@
  * @description Controller for the profile page.
  * @name profileController
  * @requires $scope
- * @requires $rootScope
- * @requires userService
- * @requires sessionService
  * @requires utilService
  * @requires approvalService
  * @requires bidBookService
@@ -13,21 +10,11 @@
  */
 angular.module("rentIT").controller("profileController", [
   "$scope",
-  "$rootScope",
-  "userService",
-  "sessionService",
+  "userFactory",
   "approvalService",
   "bidBookService",
   "toaster",
-  function (
-    $scope,
-    $rootScope,
-    userService,
-    sessionService,
-    approvalService,
-    bidBookService,
-    toaster
-  ) {
+  function ($scope, userFactory, approvalService, bidBookService, toaster) {
     // Initialize variables
     $scope.isLoading = false; // Loading state
     $scope.pageSize = 5; // Number of items per page
@@ -37,7 +24,11 @@ angular.module("rentIT").controller("profileController", [
     $scope.passwordFormData = {}; // Password form data
     $scope.changePasswordModal = false; // Change password modal
     $scope.changeProfileModal = false; // Change profile modal
-    $scope.profileFormData = {}; // Profile form data
+    $scope.profileFormData = {
+      username: $scope.user.username,
+      avatar: null,
+      tel: $scope.user.tel,
+    }; // Profile form data
     $scope.bookings = []; // Bookings
     // Booking filter
     $scope.bookingFilter = {
@@ -97,34 +88,24 @@ angular.module("rentIT").controller("profileController", [
         toaster.pop("error", "Error", "Please fill all required fields.");
         return;
       }
-      if (
-        $scope.passwordFormData.newPassword !==
-        $scope.passwordFormData.confirmPassword
-      ) {
-        toaster.pop("error", "Error", "Passwords do not match.");
-        return;
-      }
       $scope.isLoading = true;
-      userService
+      const user = userFactory.createUser($scope.user);
+      user
         .changePassword(
           $scope.passwordFormData.oldPassword,
-          $scope.passwordFormData.newPassword
+          $scope.passwordFormData.newPassword,
+          $scope.passwordFormData.confirmPassword
         )
-        .then((response) => {
-          console.log(response);
-          toaster.pop(
-            "success",
-            "Success",
-            response.data.message || "Password changed successfully."
-          );
+        .then(() => {
+          toaster.pop("success", "Success", "Password changed successfully.");
           $scope.toggleChangePasswordModal(false);
-          $scope.passwordFormData = {};
         })
-        .catch((response) => {
+        .catch((error) => {
+          console.log(error);
           toaster.pop(
             "error",
             "Error",
-            response.description || "Error changing password."
+            error?.description || "Error changing password."
           );
         })
         .finally(() => {
@@ -149,31 +130,18 @@ angular.module("rentIT").controller("profileController", [
         toaster.pop("error", "Error", "Please fill all required fields.");
         return;
       }
-      const formData = new FormData();
-      for (const key in $scope.profileFormData) {
-        formData.append(key, $scope.profileFormData[key]);
-      }
-      userService
-        .updateUser(formData)
-        .then((response) => {
-          const newUser = {
-            ...response.data.user,
-            accessToken: $rootScope.user.accessToken,
-          };
-          sessionService.setUser(newUser);
-          $rootScope.user = newUser;
-          toaster.pop(
-            "success",
-            "Success",
-            response.data.message || "Profile updated successfully."
-          );
+      const user = userFactory.createUser($scope.user);
+      user
+        .updateUser($scope.profileFormData)
+        .then(() => {
+          toaster.pop("success", "Success", "Profile updated successfully.");
           $scope.toggleChangeProfileModal(false);
         })
-        .catch((response) => {
+        .catch((error) => {
           toaster.pop(
             "error",
             "Error",
-            response.description || "Error updating profile."
+            error?.description || "Error updating profile."
           );
         })
         .finally(() => {
@@ -186,10 +154,7 @@ angular.module("rentIT").controller("profileController", [
      */
     $scope.setApproval = function () {
       $scope.isLoading = true;
-      if (
-        $rootScope.user.role === "super-admin" ||
-        $rootScope.user.role === "admin"
-      ) {
+      if ($scope.user.role === "super-admin" || $scope.user.role === "admin") {
         $scope.approvalMessage =
           "You are an admin. You are already approved as a seller.";
         $scope.approvalBtnText = "Approved";

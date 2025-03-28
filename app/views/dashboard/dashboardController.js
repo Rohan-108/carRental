@@ -17,7 +17,9 @@ angular.module("rentIT").controller("dashboardController", [
   "$rootScope",
   "userService",
   "carService",
+  "carFactory",
   "bidBookService",
+  "bidFactory",
   "chartService",
   "utilService",
   "toaster",
@@ -27,7 +29,9 @@ angular.module("rentIT").controller("dashboardController", [
     $rootScope,
     userService,
     carService,
+    carFactory,
     bidBookService,
+    bidFactory,
     chartService,
     utilService,
     toaster,
@@ -190,22 +194,14 @@ angular.module("rentIT").controller("dashboardController", [
      * @description Function to add car
      */
     $scope.addCar = function () {
-      const formData = new FormData();
-      for (const key in $scope.carFormData) {
-        if (key === "images") {
-          for (const i in $scope.carFormData.images) {
-            formData.append("images", $scope.carFormData.images[i]);
-          }
-        } else {
-          formData.append(key, $scope.carFormData[key]);
-        }
-      }
-      carService
-        .addCar(formData)
-        .then((response) => {
+      const car = carFactory.createCar($scope.carFormData);
+      $scope.isLoading = true;
+      car
+        .addCar()
+        .then(() => {
           $scope.carFormData = {};
           $scope.toggleAddCarModal(false);
-          $scope.cars.push(response.data.vehicle);
+          $scope.setCars();
           toaster.pop("success", "Success", "Car added successfully");
         })
         .catch((error) => {
@@ -214,6 +210,9 @@ angular.module("rentIT").controller("dashboardController", [
             "Error",
             error.description || "Error adding car"
           );
+        })
+        .finally(() => {
+          $scope.isLoading = false;
         });
     };
 
@@ -270,20 +269,12 @@ angular.module("rentIT").controller("dashboardController", [
      * @description Function to edit car
      */
     $scope.editCar = function () {
+      const currentCar = $scope.cars.find((car) => car._id === $scope.carId);
+      const car = carFactory.createCar(currentCar);
       $scope.isLoading = true;
-      const formData = new FormData();
-      for (const key in $scope.editCarFormData) {
-        if (key === "images") {
-          for (const i in $scope.editCarFormData.images) {
-            formData.append("images", $scope.editCarFormData.images[i]);
-          }
-        } else {
-          formData.append(key, $scope.editCarFormData[key]);
-        }
-      }
-      carService
-        .updateCar(formData, $scope.carId)
-        .then((response) => {
+      car
+        .updateCar($scope.editCarFormData)
+        .then(() => {
           $scope.editCarFormData = {};
           $scope.toggleEditCarModal(false, null);
           $scope.setCars();
@@ -361,22 +352,23 @@ angular.module("rentIT").controller("dashboardController", [
       $scope.isLoading = true;
       if (!$scope.bidId) {
         toaster.pop("error", "Error", "Please select a bid to approve");
+        $scope.isLoading = false;
         return;
       }
-      bidBookService
-        .approveBid($scope.bidId)
-        .then((response) => {
-          console.log(response);
+      const currentBid = $scope.bids.find((bid) => bid._id === $scope.bidId);
+      const bid = bidFactory.createBid(currentBid);
+      bid
+        .approveBid()
+        .then(() => {
           $scope.toggleApproveBidModal(false, null);
           $scope.setBiddings();
           toaster.pop("success", "Success", "Bid approved successfully");
         })
         .catch((error) => {
-          console.log(error);
           toaster.pop(
             "error",
             "Error",
-            error.description || "Error approving bid"
+            error?.description || "Error approving bid"
           );
         })
         .finally(() => {
@@ -391,12 +383,14 @@ angular.module("rentIT").controller("dashboardController", [
       $scope.isLoading = true;
       if (!$scope.bidId) {
         toaster.pop("error", "Error", "Please select a bid to cancel");
+        $scope.isLoading = false;
         return;
       }
-      bidBookService
-        .rejectBid($scope.bidId)
-        .then((response) => {
-          console.log(response);
+      const currentBid = $scope.bids.find((bid) => bid._id === $scope.bidId);
+      const bid = bidFactory.createBid(currentBid);
+      bid
+        .rejectBid()
+        .then(() => {
           $scope.toggleCancelBidModal(false, null);
           $scope.setBiddings();
           toaster.pop("success", "Success", "Bid cancelled successfully");
@@ -405,7 +399,7 @@ angular.module("rentIT").controller("dashboardController", [
           toaster.pop(
             "error",
             "Error",
-            error.description || "Error cancelling bid"
+            error?.description || "Error cancelling bid"
           );
         })
         .finally(() => {
@@ -473,10 +467,10 @@ angular.module("rentIT").controller("dashboardController", [
       $scope.bookingId = id;
       $scope.type = type;
       if (id) {
-        const currentBid = $scope.bookings.find(
+        const currentBooking = $scope.bookings.find(
           (booking) => booking._id === $scope.bookingId
         );
-        $scope.startOdometer = currentBid?.startOdometer;
+        $scope.startOdometer = currentBooking?.startOdometer;
       }
     };
 
@@ -497,84 +491,56 @@ angular.module("rentIT").controller("dashboardController", [
         return;
       }
       const currentOdometer = parseInt($scope.odometerFormData.odometerValue);
+      const currentBooking = $scope.bookings.find(
+        (booking) => booking._id === $scope.bookingId
+      );
+      const booking = bidFactory.createBid(currentBooking);
       $scope.isLoading = true;
-      if ($scope.type === "start") {
-        bidBookService
-          .addStartOdometerReading($scope.bookingId, currentOdometer)
-          .then(() => {
-            $scope.odometerFormData = {};
-            $scope.toggleOdometerModal(false, null, null);
-            $scope.setBookings();
-            toaster.pop(
-              "success",
-              "Success",
-              "Odometer value added successfully"
-            );
-          })
-          .catch((error) => {
-            toaster.pop(
-              "error",
-              "Error",
-              error.description || "Error adding odometer value"
-            );
-          })
-          .finally(() => {
-            $scope.isLoading = false;
-          });
-      } else {
-        const currentBid = $scope.bookings.find(
-          (booking) => booking._id === $scope.bookingId
-        );
-        if (currentBid.startOdometer >= currentOdometer) {
-          toaster.pop(
-            "error",
-            "Error",
-            "Final odometer value should be greater than start odometer value"
-          );
-          $scope.isLoading = false;
-          return;
-        }
-        bidBookService
-          .addFinalOdometerReading($scope.bookingId, currentOdometer)
-          .then(() => {
-            $scope.odometerFormData = {};
-            toaster.pop(
-              "success",
-              "Success",
-              "Odometer value added successfully"
-            );
-            finalizeBooking($scope.bookingId);
-            $scope.toggleOdometerModal(false, null, null);
-          })
-          .catch((error) => {
-            toaster.pop(
-              "error",
-              "Error",
-              error.description || "Error adding odometer value"
-            );
-          })
-          .finally(() => {
-            $scope.isLoading = false;
-          });
-      }
-    };
-
-    /**
-     * @description Finalize booking, calculate amount and update bid
-     */
-    const finalizeBooking = function (bookingId) {
-      bidBookService
-        .endTrip(bookingId)
+      booking
+        .addOdometerReading(currentOdometer, $scope.type)
         .then(() => {
-          $scope.setBookings();
-          toaster.pop("success", "Success", "Booking finalized successfully");
+          toaster.pop(
+            "success",
+            "Success",
+            `${
+              $scope.type === "start" ? "Start" : "Final"
+            } Odometer value added successfully`
+          );
+          if ($scope.type === "start") {
+            $scope.setBookings();
+            $scope.toggleOdometerModal(false, null, null);
+          }
+          if ($scope.type === "final") {
+            booking
+              .endTrip()
+              .then(() => {
+                toaster.pop("success", "Success", "Trip ended successfully");
+                $scope.setBookings();
+                $scope.toggleOdometerModal(false, null, null);
+              })
+              .catch((error) => {
+                toaster.pop(
+                  "error",
+                  "Error",
+                  error?.description || "Error ending trip"
+                );
+              })
+              .finally(() => {
+                $scope.isLoading = false;
+                $scope.odometerFormData = {};
+              });
+          }
         })
         .catch((error) => {
           toaster.pop(
             "error",
             "Error",
-            error.description || "Error finalizing booking"
+            error?.description || "Error adding odometer value"
           );
+        })
+        .finally(() => {
+          $scope.isLoading = false;
+          $scope.odometerFormData = {};
         });
     };
 
@@ -658,7 +624,6 @@ angular.module("rentIT").controller("dashboardController", [
         .then((response) => {
           const datasetLabel =
             "Comparision of Owner Revenue with All Owners Average";
-          console.log(response.data);
           const chartData = chartService.buildChartDataForComparision(
             response.data
           );

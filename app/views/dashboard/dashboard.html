@@ -321,7 +321,6 @@
               </option>
             </select>
           </div>
-          <!-- Removed the Trip Status filter as requested -->
           <div>
             <label for="sortFilterBooking">Sort by:</label>
             <select
@@ -1234,7 +1233,7 @@
     </div>
     <div class="custom-modal-body">
       <p class="custom-modal-title">
-        {{type=='start'?'Add Start Odomter Value':'Add Final Odometer Value'}}
+        {{type==='start'?'Add Start Odomter Value':'Add Final Odometer Value'}}
       </p>
       <form
         id="odometerForm"
@@ -1245,7 +1244,7 @@
         ng-submit="addOdometerValue()"
       >
         <div class="form-group" ng-if="startOdometer">
-          <p>Start Odomter Reading is: {{startOdometer}}</p>
+          <p>Start Odometer Reading is: {{startOdometer}}</p>
         </div>
         <div class="form-group">
           <label for="rating">Odometer Reading</label>

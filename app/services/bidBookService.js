@@ -1,7 +1,9 @@
 /**
  * @description This service is responsible for handling all the operations related to bidding booking.
- * @requires utilService
- * @requires DbService
+
+* @requires $http
+* @requires $rootScope
+* @requires $q
  */
 
 angular.module("rentIT").service("bidBookService", [
@@ -9,7 +11,6 @@ angular.module("rentIT").service("bidBookService", [
   "$rootScope",
   "$q",
   function ($http, $rootScope, $q) {
-    const APPROVED = "approved";
     const BACKEND_URL = "http://localhost:5000/api/v1/bids";
     /**
      * @description Add Bid to the database
@@ -191,43 +192,17 @@ angular.module("rentIT").service("bidBookService", [
 
     /**
      * @description Add the start odometer reading for the bid
-     * @param {*} bidId
-     * @param {*} currentOdometer
+     * @param {string} bidId
+     * @param {Number} currentOdometer
+     * @param {string} type
      * @returns
      */
-    function addStartOdometerReading(bidId, currentOdometer) {
+    function addOdometerReading(bidId, currentOdometer, type) {
       const deferred = $q.defer();
+      const url = type === "start" ? "startOdometer" : "finalOdometer";
       $http
         .patch(
-          `${BACKEND_URL}/startOdometer/${bidId}`,
-          { currentOdometer },
-          {
-            headers: {
-              Authorization: `Bearer ${$rootScope.user.accessToken}`,
-            },
-          }
-        )
-        .then(
-          function (response) {
-            deferred.resolve(response.data);
-          },
-          function (error) {
-            deferred.reject(error.data);
-          }
-        );
-      return deferred.promise;
-    }
-    /**
-     * @description Add the final odometer reading for the bid
-     * @param {*} bidId
-     * @param {*} currentOdometer
-     * @returns
-     */
-    function addFinalOdometerReading(bidId, currentOdometer) {
-      const deferred = $q.defer();
-      $http
-        .patch(
-          `${BACKEND_URL}/finalOdometer/${bidId}`,
+          `${BACKEND_URL}/${url}/${bidId}`,
           { currentOdometer },
           {
             headers: {
@@ -279,8 +254,7 @@ angular.module("rentIT").service("bidBookService", [
       approveBid,
       rejectBid,
       getUniqueCarsForFilter,
-      addStartOdometerReading,
-      addFinalOdometerReading,
+      addOdometerReading,
       endTrip,
     };
   },
