@@ -16,21 +16,17 @@ angular.module("rentIT").controller("profileController", [
   "$rootScope",
   "userService",
   "sessionService",
-  "utilService",
   "approvalService",
   "bidBookService",
   "toaster",
-  "$q",
   function (
     $scope,
     $rootScope,
     userService,
     sessionService,
-    utilService,
     approvalService,
     bidBookService,
-    toaster,
-    $q
+    toaster
   ) {
     // Initialize variables
     $scope.isLoading = false; // Loading state
@@ -221,7 +217,11 @@ angular.module("rentIT").controller("profileController", [
           $scope.approvalBtnDisabled = true;
         })
         .catch((error) => {
-          toaster.pop("error", "Error", error.message);
+          toaster.pop(
+            "error",
+            "Error",
+            "You are not approved as a seller yet."
+          );
         })
         .finally(() => {
           $scope.isLoading = false;
@@ -302,6 +302,30 @@ angular.module("rentIT").controller("profileController", [
         .finally(() => {
           $scope.isLoading = false;
         });
+    };
+
+    /**
+     * @description Function to change the page
+     * @param {*} pagename - Name of the page
+     */
+    $scope.nextPage = function (pagename) {
+      if (pagename === "bookings") {
+        if ($scope.currentPage < $scope.totalPage) $scope.currentPage++;
+        $scope.setBookings();
+      } else if (pagename === "bids") {
+        if ($scope.currentPage < $scope.totalPage) $scope.currentPage++;
+        $scope.setBiddings();
+      }
+    };
+
+    $scope.prevPage = function (pagename) {
+      if (pagename === "bookings") {
+        if ($scope.currentPage > 1) $scope.currentPage--;
+        $scope.setBookings();
+      } else if (pagename === "bids") {
+        if ($scope.currentPage > 1) $scope.currentPage--;
+        $scope.setBiddings();
+      }
     };
   },
 ]);

@@ -74,29 +74,36 @@ angular.module("rentIT").controller("dashboardController", [
     $scope.odometerModal = null; // Modal state for adding odometer value
     $scope.odometerFormData = {}; // Form data for adding odometer value
     $scope.type = null; // Type of odometer value (current or final)
+    $scope.startOdometer = null; // Start odometer value
     $scope.chartInstances = {
-      bookingChartInstance: null,
-      revenueChartInstance: null,
-      comparisionChartInstance: null,
+      bookChart: null,
+      revenueChart: null,
+      comparisionChart: null,
+    };
+    $scope.comparisionChartFilter = {
+      days: "7",
+      typeOfChart: "bar",
     };
     $scope.bookingChartFilter = {
       dataBy: "status",
       typeOfChart: "bar",
+      days: "7",
     };
     $scope.revenueChartFilter = {
       dataBy: "vehicle.location",
       typeOfChart: "bar",
+      days: "7",
     };
-    // $scope.comparisionChartFilter = {
-    //   days: 1,
-    // };
     /**
      * @description Initialize function
      */
     $scope.init = function () {
       if ($scope.currentTab === "home") {
-        $scope.setStat();
-        $scope.getCarsForFilter();
+        $q.all([
+          $scope.setStat(),
+          $scope.getCarsForFilter(),
+          $scope.comparisionChart(),
+        ]);
       }
     };
 
@@ -221,6 +228,7 @@ angular.module("rentIT").controller("dashboardController", [
         })
         .then((response) => {
           $scope.cars = response.data.vehicles;
+          $scope.totalPage = response.data.pages;
         })
         .catch((response) => {
           toaster.pop(
@@ -314,11 +322,11 @@ angular.module("rentIT").controller("dashboardController", [
           $scope.bids = response.data.bids;
           $scope.totalPage = response.data.pages;
         })
-        .catch((response) => {
+        .catch((error) => {
           toaster.pop(
             "error",
             "Error",
-            response.description || "Error loading biddings"
+            error?.description || "Error loading biddings"
           );
         })
         .finally(() => {
@@ -427,7 +435,8 @@ angular.module("rentIT").controller("dashboardController", [
       }
       if ($scope.bookingTab === "active") {
         filter["tripCompleted"] = false;
-        filter["startDate"] = { $gte: Date.now() };
+        const date = new Date().toISOString().split("T")[0];
+        filter["startDate"] = date;
       }
       if ($scope.bookingFilter.filterByCar != "all") {
         filter["vehicle._id"] = $scope.bookingFilter.filterByCar;
@@ -463,6 +472,12 @@ angular.module("rentIT").controller("dashboardController", [
       $scope.odometerModal = state;
       $scope.bookingId = id;
       $scope.type = type;
+      if (id) {
+        const currentBid = $scope.bookings.find(
+          (booking) => booking._id === $scope.bookingId
+        );
+        $scope.startOdometer = currentBid?.startOdometer;
+      }
     };
 
     /**
@@ -481,77 +496,85 @@ angular.module("rentIT").controller("dashboardController", [
         toaster.pop("error", "Error", "Please select a type");
         return;
       }
-      $q.when(bidBookService.getBidById($scope.bookingId))
-        .then((booking) => {
-          if (
-            $scope.type === "final" &&
-            booking.currentOdometer > $scope.odometerFormData.odometerValue
-          ) {
-            throw new Error(
-              "Final odometer value should be greater than starting odometer value"
+      const currentOdometer = parseInt($scope.odometerFormData.odometerValue);
+      $scope.isLoading = true;
+      if ($scope.type === "start") {
+        bidBookService
+          .addStartOdometerReading($scope.bookingId, currentOdometer)
+          .then(() => {
+            $scope.odometerFormData = {};
+            $scope.toggleOdometerModal(false, null, null);
+            $scope.setBookings();
+            toaster.pop(
+              "success",
+              "Success",
+              "Odometer value added successfully"
             );
-          }
-          // Update odometer value
-          return bidBookService.updateOdometer(
-            $scope.bookingId,
-            $scope.type,
-            Number($scope.odometerFormData.odometerValue)
-          );
-        })
-        .then(() => {
-          if ($scope.type === "final") {
-            return $scope.finalizeBooking();
-          }
-        })
-        .then(() => {
-          $scope.setBookings();
-          $scope.toggleOdometerModal(false, null, null);
-          $scope.odometerFormData = {};
+          })
+          .catch((error) => {
+            toaster.pop(
+              "error",
+              "Error",
+              error.description || "Error adding odometer value"
+            );
+          })
+          .finally(() => {
+            $scope.isLoading = false;
+          });
+      } else {
+        const currentBid = $scope.bookings.find(
+          (booking) => booking._id === $scope.bookingId
+        );
+        if (currentBid.startOdometer >= currentOdometer) {
           toaster.pop(
-            "success",
-            "Success",
-            "Odometer value added successfully"
+            "error",
+            "Error",
+            "Final odometer value should be greater than start odometer value"
           );
-        })
-        .catch((error) => {
-          toaster.pop("error", "Error", error.message);
-        });
+          $scope.isLoading = false;
+          return;
+        }
+        bidBookService
+          .addFinalOdometerReading($scope.bookingId, currentOdometer)
+          .then(() => {
+            $scope.odometerFormData = {};
+            toaster.pop(
+              "success",
+              "Success",
+              "Odometer value added successfully"
+            );
+            finalizeBooking($scope.bookingId);
+            $scope.toggleOdometerModal(false, null, null);
+          })
+          .catch((error) => {
+            toaster.pop(
+              "error",
+              "Error",
+              error.description || "Error adding odometer value"
+            );
+          })
+          .finally(() => {
+            $scope.isLoading = false;
+          });
+      }
     };
 
     /**
      * @description Finalize booking, calculate amount and update bid
      */
-    $scope.finalizeBooking = function () {
-      if (!$scope.bookingId) {
-        toaster.pop("error", "Error", "Please select a booking");
-        return;
-      }
-      $q.when(bidBookService.getBidById($scope.bookingId))
-        .then((booking) => {
-          // Calculate amount
-          const newAmount =
-            booking.amount +
-            booking.car.ratePerKm *
-              Math.max(
-                Number(booking.finalOdometer) -
-                  Number(booking.currentOdometer) -
-                  Number(booking.car.fixedKilometer) *
-                    utilService.getDaysDiff(booking.startDate, booking.endDate),
-                0
-              );
-          // Update bid
-          return bidBookService.updateBid({
-            id: booking.id,
-            amount: newAmount,
-            tripCompleted: true,
-            updatedAt: Date.now(),
-          });
-        })
+    const finalizeBooking = function (bookingId) {
+      bidBookService
+        .endTrip(bookingId)
         .then(() => {
-          toaster.pop("success", "Success", "Booking completed successfully");
+          $scope.setBookings();
+          toaster.pop("success", "Success", "Booking finalized successfully");
         })
         .catch((error) => {
-          toaster.pop("error", "Error", error.message);
+          toaster.pop(
+            "error",
+            "Error",
+            error.description || "Error finalizing booking"
+          );
         });
     };
 
@@ -561,8 +584,9 @@ angular.module("rentIT").controller("dashboardController", [
     $scope.bookingChart = function () {
       $scope.isLoading = true;
       const analyticsField = $scope.bookingChartFilter.dataBy;
+      const days = $scope.bookingChartFilter.days;
       chartService
-        .getBookingChartDataForOwner(analyticsField)
+        .getBookingChartDataForOwner(analyticsField, days)
         .then((response) => {
           const datasetLabel =
             "Number of Bookings by " +
@@ -597,13 +621,12 @@ angular.module("rentIT").controller("dashboardController", [
     $scope.revenueChart = function () {
       $scope.isLoading = true;
       const analyticsField = $scope.revenueChartFilter.dataBy;
+      const days = $scope.revenueChartFilter.days;
       chartService
-        .getRevenueChartDataForOwner(analyticsField)
+        .getRevenueChartDataForOwner(analyticsField, days)
         .then((response) => {
           const datasetLabel =
-            "Revenue by " +
-            analyticsField.charAt(0).toUpperCase() +
-            analyticsField.slice(1);
+            "Revenue by " + analyticsField.split(".").join(" ");
           const chartData = chartService.buildChartDataForRevenue(
             response.data
           );
@@ -627,6 +650,37 @@ angular.module("rentIT").controller("dashboardController", [
         });
     };
 
+    $scope.comparisionChart = function () {
+      $scope.isLoading = true;
+      const days = $scope.comparisionChartFilter.days;
+      chartService
+        .getOwnerAverageAgainstAllOwners(days)
+        .then((response) => {
+          const datasetLabel =
+            "Comparision of Owner Revenue with All Owners Average";
+          console.log(response.data);
+          const chartData = chartService.buildChartDataForComparision(
+            response.data
+          );
+          $scope.loadChart(
+            chartData,
+            $scope.comparisionChartFilter.typeOfChart,
+            "comparisionChart",
+            true,
+            datasetLabel
+          );
+        })
+        .catch((error) => {
+          toaster.pop(
+            "error",
+            "Error",
+            error?.name || "Error loading Comparision Chart"
+          );
+        })
+        .finally(() => {
+          $scope.isLoading = false;
+        });
+    };
     /**
      * @description To Load Chart instances
      * @param {*} data - chart data
@@ -646,17 +700,8 @@ angular.module("rentIT").controller("dashboardController", [
         ? (value) => "Rs. " + utilService.formatNumber(value)
         : (value) => (value % 1 === 0 ? utilService.formatNumber(value) : "");
       const ctx = document.getElementById(id).getContext("2d");
-      if (id === "bookChart" && $scope.chartInstances.bookingChartInstance) {
-        $scope.chartInstances.bookingChartInstance.destroy();
-      }
-      if (id === "revenueChart" && $scope.chartInstances.revenueChartInstance) {
-        $scope.chartInstances.revenueChartInstance.destroy();
-      }
-      if (
-        id === "chartComparison" &&
-        $scope.chartInstances.comparisionChartInstance
-      ) {
-        $scope.chartInstances.comparisionChartInstance.destroy();
+      if ($scope.chartInstances[id]) {
+        $scope.chartInstances[id].destroy();
       }
       const chart = new Chart(ctx, {
         type: chartType,
@@ -698,15 +743,7 @@ angular.module("rentIT").controller("dashboardController", [
                 },
         },
       });
-      if (id === "bookChart") {
-        $scope.chartInstances.bookingChartInstance = chart;
-      }
-      if (id === "revenueChart") {
-        $scope.chartInstances.revenueChartInstance = chart;
-      }
-      if (id === "chartComparison") {
-        $scope.chartInstances.comparisionChartInstance = chart;
-      }
+      $scope.chartInstances[id] = chart;
     };
 
     /**
@@ -714,8 +751,6 @@ angular.module("rentIT").controller("dashboardController", [
      * @param {*} pagename - Name of the page
      */
     $scope.nextPage = function (pagename) {
-      console.log("nextPage");
-      console.log(pagename);
       if (pagename === "bookings") {
         if ($scope.currentPage < $scope.totalPage) $scope.currentPage++;
         $scope.setBookings();
@@ -723,17 +758,22 @@ angular.module("rentIT").controller("dashboardController", [
         if ($scope.currentPage < $scope.totalPage) $scope.currentPage++;
         console.log($scope.currentPage);
         $scope.setBiddings();
+      } else if (pagename === "cars") {
+        if ($scope.currentPage < $scope.totalPage) $scope.currentPage++;
+        $scope.setCars();
       }
     };
 
     $scope.prevPage = function (pagename) {
-      console.log("prevPage");
       if (pagename === "bookings") {
         if ($scope.currentPage > 1) $scope.currentPage--;
         $scope.setBookings();
       } else if (pagename === "bids") {
         if ($scope.currentPage > 1) $scope.currentPage--;
         $scope.setBiddings();
+      } else if (pagename === "cars") {
+        if ($scope.currentPage > 1) $scope.currentPage--;
+        $scope.setCars();
       }
     };
   },

@@ -26,6 +26,7 @@ angular.module("rentIT").controller("adminController", [
     $scope.totalPage = null; // Total number of pages
     $scope.currentTab = "home"; // Current tab
     $scope.stat = {}; // Statistics data for dashboard
+    $scope.popularVehicleDetails = {}; // Popular vehicle details
     $scope.approvals = []; // Approvals data for dashboard
     $scope.approveModal = false; // Approve modal state
     $scope.cancelApproveModal = false; // Cancel approve modal state
@@ -40,25 +41,35 @@ angular.module("rentIT").controller("adminController", [
       field: "location",
       typeOfChart: "bar",
     };
+    $scope.topEarningOwnersChartFilter = {
+      typeOfChart: "bar",
+      days: "7",
+    };
     $scope.bookChartFilter = {
       field: "vehicle.location",
       typeOfChart: "bar",
+      days: "7",
     };
     $scope.revenueChartFilter = {
       field: "vehicle.location",
       typeOfChart: "bar",
+      days: "7",
     };
     $scope.chartInstances = {
       carChart: null,
       bookChart: null,
       revenueChart: null,
+      topEarningOwnersChart: null,
     };
     /**
      * @description Get statistics data for dashboard
      */
     $scope.init = function () {
       if ($scope.currentTab === "home") {
-        $scope.setStat();
+        $scope.isLoading = true;
+        $q.all([setStat(), getPopluarVehicleDetails()]).finally(() => {
+          $scope.isLoading = false;
+        });
       }
     };
 
@@ -90,7 +101,7 @@ angular.module("rentIT").controller("adminController", [
         case "home":
           break;
         case "analytics":
-          $scope.revenueChart();
+          $q.all([$scope.revenueChart(), $scope.topEarningOwnersChart()]);
           break;
         case "approvals":
           $scope.setApprovals();
@@ -104,8 +115,7 @@ angular.module("rentIT").controller("adminController", [
     /**
      * @description Set statistics for dashboard
      */
-    $scope.setStat = function () {
-      $scope.isLoading = true;
+    const setStat = function () {
       userService
         .getStatsForSuperAdmin()
         .then((result) => {
@@ -118,9 +128,25 @@ angular.module("rentIT").controller("adminController", [
             "Error",
             error.message || "Error loading statistics"
           );
+        });
+    };
+
+    /**
+     * @description Get popular vehicle details
+     */
+    const getPopluarVehicleDetails = () => {
+      chartService
+        .getPopularVehicleDetails()
+        .then((response) => {
+          $scope.popularVehicleDetails = response.data;
         })
-        .finally(() => {
-          $scope.isLoading = false;
+        .catch((error) => {
+          console.log(error);
+          toaster.pop(
+            "error",
+            "Error",
+            error.message || "Error loading popular vehicle details"
+          );
         });
     };
 
@@ -249,13 +275,12 @@ angular.module("rentIT").controller("adminController", [
     $scope.bookChart = function () {
       $scope.isLoading = true;
       const analyticsField = $scope.bookChartFilter.field;
+      const days = $scope.bookChartFilter.days;
       chartService
-        .getBookingChartDataForSuperAdmin(analyticsField)
+        .getBookingChartDataForSuperAdmin(analyticsField, days)
         .then((response) => {
           const datasetLabel =
-            "Number of Bookings by " +
-            analyticsField.charAt(0).toUpperCase() +
-            analyticsField.slice(1);
+            "Number of Bookings by " + analyticsField.split(".").join(" ");
           const chartData = chartService.buildChartDataForBooking(
             response.data
           );
@@ -284,13 +309,12 @@ angular.module("rentIT").controller("adminController", [
     $scope.revenueChart = function () {
       $scope.isLoading = true;
       const analyticsField = $scope.revenueChartFilter.field;
+      const days = $scope.revenueChartFilter.days;
       chartService
-        .getRevenueChartDataForSuperAdmin(analyticsField)
+        .getRevenueChartDataForSuperAdmin(analyticsField, days)
         .then((response) => {
           const datasetLabel =
-            "Revenue by " +
-            analyticsField.charAt(0).toUpperCase() +
-            analyticsField.slice(1);
+            "Revenue by " + analyticsField.split(".").join(" ");
           const chartData = chartService.buildChartDataForRevenue(
             response.data
           );
@@ -308,6 +332,37 @@ angular.module("rentIT").controller("adminController", [
             "error",
             "Error",
             error?.name || "Error loading Revenue Chart"
+          );
+        })
+        .finally(() => {
+          $scope.isLoading = false;
+        });
+    };
+
+    $scope.topEarningOwnersChart = function () {
+      $scope.isLoading = true;
+      const days = $scope.topEarningOwnersChartFilter.days;
+      chartService
+        .getTopOwnersForSuperAdmin(days)
+        .then((response) => {
+          const datasetLabel = "Top Earning Owners";
+          const chartData = chartService.buildChartDataForTopOwners(
+            response.data
+          );
+          $scope.loadChart(
+            chartData,
+            $scope.topEarningOwnersChartFilter.typeOfChart,
+            "topEarningOwnersChart",
+            true,
+            datasetLabel
+          );
+        })
+        .catch((error) => {
+          console.log(error);
+          toaster.pop(
+            "error",
+            "Error",
+            error?.name || "Error loading Top Earning Owners Chart"
           );
         })
         .finally(() => {

@@ -188,6 +188,89 @@ angular.module("rentIT").service("bidBookService", [
         );
       return deferred.promise;
     }
+
+    /**
+     * @description Add the start odometer reading for the bid
+     * @param {*} bidId
+     * @param {*} currentOdometer
+     * @returns
+     */
+    function addStartOdometerReading(bidId, currentOdometer) {
+      const deferred = $q.defer();
+      $http
+        .patch(
+          `${BACKEND_URL}/startOdometer/${bidId}`,
+          { currentOdometer },
+          {
+            headers: {
+              Authorization: `Bearer ${$rootScope.user.accessToken}`,
+            },
+          }
+        )
+        .then(
+          function (response) {
+            deferred.resolve(response.data);
+          },
+          function (error) {
+            deferred.reject(error.data);
+          }
+        );
+      return deferred.promise;
+    }
+    /**
+     * @description Add the final odometer reading for the bid
+     * @param {*} bidId
+     * @param {*} currentOdometer
+     * @returns
+     */
+    function addFinalOdometerReading(bidId, currentOdometer) {
+      const deferred = $q.defer();
+      $http
+        .patch(
+          `${BACKEND_URL}/finalOdometer/${bidId}`,
+          { currentOdometer },
+          {
+            headers: {
+              Authorization: `Bearer ${$rootScope.user.accessToken}`,
+            },
+          }
+        )
+        .then(
+          function (response) {
+            deferred.resolve(response.data);
+          },
+          function (error) {
+            deferred.reject(error.data);
+          }
+        );
+      return deferred.promise;
+    }
+    /**
+     * @description End the trip
+     * @param {*} bidId - The bid id
+     */
+    function endTrip(bidId) {
+      const deferred = $q.defer();
+      $http
+        .patch(
+          `${BACKEND_URL}/endTrip/${bidId}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${$rootScope.user.accessToken}`,
+            },
+          }
+        )
+        .then(
+          function (response) {
+            deferred.resolve(response.data);
+          },
+          function (error) {
+            deferred.reject(error.data);
+          }
+        );
+      return deferred.promise;
+    }
     return {
       addBid,
       getBookedDates,
@@ -196,6 +279,9 @@ angular.module("rentIT").service("bidBookService", [
       approveBid,
       rejectBid,
       getUniqueCarsForFilter,
+      addStartOdometerReading,
+      addFinalOdometerReading,
+      endTrip,
     };
   },
 ]);

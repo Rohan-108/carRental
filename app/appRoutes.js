@@ -78,12 +78,40 @@ angular.module("rentIT").config([
               return resourceInjector.loadCSS("./views/profile/profile.css");
             },
           ],
+          loggedIn: [
+            "authService",
+            function (authService) {
+              return authService
+                .isLoggedIn()
+                .then((response) => {
+                  return response;
+                })
+                .catch(() => {
+                  throw new Error("User_Not_Authenticated");
+                });
+            },
+          ],
         },
       })
       .state("chat", {
         url: "/chat",
         templateUrl: "app/views/chat/chat.html",
         controller: "chatController",
+        resolve: {
+          isLoggedIn: [
+            "authService",
+            function (authService) {
+              return authService
+                .isLoggedIn()
+                .then((response) => {
+                  return response;
+                })
+                .catch(() => {
+                  throw new Error("User_Not_Authenticated");
+                });
+            },
+          ],
+        },
       })
       .state("dashboard", {
         url: "/dashboard",
@@ -98,6 +126,19 @@ angular.module("rentIT").config([
               );
             },
           ],
+          isAdmin: [
+            "authService",
+            function (authService) {
+              return authService
+                .isAdmin()
+                .then((response) => {
+                  return response;
+                })
+                .catch(() => {
+                  throw new Error("Restricted_Access");
+                });
+            },
+          ],
         },
       })
       .state("admin", {
@@ -109,6 +150,19 @@ angular.module("rentIT").config([
             "resourceInjector",
             function (resourceInjector) {
               return resourceInjector.loadCSS("./views/admin/admin.css");
+            },
+          ],
+          isSuperAdmin: [
+            "authService",
+            function (authService) {
+              return authService
+                .isSuperAdmin()
+                .then((response) => {
+                  return response;
+                })
+                .catch(() => {
+                  throw new Error("Restricted_Access");
+                });
             },
           ],
         },

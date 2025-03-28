@@ -213,7 +213,6 @@ angular.module("rentIT").controller("carDetailController", [
       chatService
         .getConversationByCarAndMember($scope.car._id, $rootScope.user._id)
         .then((response) => {
-          console.log(response);
           $scope.convId = response.data._id;
           chatService.joinConversation($scope.convId);
           chatService
@@ -222,13 +221,11 @@ angular.module("rentIT").controller("carDetailController", [
               $scope.messages = response.data.chats;
             })
             .catch((error) => {
-              console.log(error);
               toaster.pop("error", "Error", "Error while loading chat");
             });
         })
         .catch((error) => {
-          console.log(error);
-          toaster.pop("error", "Error", "Error while loading chat");
+          toaster.pop("success", "success", "No conversation found");
         });
     };
 
@@ -255,7 +252,6 @@ angular.module("rentIT").controller("carDetailController", [
             $rootScope.user._id,
           ])
           .then((response) => {
-            console.log(response.data.conversationId);
             $scope.convId = response.data.conversationId;
             chatService
               .sendMessage($scope.message, $scope.convId)
@@ -344,7 +340,6 @@ angular.module("rentIT").controller("carDetailController", [
       bidBookService
         .getBookedDates($scope.car._id)
         .then((response) => {
-          console.log(response);
           const bookings = response.data.bookedDates;
           const flattenBookedDates = bookings.flatMap((booking) =>
             getDatesInRange(booking.startDate, booking.endDate)

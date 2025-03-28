@@ -54,7 +54,7 @@
       <h2>Your Numbers</h2>
       <div class="summary-cards">
         <div class="card">
-          <h3>Total Bid</h3>
+          <h3>Pending Bid</h3>
           <p id="biddingCount">{{stat.bids}}</p>
         </div>
         <div class="card">
@@ -67,12 +67,15 @@
         </div>
         <div class="card">
           <h3>Total Revenue</h3>
-          <p style="color: gray; font-size: 0.8rem">After 25% Commission Cut</p>
-          <p><span id="revenue">{{stat.revenue}}</span></p>
+          <p><span id="revenue">{{stat.revenue | currency:"Rs."}}</span></p>
         </div>
         <div class="card">
           <h3>Average Rental Period</h3>
-          <p><span id="averageRentDay">{{stat.avgRentalDay}}</span></p>
+          <p>
+            <span id="averageRentDay"
+              >{{stat.avgRentalDay}} {{stat.avgRentalDay>1?"days":"day"}}</span
+            >
+          </p>
         </div>
         <div class="card">
           <h3>Rejected Bids</h3>
@@ -122,7 +125,23 @@
           </div>
         </div>
       </div>
-      <div class="pagination"></div>
+      <div class="pagination">
+        <button
+          class="pagination-button"
+          ng-disabled="currentPage === 1"
+          ng-click="prevPage('cars')"
+        >
+          Prev
+        </button>
+        <span>Page {{currentPage}} of {{totalPage}}</span>
+        <button
+          class="pagination-button"
+          ng-disabled="currentPage === totalPage"
+          ng-click="nextPage('cars')"
+        >
+          Next
+        </button>
+      </div>
     </div>
 
     <!-- Bidding Section -->
@@ -205,7 +224,7 @@
             <td data-label="Plate Number">{{bid.vehicle.plateNumber}}</td>
             <td data-label="Start Date">{{bid.startDate | date}}</td>
             <td data-label="End Date">{{bid.endDate | date}}</td>
-            <td data-label="Amount">{{bid.amount | currency}}</td>
+            <td data-label="Amount">{{bid.amount | currency:"Rs."}}</td>
             <td data-label="Status" ng-if="bid.status!=='pending'">
               {{bid.status}}
             </td>
@@ -337,11 +356,12 @@
             <th scope="col">End Date</th>
             <th scope="col">Amount</th>
             <th scope="col" ng-if="bookingTab==='active'">Action</th>
+            <th scope="col" ng-if="bookingTab==='completed'">Invoice</th>
           </tr>
         </thead>
         <tbody id="bookingContainer">
           <tr ng-if="bookings.length === 0">
-            <td colspan="{{bookingTab=='active'?'7':'6'}}" class="no-data">
+            <td colspan="{{bookingTab==='active'?'7':'6'}}" class="no-data">
               There is no data
             </td>
           </tr>
@@ -351,22 +371,28 @@
             <td data-label="Adhaar Number">{{booking.user.adhaar}}</td>
             <td data-label="Start Date">{{booking.startDate |date}}</td>
             <td data-label="End Date">{{booking.endDate | date}}</td>
-            <td data-label="Amount">{{booking.amount | currency}}</td>
+            <td data-label="Amount">{{booking.amount | currency:"Rs."}}</td>
             <td data-label="Action" ng-if="bookingTab=='active'">
               <button
                 class="add-odometer"
-                ng-if="!booking.currentOdometer"
-                ng-click="toggleOdometerModal(true, booking._id,'current')"
+                ng-if="!booking.startOdometer"
+                ng-click="toggleOdometerModal(true, booking._id,'start')"
               >
                 Add Current Odometer
               </button>
               <button
                 class="add-odometer"
-                ng-if="booking.currentOdometer && !booking.finalOdometer"
+                style="background-color: rgb(223, 47, 47)"
+                ng-if="booking.startOdometer && !booking.finalOdometer"
                 ng-click="toggleOdometerModal(true, booking._id,'final')"
               >
                 Add Final Odometer
               </button>
+            </td>
+            <td data-label="Invoice" ng-if="bookingTab==='completed'">
+              <a ng-href="{{booking.invoice}}" target="_blank">
+                <button class="add-odometer">Download Invoice</button>
+              </a>
             </td>
           </tr>
         </tbody>
@@ -379,7 +405,7 @@
         >
           Prev
         </button>
-        <span>Page {{currentPage}} of {{totalPage}}</span>
+        <span>Page {{currentPage}} of {{totalPage===0?1:totalPage}}</span>
         <button
           class="pagination-button"
           ng-disabled="currentPage === totalPage"
@@ -395,6 +421,21 @@
       <div class="chartHeader">
         <h2>Revenue Analytics</h2>
         <div class="analytics">
+          <div class="fields">
+            <label for="days">No Of Days:</label>
+            <select
+              name="days"
+              id="days"
+              ng-model="revenueChartFilter.days"
+              ng-change="revenueChart()"
+            >
+              <option value="7" selected>Last 7 Days</option>
+              <option value="30">Last 30 Days</option>
+              <option value="90">Last 90 Days</option>
+              <option value="180">Last 180 Days</option>
+              <option value="365">Last 365 Days</option>
+            </select>
+          </div>
           <div class="fields">
             <label for="revenueFilter">Filter:</label>
             <select
@@ -434,12 +475,71 @@
         </p>
       </div>
     </div>
+    <!-- Comparison Chart Section -->
+    <div id="revenue-chart" class="chart" ng-if="currentTab==='home'">
+      <div class="chartHeader">
+        <h2>Comparision</h2>
+        <div class="analytics">
+          <div class="fields">
+            <label for="days">No Of Days:</label>
+            <select
+              name="days"
+              id="days"
+              ng-model="comparisionChartFilter.days"
+              ng-change="comparisionChart()"
+            >
+              <option value="7" selected>Last 7 Days</option>
+              <option value="30">Last 30 Days</option>
+              <option value="90">Last 90 Days</option>
+              <option value="180">Last 180 Days</option>
+              <option value="365">Last 365 Days</option>
+            </select>
+          </div>
+          <div class="fields">
+            <label for="comparisionChartType">Chart:</label>
+            <select
+              name="comparisionChartType"
+              id="comparisionChartType"
+              ng-model="comparisionChartFilter.typeOfChart"
+              ng-change="comparisionChart()"
+            >
+              <option value="bar" selected>Bar</option>
+              <option value="pie">Pie</option>
+              <option value="doughnut">DoughNut</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="comparisionChart"></canvas>
+      </div>
+      <div>
+        <p style="text-align: center; font-size: 0.8rem">
+          *Revenue is calculated for confirmed bokkings only.
+        </p>
+      </div>
+    </div>
 
     <!-- Booking Analytics Section -->
     <div id="booking-chart" class="chart" ng-if="currentTab==='analytics'">
       <div class="chartHeader">
         <h2>Booking Analytics</h2>
         <div class="analytics">
+          <div class="fields">
+            <label for="days">No Of Days:</label>
+            <select
+              name="days"
+              id="days"
+              ng-model="bookingChartFilter.days"
+              ng-change="bookingChart()"
+            >
+              <option value="7" selected>Last 7 Days</option>
+              <option value="30">Last 30 Days</option>
+              <option value="90">Last 90 Days</option>
+              <option value="180">Last 180 Days</option>
+              <option value="365">Last 365 Days</option>
+            </select>
+          </div>
           <div class="fields">
             <label for="bookingFilter">Filter:</label>
             <select
@@ -1134,8 +1234,7 @@
     </div>
     <div class="custom-modal-body">
       <p class="custom-modal-title">
-        {{type=='current'?'Add Current Odomter Value':'Add Final Odometer
-        Value'}}
+        {{type=='start'?'Add Start Odomter Value':'Add Final Odometer Value'}}
       </p>
       <form
         id="odometerForm"
@@ -1145,6 +1244,9 @@
         novalidate
         ng-submit="addOdometerValue()"
       >
+        <div class="form-group" ng-if="startOdometer">
+          <p>Start Odomter Reading is: {{startOdometer}}</p>
+        </div>
         <div class="form-group">
           <label for="rating">Odometer Reading</label>
           <input

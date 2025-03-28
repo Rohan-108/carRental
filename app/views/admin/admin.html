@@ -42,41 +42,68 @@
     </div>
     <!------Home section -------------------------------------------------------------->
     <section id="home" class="stat" ng-if="currentTab==='home'">
-      <h2>Admin Dashboard</h2>
-      <div class="summary-cards">
-        <div class="card">
-          <h3>Total Bid</h3>
-          <p id="biddingCount">{{stat.bids}}</p>
+      <div>
+        <h2 style="padding: 0.5rem">Admin Dashboard</h2>
+        <div class="summary-cards">
+          <div class="card">
+            <h3>Pending Bid</h3>
+            <p id="biddingCount">{{stat.bids}}</p>
+          </div>
+          <div class="card">
+            <h3>Total Booking</h3>
+            <p id="bookingCount">{{stat.bookings}}</p>
+          </div>
+          <div class="card">
+            <h3>Users</h3>
+            <p id="noOfAdmin">{{stat.users}}</p>
+          </div>
+          <div class="card">
+            <h3>Cars</h3>
+            <p id="noOfCars">{{stat.cars}}</p>
+          </div>
+          <div class="card">
+            <h3>Total Revenue</h3>
+            <p id="revenue">{{stat.revenue | currency:"Rs."}}</p>
+          </div>
+          <div class="card">
+            <h3>Average Rental Period</h3>
+            <p id="averageRentDay">
+              {{stat.avgRentalDay}} {{stat.avgRentalDay>1?"days":"day"}}
+            </p>
+          </div>
+          <div class="card">
+            <h3>Rejected Bids</h3>
+            <p id="rejectedBids">{{stat.rejectedBids}}</p>
+          </div>
+          <div class="card">
+            <h3>Conversion Ratio</h3>
+            <p id="conversionRatio">{{stat.conversionRatio}} %</p>
+          </div>
         </div>
-        <div class="card">
-          <h3>Total Booking</h3>
-          <p id="bookingCount">{{stat.bookings}}</p>
-        </div>
-        <div class="card">
-          <h3>Users</h3>
-          <p id="noOfAdmin">{{stat.users}}</p>
-        </div>
-        <div class="card">
-          <h3>Cars</h3>
-          <p id="noOfCars">{{stat.cars}}</p>
-        </div>
-        <div class="card">
-          <h3>Total Revenue</h3>
-          <p id="revenue">{{stat.revenue | currency}}</p>
-        </div>
-        <div class="card">
-          <h3>Average Rental Period</h3>
-          <p id="averageRentDay">
-            {{stat.avgRentalDay}} {{stat.avgRentalDay>1?"days":"day"}}
-          </p>
-        </div>
-        <div class="card">
-          <h3>Rejected Bids</h3>
-          <p id="rejectedBids">{{stat.rejectedBids}}</p>
-        </div>
-        <div class="card">
-          <h3>Conversion Ratio</h3>
-          <p id="conversionRatio">{{stat.conversionRatio}} %</p>
+      </div>
+      <div>
+        <h2 style="padding: 0.5rem">Popular Things/Types:</h2>
+        <div class="summary-cards">
+          <div class="card">
+            <h3>Most Popular vehicleType</h3>
+            <p>{{popularVehicleDetails.popularVehicleType[0].name}}</p>
+          </div>
+          <div class="card">
+            <h3>Most Popular Transmission</h3>
+            <p>{{popularVehicleDetails.popularTransmissionType[0].name}}</p>
+          </div>
+          <div class="card">
+            <h3>Most Popular Fuel Type</h3>
+            <p>{{popularVehicleDetails.popularFuelType[0].name}}</p>
+          </div>
+          <div class="card">
+            <h3>Most Popular Model</h3>
+            <p>{{popularVehicleDetails.popularModel[0].name}}</p>
+          </div>
+          <div class="card">
+            <h3>Most Popular Location</h3>
+            <p>{{popularVehicleDetails.popularLocation[0].name}}</p>
+          </div>
         </div>
       </div>
     </section>
@@ -85,6 +112,21 @@
       <div class="chartHeader">
         <h2>Revenue Analytics</h2>
         <div class="analytics">
+          <div class="fields">
+            <label for="days">No Of Days:</label>
+            <select
+              name="days"
+              id="days"
+              ng-model="revenueChartFilter.days"
+              ng-change="revenueChart()"
+            >
+              <option value="7" selected>Last 7 Days</option>
+              <option value="30">Last 30 Days</option>
+              <option value="90">Last 90 Days</option>
+              <option value="180">Last 180 Days</option>
+              <option value="365">Last 365 Days</option>
+            </select>
+          </div>
           <div class="field">
             <label for="revenueFilter">Filter:</label>
             <select
@@ -97,8 +139,8 @@
               <option value="vehicle.fuelType">By FuelType</option>
               <option value="vehicle.transmission">By Transmission Type</option>
               <option value="vehicle.location" selected>By Location</option>
-              <option value="vehicle.plateNumber">By Per Car</option>
-              <option value="user.email">By Car Owner</option>
+              <!-- <option value="vehicle.plateNumber">By Per Car</option>
+              <option value="user.email">By Car Owner</option> -->
             </select>
           </div>
           <div class="field">
@@ -121,8 +163,49 @@
       </div>
       <div>
         <p style="text-align: center; font-size: 0.8rem">
-          *Revenue is calculated after 25% commission cut
+          *revenue is calculated for confirmed bookings only.
         </p>
+      </div>
+    </section>
+    <!-----Revenue Chart Section-------------------------------------------------------->
+    <section class="chart" ng-if="currentTab==='analytics'">
+      <div class="chartHeader">
+        <h2>Top Earnings Owners</h2>
+        <div class="analytics">
+          <div class="fields">
+            <label for="days">No Of Days:</label>
+            <select
+              name="days"
+              id="days"
+              ng-model="topEarningOwnersChartFilter.days"
+              ng-change="topEarningOwnersChart()"
+            >
+              <option value="7" selected>Last 7 Days</option>
+              <option value="30">Last 30 Days</option>
+              <option value="90">Last 90 Days</option>
+              <option value="180">Last 180 Days</option>
+              <option value="365">Last 365 Days</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="topEarningOwnersChartType">Chart:</label>
+            <select
+              name="topEarningOwnersChartType"
+              id="topEarningOwnersChartType"
+              ng-model="topEarningOwnersChartFilter.typeOfChart"
+              ng-change="topEarningOwnersChart()"
+            >
+              <option value="bar" selected>Bar</option>
+              <option value="pie">Pie</option>
+              <option value="doughnut">DoughNut</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="topEarningOwnersChart"></canvas>
+      </div>
+      <div>
         <p style="text-align: center; font-size: 0.8rem">
           *revenue is calculated for confirmed bookings only.
         </p>
@@ -137,6 +220,21 @@
       <div class="chartHeader">
         <h2>Number of Bookings</h2>
         <div class="analytics">
+          <div class="fields">
+            <label for="days">No Of Days:</label>
+            <select
+              name="days"
+              id="days"
+              ng-model="bookChartFilter.days"
+              ng-change="bookChart()"
+            >
+              <option value="7" selected>Last 7 Days</option>
+              <option value="30">Last 30 Days</option>
+              <option value="90">Last 90 Days</option>
+              <option value="180">Last 180 Days</option>
+              <option value="365">Last 365 Days</option>
+            </select>
+          </div>
           <div class="field">
             <label for="bookingFilter">Filter:</label>
             <select
@@ -359,7 +457,7 @@
     </div>
   </div>
 </div>
-<!-- cancel bid modal ------------------------------------------------------>
+<!-- cancel approval modal ------------------------------------------------------>
 <div class="custom-modal" id="cancelModal" ng-if="cancelApproveModal==true">
   <div class="custom-modal-inner">
     <div class="custom-modal-header">

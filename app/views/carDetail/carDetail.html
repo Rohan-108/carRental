@@ -125,7 +125,10 @@
         <div class="msger-header-title">Chat With Owner</div>
       </header>
       <main class="userChat" id="messageBoxUser">
-        <div class="no-chat" ng-if="car.owner._id===user._id">
+        <div
+          class="no-chat"
+          ng-if="car.owner._id===user._id || user.role==='super-admin'"
+        >
           <p>You can't Chat</p>
         </div>
         <div

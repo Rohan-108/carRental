@@ -128,6 +128,7 @@
             <th scope="col">Start Date</th>
             <th scope="col">End Date</th>
             <th scope="col">Amount</th>
+            <th scope="col">Invoice</th>
             <th scope="col">Confirmed At</th>
           </tr>
         </thead>
@@ -138,11 +139,30 @@
             <td data-label="Plate Number">{{booking.vehicle.plateNumber}}</td>
             <td data-label="Start Date">{{booking.startDate | date}}</td>
             <td data-label="End Date">{{booking.endDate | date}}</td>
-            <td data-label="Amount">{{booking.amount | currency}}</td>
+            <td data-label="Amount">{{booking.amount | currency:"Rs."}}</td>
+            <td data-label="Invoice">
+              <a
+                ng-href="{{booking.invoice?booking.invoice:''}}"
+                target="_blank"
+              >
+                <button
+                  ng-show="booking.invoice"
+                  style="
+                    border-radius: 1rem;
+                    background-color: rgb(39, 230, 39);
+                    cursor: pointer;
+                    padding: 0.3rem;
+                  "
+                >
+                  Download Invoice
+                </button>
+                <p ng-show="!booking.invoice">Not Completed</p>
+              </a>
+            </td>
             <td data-label="Confirmed At">{{booking.createdAt | date}}</td>
           </tr>
           <tr ng-if="bookings.length === 0">
-            <td colspan="7" class="no-data">There is no data</td>
+            <td colspan="8" class="no-data">There is no data</td>
           </tr>
         </tbody>
       </table>
@@ -150,15 +170,15 @@
         <button
           class="pagination-button"
           ng-disabled="currentPage === 1"
-          ng-click="prevPage(bookings)"
+          ng-click="prevPage('bookings')"
         >
           Prev
         </button>
-        <span>Page {{currentPage}} of {{totalPage}}</span>
+        <span>Page {{currentPage}} of {{totalPage===0?1:totalPage}}</span>
         <button
           class="pagination-button"
           ng-disabled="currentPage === totalPage"
-          ng-click="nextPage(bookings)"
+          ng-click="nextPage('bookings')"
         >
           Next
         </button>
@@ -228,7 +248,7 @@
             <td data-label="Plate Number">{{bid.vehicle.plateNumber}}</td>
             <td data-label="Start Date">{{bid.startDate | date}}</td>
             <td data-label="End Date">{{bid.endDate| date}}</td>
-            <td data-label="Amount">{{bid.amount | currency}}</td>
+            <td data-label="Amount">{{bid.amount | currency:"Rs."}}</td>
             <td data-label="Status">{{bid.status}}</td>
           </tr>
           <tr ng-if="bids.length === 0">
@@ -240,15 +260,15 @@
         <button
           class="pagination-button"
           ng-disabled="currentPage === 1"
-          ng-click="prevPage(bids)"
+          ng-click="prevPage('bids')"
         >
           Prev
         </button>
-        <span>Page {{currentPage}} of {{totalPage}}</span>
+        <span>Page {{currentPage}} of {{totalPage===0?1:totalPage}}</span>
         <button
           class="pagination-button"
           ng-disabled="currentPage === totalPage"
-          ng-click="nextPage(bids)"
+          ng-click="nextPage('bids')"
         >
           Next
         </button>

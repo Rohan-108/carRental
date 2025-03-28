@@ -18,7 +18,7 @@
           />
           <div class="info">
             <p>{{conv.members[0].username}}</p>
-            <p>{{conv.car.name}}</p>
+            <p>{{conv.vehicle.name}}</p>
           </div>
         </div>
       </div>
@@ -78,7 +78,7 @@
           class="msger-send-btn"
           id="send"
           style="height: max-content; margin-block: auto"
-          ng-disabled="chatForm.$invalid"
+          ng-disabled="chatForm.$invalid || user.role=='super-admin'"
         >
           Send
         </button>
@@ -121,7 +121,7 @@
                   type="submit"
                   name="submit"
                   value="Send"
-                  ng-disabled="imageForm.$invalid"
+                  ng-disabled="imageForm.$invalid || user.role=='super-admin'"
                   style="margin: 0"
                 />
               </div>

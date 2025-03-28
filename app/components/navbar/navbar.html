@@ -22,7 +22,7 @@
         <li ng-show="user">
           <a ui-sref="profile" ui-sref-active="active">Profile</a>
         </li>
-        <li ng-show="user">
+        <li ng-show="user && !(user.role==='super-admin')">
           <a ui-sref="chat" ui-sref-active="active">Chat</a>
         </li>
       </ul>
@@ -30,7 +30,7 @@
         <li class="go-premium-cta" ng-show="!user">
           <a ui-sref="login">Login</a>
         </li>
-        <li class="go-premium-cta" ng-show="user && user.role==='admin'">
+        <li class="go-premium-cta" ng-show="user && user.role ==='admin'">
           <a ui-sref="dashboard">Dashboard</a>
         </li>
         <li class="go-premium-cta" ng-show="user && user.role==='super-admin'">
