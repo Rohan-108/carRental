@@ -2,11 +2,11 @@
  * @description Controller for the profile page.
  * @name profileController
  * @requires $scope
- * @requires utilService
+ * @requires userFactory
  * @requires approvalService
  * @requires bidBookService
  * @requires toaster
- * @requires $q
+ * @requires $uibModal
  */
 angular.module("rentIT").controller("profileController", [
   "$scope",
@@ -14,16 +14,23 @@ angular.module("rentIT").controller("profileController", [
   "approvalService",
   "bidBookService",
   "toaster",
-  function ($scope, userFactory, approvalService, bidBookService, toaster) {
+  "$uibModal",
+  function (
+    $scope,
+    userFactory,
+    approvalService,
+    bidBookService,
+    toaster,
+    $uibModal
+  ) {
     // Initialize variables
     $scope.isLoading = false; // Loading state
     $scope.pageSize = 5; // Number of items per page
     $scope.currentPage = 1; // Current page number
     $scope.totalPage = null; // Total number of pages
+    $scope.totalItems = 0; // Total items for UI Bootstrap pagination
     $scope.currentTab = "home"; // Current tab
     $scope.passwordFormData = {}; // Password form data
-    $scope.changePasswordModal = false; // Change password modal
-    $scope.changeProfileModal = false; // Change profile modal
     $scope.profileFormData = {
       username: $scope.user.username,
       avatar: null,
@@ -73,84 +80,130 @@ angular.module("rentIT").controller("profileController", [
     };
 
     /**
-     * @description Toggle the change password modal.
-     * @param {*} state - State of the change password modal
+     * @description Open the change password modal.
      */
-    $scope.toggleChangePasswordModal = function (state) {
-      $scope.changePasswordModal = state;
-    };
+    $scope.toggleChangePasswordModal = function () {
+      var modalInstance = $uibModal.open({
+        templateUrl: "changePasswordModal.html",
+        backdrop: "static", // Prevent closing on backdrop click
+        keyboard: false, // Prevent closing on ESC key
+        controller: function ($scope, $uibModalInstance, passwordFormData) {
+          $scope.passwordFormData = passwordFormData;
 
-    /**
-     * @description Change password.
-     */
-    $scope.changePassword = function () {
-      if ($scope.changePasswordForm.$invalid) {
-        toaster.pop("error", "Error", "Please fill all required fields.");
-        return;
-      }
-      $scope.isLoading = true;
-      const user = userFactory.createUser($scope.user);
-      user
-        .changePassword(
-          $scope.passwordFormData.oldPassword,
-          $scope.passwordFormData.newPassword,
-          $scope.passwordFormData.confirmPassword
-        )
-        .then(() => {
-          toaster.pop("success", "Success", "Password changed successfully.");
-          $scope.toggleChangePasswordModal(false);
+          $scope.ok = function () {
+            if ($scope.changePasswordForm.$invalid) {
+              return;
+            }
+            $uibModalInstance.close($scope.passwordFormData);
+          };
+
+          $scope.cancel = function () {
+            $uibModalInstance.dismiss("cancel");
+          };
+        },
+        resolve: {
+          passwordFormData: function () {
+            return $scope.passwordFormData;
+          },
+        },
+      });
+
+      modalInstance.result
+        .then(function (passwordData) {
+          // Handle the password change
+          $scope.isLoading = true;
+          const user = userFactory.createUser($scope.user);
+          user
+            .changePassword(
+              passwordData.oldPassword,
+              passwordData.newPassword,
+              passwordData.confirmPassword
+            )
+            .then(() => {
+              toaster.pop(
+                "success",
+                "Success",
+                "Password changed successfully."
+              );
+            })
+            .catch((error) => {
+              console.log(error);
+              toaster.pop(
+                "error",
+                "Error",
+                error?.description || "Error changing password."
+              );
+            })
+            .finally(() => {
+              $scope.isLoading = false;
+            });
         })
-        .catch((error) => {
-          console.log(error);
-          toaster.pop(
-            "error",
-            "Error",
-            error?.description || "Error changing password."
-          );
-        })
-        .finally(() => {
-          $scope.isLoading = false;
+        .catch(function () {
+          console.log("Password modal dismissed.");
         });
     };
 
     /**
-     * @description Toggle the change profile modal.
-     * @param {*} state - State of the change profile modal
+     * @description Open the change profile modal.
      */
-    $scope.toggleChangeProfileModal = function (state) {
-      $scope.changeProfileModal = state;
-    };
+    $scope.toggleChangeProfileModal = function () {
+      var modalInstance = $uibModal.open({
+        templateUrl: "profileEditModal.html",
+        backdrop: "static", // Prevent closing on backdrop click
+        keyboard: false, // Prevent closing on ESC key
+        controller: function ($scope, $uibModalInstance, profileFormData) {
+          $scope.profileFormData = profileFormData;
 
-    /**
-     * @description Change profile data.
-     */
-    $scope.changeProfile = function () {
-      $scope.isLoading = true;
-      if ($scope.editProfileForm.$invalid) {
-        toaster.pop("error", "Error", "Please fill all required fields.");
-        return;
-      }
-      const user = userFactory.createUser($scope.user);
-      user
-        .updateUser($scope.profileFormData)
-        .then(() => {
-          toaster.pop("success", "Success", "Profile updated successfully.");
-          $scope.toggleChangeProfileModal(false);
+          $scope.ok = function () {
+            if ($scope.editProfileForm.$invalid) {
+              return;
+            }
+            $uibModalInstance.close($scope.profileFormData);
+          };
+
+          $scope.cancel = function () {
+            $uibModalInstance.dismiss("cancel");
+          };
+        },
+        resolve: {
+          profileFormData: function () {
+            return angular.copy($scope.profileFormData);
+          },
+        },
+      });
+
+      modalInstance.result
+        .then(function (profileData) {
+          // Handle the profile update
+          $scope.isLoading = true;
+          const user = userFactory.createUser($scope.user);
+          user
+            .updateUser(profileData)
+            .then(() => {
+              toaster.pop(
+                "success",
+                "Success",
+                "Profile updated successfully."
+              );
+            })
+            .catch((error) => {
+              toaster.pop(
+                "error",
+                "Error",
+                error?.description || "Error updating profile."
+              );
+            })
+            .finally(() => {
+              $scope.isLoading = false;
+            });
         })
-        .catch((error) => {
-          toaster.pop(
-            "error",
-            "Error",
-            error?.description || "Error updating profile."
-          );
-        })
-        .finally(() => {
-          $scope.isLoading = false;
+        .catch(function () {
+          console.log("Profile modal dismissed.");
         });
     };
 
     /**
-     * @description Set approval status , message and button text.
+     * @description Set approval status, message and button text.
      */
     $scope.setApproval = function () {
       $scope.isLoading = true;
@@ -232,6 +285,7 @@ angular.module("rentIT").controller("profileController", [
         .then((response) => {
           $scope.bookings = response.data.bids;
           $scope.totalPage = response.data.pages;
+          $scope.totalItems = response.data.pages * $scope.pageSize; // Calculate total items
         })
         .catch((error) => {
           toaster.pop("error", "Error", error.name || "Error getting bids.");
@@ -255,11 +309,13 @@ angular.module("rentIT").controller("profileController", [
       } else {
         sort.amount = $scope.bidFilter.sortOrder === "desc" ? -1 : 1;
       }
+      $scope.isLoading = true;
       bidBookService
         .getAllBidsByUser($scope.currentPage, $scope.pageSize, filter, sort)
         .then((response) => {
           $scope.bids = response.data.bids;
           $scope.totalPage = response.data.pages;
+          $scope.totalItems = response.data.pages * $scope.pageSize; // Calculate total items
         })
         .catch((error) => {
           toaster.pop("error", "Error", error.name || "Error getting bids.");
@@ -270,25 +326,70 @@ angular.module("rentIT").controller("profileController", [
     };
 
     /**
-     * @description Function to change the page
-     * @param {*} pagename - Name of the page
+     * @description Handle page change for UI Bootstrap pagination
+     * @param {string} pagename - Type of items being paginated
      */
-    $scope.nextPage = function (pagename) {
+    $scope.pageChanged = function (pagename) {
       if (pagename === "bookings") {
-        if ($scope.currentPage < $scope.totalPage) $scope.currentPage++;
         $scope.setBookings();
       } else if (pagename === "bids") {
-        if ($scope.currentPage < $scope.totalPage) $scope.currentPage++;
+        $scope.setBiddings();
+      }
+    };
+
+    // Legacy pagination functions maintained for compatibility
+    $scope.nextPage = function (pagename) {
+      if ($scope.currentPage >= $scope.totalPage) return;
+
+      $scope.currentPage++;
+      if (pagename === "bookings") {
+        $scope.setBookings();
+      } else if (pagename === "biddings" || pagename === "bids") {
         $scope.setBiddings();
       }
     };
 
     $scope.prevPage = function (pagename) {
+      if ($scope.currentPage <= 1) return;
+
+      $scope.currentPage--;
       if (pagename === "bookings") {
-        if ($scope.currentPage > 1) $scope.currentPage--;
         $scope.setBookings();
-      } else if (pagename === "bids") {
-        if ($scope.currentPage > 1) $scope.currentPage--;
+      } else if (pagename === "biddings" || pagename === "bids") {
+        $scope.setBiddings();
+      }
+    };
+
+    /**
+     * @description Generate an array for pagination.
+     */
+    $scope.getPageArray = function () {
+      const pages = [];
+      const maxPages = Math.min(5, $scope.totalPage);
+      let startPage = Math.max(1, $scope.currentPage - 2);
+      let endPage = Math.min($scope.totalPage, startPage + maxPages - 1);
+
+      if (endPage - startPage + 1 < maxPages) {
+        startPage = Math.max(1, endPage - maxPages + 1);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+      return pages;
+    };
+
+    /**
+     * @description Navigate to a specific page.
+     * @param {number} page - Page number to navigate to.
+     */
+    $scope.goToPage = function (page) {
+      if (page === $scope.currentPage) return;
+
+      $scope.currentPage = page;
+      if ($scope.currentTab === "bookings") {
+        $scope.setBookings();
+      } else if ($scope.currentTab === "biddings") {
         $scope.setBiddings();
       }
     };

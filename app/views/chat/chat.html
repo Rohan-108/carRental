@@ -1,134 +1,320 @@
-<div class="msger" ng-init="init()">
-  <header class="msger-header">
-    <div class="msger-header-title">Chats</div>
-  </header>
-  <div class="chat-container">
-    <div class="sidebar" id="sidebar">
+<div
+  class="container-fluid"
+  style="height: 91vh; padding: 0; background-color: #f5f5f5"
+  ng-init="init()"
+>
+  <style>
+    /* Keep minimal styles for hover states and complex selectors */
+    .conversation:hover {
+      background-color: #f8f8f8;
+    }
+    .message-outgoing .message-bubble {
+      background-color: #dcf8c6;
+      border-bottom-right-radius: 5px;
+    }
+    .message-incoming .message-bubble {
+      background-color: #fff;
+      border-bottom-left-radius: 5px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    .chat-input:focus {
+      height: 60px;
+    }
+  </style>
+
+  <div
+    style="display: flex; height: calc(100vh - 56px); background-color: #e5ddd5"
+  >
+    <!-- Conversation sidebar -->
+    <div
+      id="sidebar"
+      style="
+        width: 30%;
+        background-color: white;
+        border-right: 1px solid #ddd;
+        overflow-y: auto;
+      "
+    >
       <div
-        class="conversation"
         ng-repeat="conv in conversations"
         ng-class="{'active':conv._id==convId}"
         ng-click="changeChat(conv._id)"
+        style="
+          padding: 10px 15px;
+          border-bottom: 1px solid #f2f2f2;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        "
+        ng-style="conv._id==convId ? {'background-color': '#ebebeb', 'border-left': '5px solid #337ab7'} : {}"
       >
-        <div class="convDetail">
+        <div style="display: flex; align-items: center">
           <img
             ng-src="{{conv.members[0].avatar}}"
             alt="owner image"
-            class="user-img"
+            style="
+              width: 50px;
+              height: 50px;
+              border-radius: 50%;
+              object-fit: cover;
+            "
           />
-          <div class="info">
-            <p>{{conv.members[0].username}}</p>
-            <p>{{conv.vehicle.name}}</p>
+          <div style="margin-left: 15px; width: calc(100% - 65px)">
+            <p
+              style="
+                margin: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                font-weight: bold;
+                font-size: 14px;
+              "
+            >
+              {{conv.members[0].username}}
+            </p>
+            <p
+              style="
+                margin: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                color: #777;
+                font-size: 13px;
+              "
+            >
+              <i class="glyphicon glyphicon-car"></i> {{conv.vehicle.name}}
+            </p>
           </div>
         </div>
       </div>
     </div>
-    <div class="right-col">
-      <!--Chat box showing message-->
-      <main class="msger-chat" id="messageBox">
-        <div class="no-chat" ng-show="{{user.role=='super-admin'}}">
-          <p>You can't Chat</p>
-        </div>
-        <div class="msg" ng-repeat="chat in messages" ng-if="messages.length>0">
-          <div class="{{chat.sender._id===user._id?'right-msg':'left-msg'}}">
-            <div class="msg-img">
-              <img ng-src="{{chat.sender.avatar}}" alt="user" />
-            </div>
-            <div class="msg-bubble">
-              <div class="msg-info">
-                <div class="msg-info-name">{{chat.sender.username}}</div>
-                <div class="msg-info-time">{{chat.createdAt | date}}</div>
-              </div>
 
-              <div class="msg-text">{{chat.message}}</div>
-              <div class="chat-img" ng-show="chat.image">
-                <img ng-src="{{chat.image}}" alt="chat image" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-      <!---Chat form to send message-->
-      <form
-        class="msger-inputarea"
-        name="chatForm"
-        novalidate
-        ng-submit="sendChat()"
+    <div style="flex: 1; display: flex; flex-direction: column">
+      <!-- Chat box showing message -->
+      <div
+        id="messageBox"
+        style="
+          flex: 1;
+          overflow-y: auto;
+          padding: 15px;
+          background-color: #f9f9f9;
+        "
       >
-        <textarea
-          type="text"
-          class="msger-input"
-          placeholder="Enter your message..."
-          ng-model="message"
-          id="msg"
-        ></textarea>
-        <button
-          type="button"
-          style="cursor: pointer"
-          ng-click="toggleModal(true)"
+        <div
+          ng-show="{{user.role=='super-admin'}}"
+          style="
+            padding: 30px 15px;
+            text-align: center;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin: 10px 0;
+          "
         >
-          <img
-            src="../../asset/images/attachment.svg"
-            alt="attachment"
-            style="width: 20px; height: 20px"
-          />
-        </button>
-        <button
-          type="submit"
-          class="msger-send-btn"
-          id="send"
-          style="height: max-content; margin-block: auto"
-          ng-disabled="chatForm.$invalid || user.role=='super-admin'"
+          <p>
+            <i class="glyphicon glyphicon-lock"></i> You can't chat as admin
+          </p>
+        </div>
+
+        <div
+          ng-if="messages.length === 0 && user.role!='super-admin'"
+          style="
+            padding: 30px 15px;
+            text-align: center;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin: 10px 0;
+          "
         >
-          Send
-        </button>
-      </form>
-      <!------Image modALLLLLLLLLLLLLLLLLLL-->
-      <div class="imageModal" ng-show="imageModal==true" id="modal">
-        <div class="formbg innerModal">
-          <div class="formbg-inner" style="padding: 1rem">
-            <div class="closeButton" ng-click="toggleModal(false)">
-              <img src="../../asset/images/exit.svg" alt="Close" />
+          <span
+            class="glyphicon glyphicon-comment"
+            style="font-size: 40px; color: #ddd"
+          ></span>
+          <p class="text-muted mt-3">
+            No messages yet. Start the conversation!
+          </p>
+        </div>
+
+        <div
+          ng-repeat="chat in messages"
+          ng-if="messages.length>0"
+          style="margin-bottom: 15px; clear: both"
+        >
+          <div
+            ng-class="{'message-outgoing': chat.sender._id===user._id, 'message-incoming': chat.sender._id!==user._id}"
+            style="display: flex; margin-bottom: 10px"
+            ng-style="chat.sender._id===user._id ? {'flex-direction': 'row-reverse'} : {}"
+          >
+            <div style="margin: 0 8px; align-self: flex-start">
+              <img
+                ng-src="{{chat.sender.avatar}}"
+                alt="user"
+                class="img-circle"
+                style="
+                  width: 40px;
+                  height: 40px;
+                  border: 2px solid #fff;
+                  border-radius: 50%;
+                  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                "
+              />
             </div>
-            <p class="padding-bottom--15 spanText">Send Image with Message</p>
-            <form
-              id="imageForm"
-              name="imageForm"
-              novalidate
-              ng-submit="uploadImage()"
-            >
-              <div class="field">
-                <label for="image">Upload Image (500Kb)</label>
-                <input
-                  type="file"
-                  name="image"
-                  id="image"
-                  accept="image/jpg, image/jpeg, image/png"
-                  title="Upload Image (jpg, jpeg, png) only allowed and less than 500kb"
-                  ng-model="image"
-                  ng-required="true"
-                  valid-Avatar
-                />
-                <span
-                  style="color: red"
-                  ng-show="imageForm.image.$invalid && imageForm.image.$dirty"
+            <div style="max-width: 75%">
+              <div style="margin-bottom: 4px; font-size: 12px">
+                <span style="font-weight: bold; color: #555"
+                  >{{chat.sender.username}}</span
                 >
-                  Upload Image (jpg, jpeg, png) only allowed and less than 500kb
-                </span>
+                <span style="color: #999; margin-left: 8px"
+                  >{{chat.createdAt | date:'MMM d, h:mm a'}}</span
+                >
               </div>
-              <div class="field">
-                <input
-                  type="submit"
-                  name="submit"
-                  value="Send"
-                  ng-disabled="imageForm.$invalid || user.role=='super-admin'"
-                  style="margin: 0"
+              <div
+                class="message-bubble"
+                style="
+                  padding: 10px 15px;
+                  border-radius: 18px;
+                  position: relative;
+                "
+              >
+                <p style="margin: 0; word-wrap: break-word">{{chat.message}}</p>
+                <img
+                  ng-if="chat.image"
+                  ng-src="{{chat.image}}"
+                  alt="chat image"
+                  class="img-responsive img-rounded"
+                  style="max-width: 100%; border-radius: 8px; margin-top: 8px"
                 />
               </div>
-            </form>
+            </div>
           </div>
         </div>
+      </div>
+
+      <!-- Chat form to send message -->
+      <div
+        style="
+          background-color: #f5f5f5;
+          padding: 10px;
+          border-top: 1px solid #ddd;
+        "
+      >
+        <form name="chatForm" ng-submit="sendChat()" novalidate>
+          <div
+            style="display: flex; align-items: center; width: 100%; gap: 10px"
+          >
+            <textarea
+              class="form-control chat-input"
+              placeholder="Type your message..."
+              ng-model="message"
+              ng-required="true"
+              id="msg"
+              rows="1"
+              style="
+                border-radius: 20px;
+                padding: 10px 70px 10px 15px;
+                height: 44px;
+                max-height: 100px;
+                overflow: hidden;
+                transition: height 0.2s;
+                width: 90%;
+              "
+            ></textarea>
+            <div style="display: flex; align-items: center; gap: 5px">
+              <button
+                type="button"
+                class="btn btn-default"
+                ng-click="openImageModal()"
+                ng-disabled="user.role=='super-admin'"
+                style="
+                  border-radius: 40%;
+                  width: 45px;
+                  height: 44px;
+                  padding: 0;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <span class="glyphicon glyphicon-paperclip"></span>
+              </button>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                id="send"
+                ng-disabled="chatForm.$invalid || user.role=='super-admin'"
+                style="
+                  width: 80px;
+                  height: 44px;
+                  padding: 0;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <span
+                  class="glyphicon glyphicon-send"
+                  style="
+                    font-size: 1rem;
+                    display: flex;
+                    gap: 5px;
+                    align-items: center;
+                    justify-content: center;
+                  "
+                  >Send</span
+                >
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   </div>
+
+  <!-- Image Modal Template -->
+  <script type="text/ng-template" id="imageModalContent.html">
+    <div class="modal-header bg-primary text-white">
+      <h3 class="modal-title" id="modal-title">Send Image with Message</h3>
+      <button type="button" class="close" ng-click="cancel()" aria-label="Close modal">
+        <span aria-hidden="true">
+          <span class="glyphicon glyphicon-remove"></span>
+        </span>
+      </button>
+    </div>
+    <div class="modal-body" id="modal-body">
+      <form id="imageForm" name="imageForm" ng-submit="uploadImage()">
+        <div class="form-group">
+          <label for="image">Upload Image (500Kb)</label>
+          <div>
+            <input
+              type="file"
+              id="image"
+              name="image"
+              accept="image/jpg, image/jpeg, image/png"
+              ng-required="true"
+              ng-model="$parent.image"
+              valid-Avatar
+              aria-describedby="image-help"
+            />
+            <p class="help-block" id="image-help">Choose file...</p>
+          </div>
+          <div
+            class="text-danger"
+            ng-show="imageForm.image.$invalid && imageForm.image.$dirty"
+            id="image-error"
+            role="alert"
+          >
+            Upload Image (jpg, jpeg, png) only allowed and less than 500kb
+          </div>
+        </div>
+        <div class="form-group text-right">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            ng-disabled="imageForm.$invalid"
+            aria-label="Upload image"
+          >
+            <span class="glyphicon glyphicon-send"></span> Send Image
+          </button>
+        </div>
+      </form>
+    </div>
+  </script>
 </div>

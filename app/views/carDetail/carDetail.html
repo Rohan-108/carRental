@@ -1,228 +1,607 @@
-<main class="carDetailContainer" ng-init="init()">
-  <!---Car Detail section--------------------------------------------------------->
-  <section class="carDetail">
-    <!---Car Image section--------------------------------------------------------->
-    <div class="carImage">
-      <div class="image-gallery">
-        <img id="mainImage" ng-src="{{currentImage}}" alt="Car Image" />
-        <div class="thumbnail-container" id="thumbnailContainer">
-          <img
-            ng-repeat="image in car.images"
-            ng-src="{{image}}"
-            alt="Car Image"
-            class="thumbnail"
-            ng-click="changeImage(image)"
-          />
+<main class="container my-4" ng-init="init()">
+  <!-- Car Detail Section -->
+  <div class="row">
+    <div class="col-lg-8">
+      <div
+        class="panel panel-default"
+        style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1)"
+      >
+        <div class="panel-heading bg-primary text-white">
+          <h4 class="panel-title">
+            <span class="glyphicon glyphicon-car"></span> Car Details
+          </h4>
         </div>
-      </div>
-    </div>
-    <div class="details">
-      <h2>🚗 Car Details</h2>
-      <div class="infoBox">
-        <h3>Car Name</h3>
-        <p id="carName">{{car.name}}</p>
-      </div>
-      <div class="infoBox">
-        <h3>💰 Price</h3>
-        <p id="carPrice">{{car.rentalPrice}}</p>
-      </div>
-      <div class="infoBox">
-        <h3>🛑 Seats</h3>
-        <p id="carSeats">{{car.seats}}</p>
-      </div>
-      <div class="infoBox">
-        <h3>⛽ Fuel</h3>
-        <p id="carFuel">{{car.fuelType}}</p>
-      </div>
-      <div class="infoBox">
-        <h3>⚙️ Transmission</h3>
-        <p id="carTransmission">{{car.transmission}}</p>
-      </div>
-      <div class="infoBox">
-        <h3>🚘 Type</h3>
-        <p id="carType">{{car.vehicleType}}</p>
-      </div>
-    </div>
-
-    <div class="ownerDetails">
-      <h2>👤 Owner Details</h2>
-      <div class="owner">
-        <div class="infoBox">
-          <h3>🏷️ Name</h3>
-          <p id="ownerName">{{car.owner.username}}</p>
-        </div>
-        <div class="infoBox">
-          <h3>📧 Email</h3>
-          <p id="ownerEmail">{{car.owner.email}}</p>
-        </div>
-        <div class="infoBox">
-          <h3>📞 Contact</h3>
-          <p id="ownerPhone">{{car.owner.tel}}</p>
-        </div>
-      </div>
-    </div>
-  </section>
-  <div>
-    <!----rental section------------------------------------->
-    <section class="date-picker-container">
-      <h2>📅 Select Dates</h2>
-
-      <div class="dateContainer">
-        <input id="datepicker" placeholder="Select your dates" />
-        <p>
-          min:<span id="minRentalPeriod">{{car.minRentalPeriod}}</span> days
-        </p>
-        <p>
-          max:<span id="maxRentalPeriod">{{car.maxRentalPeriod}}</span> days
-        </p>
-      </div>
-      <label for="amount" style="margin: 0">Pick your price per day:</label>
-      <input
-        id="amount"
-        type="number"
-        name="amount"
-        min="100"
-        max="10000"
-        ng-model="rental.amount"
-        placeholder="Give the amount"
-        valid-Number
-      />
-      <p style="color: gray; margin: 0" id="info">
-        Additional service charges will apply for more than
-        {{car.fixedKilometer}}km. Charge of Rs.{{car.ratePerKm}} per km will be
-        added.
-      </p>
-      <div style="display: flex; gap: 1rem">
-        <label
-          for="outStation"
-          style="margin: 0; justify-self: center; align-self: center"
-          >Want to take for Outstation:</label
-        >
-        <input
-          type="checkbox"
-          id="outStation"
-          name="outStation"
-          value="outStation"
-          style="
-            width: auto;
-            margin: 0;
-            justify-self: center;
-            align-self: center;
-          "
-          ng-model="rental.isOutStation"
-          ng-change="changeBidAmount()"
-        />
-      </div>
-      <p style="color: gray; margin: 0">
-        Pick price greater than base price, to have higher chance of
-        confirmation by owner.
-      </p>
-      <button id="rentButton" class="btn" ng-click="bidNow()">Bid Now</button>
-    </section>
-    <!----car user chat section------------------------------------->
-    <div class="carUserChat">
-      <header class="msger-header">
-        <div class="msger-header-title">Chat With Owner</div>
-      </header>
-      <main class="userChat" id="messageBoxUser">
-        <div
-          class="no-chat"
-          ng-if="car.owner._id===user._id || user.role==='super-admin'"
-        >
-          <p>You can't Chat</p>
-        </div>
-        <div
-          class="msg"
-          ng-repeat="chat in messages"
-          ng-if="messages.length>0 && car.owner._id!==user._id"
-        >
-          <div class="{{chat.sender._id===user._id?'right-msg':'left-msg'}}">
-            <div class="msg-img">
-              <img ng-src="{{chat.sender.avatar}}" alt="user" />
+        <div class="panel-body">
+          <div class="row">
+            <!-- Car Image Gallery - Enhanced -->
+            <div class="col-md-6 mb-4">
+              <div class="panel panel-default border-0">
+                <div class="text-center">
+                  <img
+                    id="mainImage"
+                    ng-src="{{currentImage}}"
+                    alt="Car Image"
+                    class="img-responsive img-rounded"
+                    style="
+                      max-height: 300px;
+                      width: auto;
+                      margin: 0 auto;
+                      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                    "
+                  />
+                </div>
+                <div class="panel-body p-2 mt-3">
+                  <div class="d-flex justify-content-center">
+                    <div
+                      class="text-center"
+                      style="
+                        overflow-x: auto;
+                        white-space: nowrap;
+                        width: 100%;
+                        padding: 10px 0;
+                        text-align: center;
+                      "
+                    >
+                      <div
+                        ng-repeat="image in car.images"
+                        class="d-inline-block"
+                        style="padding: 5px"
+                      >
+                        <img
+                          ng-src="{{image}}"
+                          alt="Car Image"
+                          class="thumbnail shadow-sm"
+                          style="
+                            width: 80px;
+                            height: 60px;
+                            cursor: pointer;
+                            border: 3px solid transparent;
+                          "
+                          ng-click="changeImage(image)"
+                          ng-class="{'border-primary': currentImage === image}"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="msg-bubble">
-              <div class="msg-info">
-                <div class="msg-info-name">{{chat.sender.username}}</div>
-                <div class="msg-info-time">{{chat.createdAt |date}}</div>
+
+            <!-- Car Details - Improved Layout -->
+            <div class="col-md-6">
+              <h4 class="text-primary mb-3 font-weight-bold">{{car.name}}</h4>
+
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(2, 1fr);
+                  gap: 15px;
+                  margin-bottom: 15px;
+                "
+              >
+                <div
+                  style="
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                    padding: 15px;
+                    text-align: center;
+                    transition: transform 0.2s;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                  "
+                >
+                  <i
+                    class="glyphicon glyphicon-tag text-primary"
+                    style="font-size: 24px; margin-bottom: 8px"
+                  ></i>
+                  <h6 style="margin: 8px 0; font-weight: 500">Price</h6>
+                  <p
+                    class="font-weight-bold"
+                    style="margin: 0; font-size: 16px"
+                  >
+                    {{car.rentalPrice}}
+                  </p>
+                </div>
+
+                <div
+                  style="
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                    padding: 15px;
+                    text-align: center;
+                    transition: transform 0.2s;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                  "
+                >
+                  <i
+                    class="glyphicon glyphicon-user text-primary"
+                    style="font-size: 24px; margin-bottom: 8px"
+                  ></i>
+                  <h6 style="margin: 8px 0; font-weight: 500">Seats</h6>
+                  <p
+                    class="font-weight-bold"
+                    style="margin: 0; font-size: 16px"
+                  >
+                    {{car.seats}}
+                  </p>
+                </div>
+
+                <div
+                  style="
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                    padding: 15px;
+                    text-align: center;
+                    transition: transform 0.2s;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                  "
+                >
+                  <i
+                    class="glyphicon glyphicon-tint text-primary"
+                    style="font-size: 24px; margin-bottom: 8px"
+                  ></i>
+                  <h6 style="margin: 8px 0; font-weight: 500">Fuel</h6>
+                  <p
+                    class="font-weight-bold"
+                    style="margin: 0; font-size: 16px"
+                  >
+                    {{car.fuelType}}
+                  </p>
+                </div>
+
+                <div
+                  style="
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                    padding: 15px;
+                    text-align: center;
+                    transition: transform 0.2s;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                  "
+                >
+                  <i
+                    class="glyphicon glyphicon-cog text-primary"
+                    style="font-size: 24px; margin-bottom: 8px"
+                  ></i>
+                  <h6 style="margin: 8px 0; font-weight: 500">Transmission</h6>
+                  <p
+                    class="font-weight-bold"
+                    style="margin: 0; font-size: 16px"
+                  >
+                    {{car.transmission}}
+                  </p>
+                </div>
+
+                <div
+                  style="
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                    padding: 15px;
+                    text-align: center;
+                    transition: transform 0.2s;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                  "
+                >
+                  <i
+                    class="glyphicon glyphicon-road text-primary"
+                    style="font-size: 24px; margin-bottom: 8px"
+                  ></i>
+                  <h6 style="margin: 8px 0; font-weight: 500">Type</h6>
+                  <p
+                    class="font-weight-bold"
+                    style="margin: 0; font-size: 16px"
+                  >
+                    {{car.vehicleType}}
+                  </p>
+                </div>
+
+                <div
+                  style="
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                    padding: 15px;
+                    text-align: center;
+                    transition: transform 0.2s;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                  "
+                >
+                  <i
+                    class="glyphicon glyphicon-credit-card text-primary"
+                    style="font-size: 24px; margin-bottom: 8px"
+                  ></i>
+                  <h6 style="margin: 8px 0; font-weight: 500">Plate Number</h6>
+                  <p
+                    class="font-weight-bold"
+                    style="margin: 0; font-size: 16px"
+                  >
+                    {{car.plateNumber || 'N/A'}}
+                  </p>
+                </div>
               </div>
 
-              <div class="msg-text">{{chat.message}}</div>
-              <div class="chat-img" ng-show="chat.image">
-                <img ng-src="{{chat.image}}" alt="chat image" />
+              <div class="mt-3">
+                <span
+                  class="label label-info"
+                  ng-if="car.features && car.features.length"
+                  ng-repeat="feature in car.features"
+                  style="
+                    margin-right: 5px;
+                    display: inline-block;
+                    margin-bottom: 5px;
+                  "
+                >
+                  {{feature}}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Owner Details -->
+          <div class="mt-4">
+            <h5 class="border-bottom pb-2 mb-3">
+              <span class="glyphicon glyphicon-user"></span> Owner Details
+            </h5>
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <div
+                  class="panel panel-default bg-light"
+                  style="box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05)"
+                >
+                  <div class="panel-body text-center" style="padding: 15px">
+                    <h6 class="panel-title">
+                      <span
+                        class="glyphicon glyphicon-credit-card text-primary"
+                      ></span>
+                      Name
+                    </h6>
+                    <p class="text-bold">{{car.owner.username}}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <div
+                  class="panel panel-default bg-light"
+                  style="box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05)"
+                >
+                  <div class="panel-body text-center" style="padding: 15px">
+                    <h6 class="panel-title">
+                      <span
+                        class="glyphicon glyphicon-envelope text-primary"
+                      ></span>
+                      Email
+                    </h6>
+                    <p class="text-bold">{{car.owner.email}}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <div
+                  class="panel panel-default bg-light"
+                  style="box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05)"
+                >
+                  <div class="panel-body text-center" style="padding: 15px">
+                    <h6 class="panel-title">
+                      <span
+                        class="glyphicon glyphicon-phone text-primary"
+                      ></span>
+                      Contact
+                    </h6>
+                    <p class="text-bold">{{car.owner.tel}}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </main>
-      <!-- //chat form -->
-      <form
-        class="msger-inputarea"
-        id="chatForm"
-        name="chatForm"
-        novalidate
-        ng-submit="sendChat()"
-      >
-        <textarea
-          type="text"
-          class="msger-input"
-          placeholder="Enter your message..."
-          ng-required="true"
-          ng-model="message"
-        ></textarea>
-        <button
-          type="button"
-          style="cursor: pointer"
-          ng-click="toggleModal(true)"
-          ng-disabled="car.owner_id==user._id || user.role==='super-admin'"
-        >
-          📎
-        </button>
-        <button
-          type="submit"
-          class="msger-send-btn"
-          id="sendUser"
-          style="height: max-content; margin-block: auto"
-          ng-disabled="chatForm.$invalid || car.owner._id==user._id || user.role==='super-admin'"
-        >
-          Send
-        </button>
-      </form>
-      <!-- Image Modal -->
-      <div class="imageModal" ng-show="imageModal==true">
-        <div class="formbg innerModal">
-          <div class="formbg-inner" style="padding: 1rem">
-            <div class="closeButton" ng-click="toggleModal(false)">
-              <img src="../../asset/images/exit.svg" alt="Close" />
-            </div>
-            <p class="padding-bottom--15 spanText">Send Image with Message</p>
-            <form id="imageForm" name="imageForm" ng-submit="uploadImage()">
-              <div class="field">
-                <label for="image">Upload Image (500Kb)</label>
-                <input
-                  type="file"
-                  name="image"
-                  id="image"
-                  accept="image/jpg, image/jpeg, image/png"
-                  title="Upload Image (jpg, jpeg, png) only allowed and less than 500kb"
-                  ng-required="true"
-                  ng-model="image"
-                  valid-Avatar
-                />
-                <span
-                  style="color: red"
-                  ng-show="imageForm.image.$invalid && imageForm.image.$dirty"
-                >
-                  Upload Image (jpg, jpeg, png) only allowed and less than 500kb
+      </div>
+    </div>
+
+    <!-- Booking & Chat Section -->
+    <div class="col-lg-4">
+      <!-- Rental Form Section - Updated with easepicker -->
+      <div class="panel panel-default shadow">
+        <div class="panel-heading bg-primary text-white">
+          <h4 class="panel-title">
+            <span class="glyphicon glyphicon-calendar"></span> Book This Car
+          </h4>
+        </div>
+        <div class="panel-body">
+          <form>
+            <div class="form-group">
+              <label>Select Dates</label>
+              <div class="input-group">
+                <span class="input-group-addon">
+                  <span class="glyphicon glyphicon-calendar"></span>
                 </span>
-              </div>
-              <div class="field">
                 <input
-                  type="submit"
-                  name="submit"
-                  value="Send"
-                  ng-disabled="imageForm.$invalid"
-                  style="margin: 0"
+                  type="text"
+                  class="form-control easepicker"
+                  placeholder="Select your dates"
                 />
+              </div>
+              <div class="help-block">
+                <span class="pull-left">
+                  Min: <strong>{{car.minRentalPeriod}}</strong> days
+                </span>
+                <span class="pull-right">
+                  Max: <strong>{{car.maxRentalPeriod}}</strong> days
+                </span>
+                <div class="clearfix"></div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="amount">Price per day</label>
+              <div class="input-group">
+                <span class="input-group-addon">
+                  <span class="glyphicon glyphicon-usd"></span>
+                </span>
+                <input
+                  id="amount"
+                  type="number"
+                  class="form-control"
+                  name="amount"
+                  min="100"
+                  max="10000"
+                  ng-model="rental.amount"
+                  placeholder="Enter an amount"
+                  valid-Number
+                />
+              </div>
+              <span class="help-block text-center">
+                Additional service charges will apply for more than
+                {{car.fixedKilometer}}km. Charge of Rs.{{car.ratePerKm}} per km
+                will be added.
+              </span>
+            </div>
+
+            <div class="checkbox">
+              <label>
+                <input
+                  type="checkbox"
+                  id="outStation"
+                  name="outStation"
+                  value="outStation"
+                  ng-model="rental.isOutStation"
+                  ng-change="changeBidAmount()"
+                />
+                Take for Outstation
+              </label>
+            </div>
+
+            <p class="text-muted text-center">
+              Pick price greater than base price to have higher chance of
+              confirmation by owner.
+            </p>
+
+            <button
+              type="button"
+              class="btn btn-primary btn-block shadow"
+              ng-click="bidNow()"
+            >
+              <span class="glyphicon glyphicon-gavel"></span> Bid Now
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Chat Section -->
+      <div
+        class="panel panel-default"
+        style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1)"
+      >
+        <div class="panel-heading bg-primary text-white">
+          <h4 class="panel-title">
+            <span class="glyphicon glyphicon-comment"></span> Chat With Owner
+          </h4>
+        </div>
+        <div
+          class="panel-body"
+          style="
+            padding: 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+          "
+        >
+          <div
+            style="
+              height: 300px;
+              overflow-y: auto;
+              padding: 15px;
+              background-color: #f9f9f9;
+            "
+          >
+            <div
+              class="text-center"
+              style="
+                padding: 30px 15px;
+                background-color: #f8f9fa;
+                border-radius: 8px;
+                margin: 10px 0;
+              "
+              ng-if="car.owner._id===user._id || user.role==='super-admin'"
+            >
+              <p>
+                <span class="glyphicon glyphicon-lock"></span> You can't chat as
+                owner or admin
+              </p>
+            </div>
+            <div
+              class="text-center"
+              style="
+                padding: 30px 15px;
+                background-color: #f8f9fa;
+                border-radius: 8px;
+                margin: 10px 0;
+              "
+              ng-if="!user"
+            >
+              <span
+                class="glyphicon glyphicon-comment"
+                style="font-size: 40px; color: #ddd"
+              ></span>
+              <p class="text-muted mt-3">
+                You need to login to chat with owner.
+              </p>
+            </div>
+            <!-- No messages indicator -->
+            <div
+              class="text-center"
+              style="
+                padding: 30px 15px;
+                background-color: #f8f9fa;
+                border-radius: 8px;
+                margin: 10px 0;
+              "
+              ng-if="user && messages.length === 0 && car.owner._id!==user._id && user.role!=='super-admin'"
+            >
+              <span
+                class="glyphicon glyphicon-comment"
+                style="font-size: 40px; color: #ddd"
+              ></span>
+              <p class="text-muted mt-3">
+                No messages yet. Start the conversation!
+              </p>
+            </div>
+
+            <div
+              style="margin-bottom: 15px; clear: both"
+              ng-repeat="chat in messages"
+              ng-if="messages.length>0 && car.owner._id!==user._id"
+            >
+              <div
+                style="display: flex; margin-bottom: 10px"
+                ng-class="{'message-outgoing': chat.sender._id===user._id, 'message-incoming': chat.sender._id!==user._id}"
+                ng-style="chat.sender._id===user._id ? {'flex-direction': 'row-reverse'} : {}"
+              >
+                <div style="margin: 0 8px; align-self: flex-start">
+                  <img
+                    ng-src="{{chat.sender.avatar}}"
+                    alt="user"
+                    class="img-circle"
+                    style="
+                      width: 40px;
+                      height: 40px;
+                      border: 2px solid #fff;
+                      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    "
+                  />
+                </div>
+                <div style="max-width: 75%">
+                  <div style="margin-bottom: 4px; font-size: 12px">
+                    <span style="font-weight: bold; color: #555"
+                      >{{chat.sender.username}}</span
+                    >
+                    <span style="color: #999; margin-left: 8px"
+                      >{{chat.createdAt | date:'MMM d, h:mm a'}}</span
+                    >
+                  </div>
+                  <div
+                    style="
+                      padding: 10px 15px;
+                      border-radius: 18px;
+                      position: relative;
+                    "
+                    ng-style="chat.sender._id===user._id ? {'background-color': '#dcf8c6', 'border-bottom-right-radius': '5px'} : {'background-color': '#fff', 'border-bottom-left-radius': '5px', 'box-shadow': '0 1px 2px rgba(0, 0, 0, 0.1)'}"
+                  >
+                    <p style="margin: 0; word-wrap: break-word">
+                      {{chat.message}}
+                    </p>
+                    <img
+                      ng-src="{{chat.image}}"
+                      alt="chat image"
+                      class="img-responsive img-rounded"
+                      style="
+                        max-width: 100%;
+                        border-radius: 8px;
+                        margin-top: 8px;
+                      "
+                      ng-if="chat.image"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            style="
+              background-color: #f5f5f5;
+              padding: 10px;
+              border-top: 1px solid #ddd;
+            "
+          >
+            <form
+              name="chatForm"
+              ng-submit="sendChat()"
+              novalidate
+              class="w-100"
+            >
+              <div class="row no-gutters">
+                <div class="col-xs-10 col-sm-10 pr-1">
+                  <textarea
+                    class="form-control"
+                    placeholder="Type your message..."
+                    ng-model="message"
+                    ng-required="true"
+                    rows="1"
+                    style="
+                      border-radius: 20px;
+                      padding: 10px 15px;
+                      height: 72px;
+                      max-height: 100px;
+                      resize: none;
+                      overflow: hidden;
+                      transition: height 0.2s;
+                    "
+                  ></textarea>
+                </div>
+                <div class="col-xs-2 col-sm-2 d-flex align-items-center">
+                  <div class="btn-group">
+                    <button
+                      type="button"
+                      class="btn btn-default"
+                      ng-click="toggleModal(true)"
+                      ng-disabled="!user || car.owner._id===user._id || user.role==='super-admin'"
+                      aria-label="Attach file"
+                      style="
+                        width: 36px;
+                        height: 36px;
+                        padding: 0;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-right: 5px;
+                      "
+                    >
+                      <span
+                        class="glyphicon glyphicon-paperclip"
+                        style="font-size: 16px"
+                      ></span>
+                    </button>
+                    <button
+                      type="submit"
+                      class="btn btn-primary"
+                      ng-disabled="chatForm.$invalid || !user ||  car.owner._id==user._id || user.role==='super-admin'"
+                      aria-label="Send message"
+                      style="
+                        width: 36px;
+                        height: 36px;
+                        padding: 0;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                      "
+                    >
+                      <span
+                        class="glyphicon glyphicon-send"
+                        style="font-size: 16px"
+                      ></span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </form>
           </div>
@@ -230,4 +609,54 @@
       </div>
     </div>
   </div>
+
+  <!-- Image Upload Modal -->
+  <script type="text/ng-template" id="imageModalContent.html">
+    <div class="modal-header bg-primary text-white">
+      <h3 class="modal-title" id="modal-title">Send Image with Message</h3>
+      <button type="button" class="close" ng-click="cancel()" aria-label="Close modal">
+        <span aria-hidden="true">
+          <span class="glyphicon glyphicon-remove"></span>
+        </span>
+      </button>
+    </div>
+    <div class="modal-body" id="modal-body">
+      <form id="imageForm" name="imageForm" ng-submit="uploadImage()">
+        <div class="form-group">
+          <label for="image">Upload Image (500Kb)</label>
+          <div>
+            <input
+              type="file"
+              id="image"
+              name="image"
+              accept="image/jpg, image/jpeg, image/png"
+              ng-required="true"
+              ng-model="$parent.image"
+              valid-Avatar
+              aria-describedby="image-help"
+            />
+            <p class="help-block" id="image-help">Choose file...</p>
+          </div>
+          <div
+            class="text-danger"
+            ng-show="imageForm.image.$invalid && imageForm.image.$dirty"
+            id="image-error"
+            role="alert"
+          >
+            Upload Image (jpg, jpeg, png) only allowed and less than 500kb
+          </div>
+        </div>
+        <div class="form-group text-right">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            ng-disabled="imageForm.$invalid"
+            aria-label="Upload image"
+          >
+            <span class="glyphicon glyphicon-send"></span> Send Image
+          </button>
+        </div>
+      </form>
+    </div>
+  </script>
 </main>

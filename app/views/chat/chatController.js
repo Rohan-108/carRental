@@ -8,6 +8,7 @@
  * @requires chatService
  * @requires toaster
  * @requires $q
+ * @requires $uibModal
  */
 angular.module("rentIT").controller("chatController", [
   "$scope",
@@ -16,14 +17,18 @@ angular.module("rentIT").controller("chatController", [
   "toaster",
   "$q",
   "$timeout",
-  function ($scope, $rootScope, chatService, toaster, $q, $timeout) {
+  "$uibModal",
+  function ($scope, $rootScope, chatService, toaster, $q, $timeout, $uibModal) {
     // Initialize variables
     $scope.messages = []; // to hold the messages
     $scope.message = ""; // to hold the message
     $scope.convId = null; // current conversation id
     $scope.conversations = []; // to hold the conversations
-    $scope.imageModal = false; // to toggle the image modal
     $scope.image = null; // to hold the image
+    $scope.modalInstance = null; // to hold modal instance reference
+
+    // For backward compatibility
+    $scope.imageModal = false;
 
     /**
      * @description load the sidebar with all the conversations
@@ -33,10 +38,24 @@ angular.module("rentIT").controller("chatController", [
       $scope.listenToMessageEvent();
     };
 
+    /**
+     * @description Helper function to scroll to the bottom of the chat
+     */
+    $scope.scrollToBottom = function () {
+      $timeout(function () {
+        const messageBox = document.getElementById("messageBox");
+        if (messageBox) {
+          messageBox.scrollTop = messageBox.scrollHeight;
+        }
+      }, 100); // Small delay to ensure DOM is updated
+    };
+
     $scope.listenToMessageEvent = function () {
       chatService.socket.on("newMessage", (data) => {
         $timeout(() => {
           $scope.messages.push(data);
+          // Scroll to bottom when new message arrives
+          $scope.scrollToBottom();
         });
       });
     };
@@ -84,6 +103,8 @@ angular.module("rentIT").controller("chatController", [
         .getAllChats($scope.convId)
         .then((response) => {
           $scope.messages = response.data.chats;
+          // Scroll to bottom when conversation is changed
+          $scope.scrollToBottom();
         })
         .catch((error) => {
           toaster.pop("error", "Error", "Error while fetching chats");
@@ -102,6 +123,8 @@ angular.module("rentIT").controller("chatController", [
         .sendMessage($scope.message, $scope.convId)
         .then(() => {
           $scope.message = "";
+          // Scroll to bottom after sending a message (in case socket is slow)
+          $scope.scrollToBottom();
         })
         .catch((error) => {
           toaster.pop("error", "Error", "Error while sending message");
@@ -109,37 +132,92 @@ angular.module("rentIT").controller("chatController", [
     };
 
     /**
-     * @description toggle the image modal
+     * @description Open the image upload modal using Angular UI Bootstrap
+     */
+    $scope.openImageModal = function () {
+      const convId = $scope.convId;
+      $scope.modalInstance = $uibModal.open({
+        animation: true,
+        templateUrl: "imageModalContent.html",
+        backdrop: "static",
+        keyboard: false,
+        controller: function ($scope, $uibModalInstance) {
+          $scope.cancel = function () {
+            $uibModalInstance.dismiss("cancel");
+          };
+
+          $scope.uploadImage = function () {
+            if ($scope.$parent.image === null) {
+              toaster.pop("error", "Error", "Please select an image");
+              return;
+            }
+            if (!convId) {
+              toaster.pop(
+                "error",
+                "Error",
+                "Please create a conversation first"
+              );
+              return;
+            }
+            const key = $scope.$parent.image.name + "-" + Date.now();
+            const contentType = $scope.$parent.image.type;
+            chatService
+              .uploadAttachment($scope.$parent.image, key, contentType, convId)
+              .then((response) => {
+                toaster.pop(
+                  "success",
+                  "Success",
+                  "Image uploaded successfully"
+                );
+                $uibModalInstance.close();
+                $scope.$parent.image = null;
+              })
+              .catch((error) => {
+                toaster.pop(
+                  "error",
+                  "Error",
+                  error?.message || "Error while uploading image"
+                );
+              });
+          };
+        },
+      });
+
+      // Set state flag for backward compatibility
+      $scope.imageModal = true;
+
+      // Handle both resolution and rejection of modal promise
+      $scope.modalInstance.result
+        .then(
+          function (result) {
+            // Handle close (success)
+            console.log("Modal closed with result:", result);
+          },
+          function (reason) {
+            // Handle dismiss (cancel)
+            console.log("Modal dismissed with reason:", reason);
+          }
+        )
+        .finally(function () {
+          // Reset state regardless of how the modal closed
+          $scope.imageModal = false;
+          $scope.modalInstance = null;
+        });
+    };
+
+    /**
+     * @description For backward compatibility with old modal implementation
      * @param {*} state - state of the modal
      */
     $scope.toggleModal = function (state) {
+      if (state) {
+        $scope.openImageModal();
+      } else if ($scope.modalInstance) {
+        $scope.modalInstance.dismiss("cancel");
+        $scope.modalInstance = null;
+      }
       $scope.imageModal = state;
       $scope.image = null;
-    };
-    /**
-     * @description upload the image to the selected conversation
-     */
-    $scope.uploadImage = function () {
-      if ($scope.image === null) {
-        toaster.pop("error", "Error", "Please select an image");
-        return;
-      }
-      const key = $scope.image.name + "-" + Date.now();
-      const contentType = $scope.image.type;
-      chatService
-        .uploadAttachment($scope.image, key, contentType, $scope.convId)
-        .then((response) => {
-          toaster.pop("success", "Success", "Image uploaded successfully");
-          $scope.toggleModal(false);
-          $scope.image = null;
-        })
-        .catch((error) => {
-          toaster.pop(
-            "error",
-            "Error",
-            error?.message || "Error while uploading image"
-          );
-        });
     };
   },
 ]);

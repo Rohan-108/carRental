@@ -10,6 +10,7 @@ angular.module("rentIT").controller("adminController", [
   "approvalService",
   "toaster",
   "$q",
+  "$uibModal",
   function (
     $scope,
     userService,
@@ -17,26 +18,29 @@ angular.module("rentIT").controller("adminController", [
     utilService,
     approvalService,
     toaster,
-    $q
+    $q,
+    $uibModal
   ) {
     // Initialize scope variables
     $scope.isLoading = false; // Loading state
     $scope.pageSize = 5; // Number of items per page
     $scope.currentPage = 1; // Current page number
-    $scope.totalPage = null; // Total number of pages
+    $scope.totalPage = 0; // Total number of pages
+    $scope.totalItems = 0; // Total number of items
     $scope.currentTab = "home"; // Current tab
     $scope.stat = {}; // Statistics data for dashboard
     $scope.popularVehicleDetails = {}; // Popular vehicle details
     $scope.approvals = []; // Approvals data for dashboard
-    $scope.approveModal = false; // Approve modal state
-    $scope.cancelApproveModal = false; // Cancel approve modal state
     $scope.approvalId = null; // Approval id
-    // Approval filter
+
+    // Approval filter with additional options
     $scope.approvalFilter = {
       status: "all",
       sortBy: "date",
       orderBy: "desc",
     };
+
+    // Chart filter configurations
     $scope.carChartFilter = {
       field: "location",
       typeOfChart: "bar",
@@ -61,6 +65,7 @@ angular.module("rentIT").controller("adminController", [
       revenueChart: null,
       topEarningOwnersChart: null,
     };
+
     /**
      * @description Get statistics data for dashboard
      */
@@ -74,29 +79,77 @@ angular.module("rentIT").controller("adminController", [
     };
 
     /**
-     * @description toggle approve modal
-     * @param {Boolean} state - Modal state
-     * @param {string} id - Bid id
+     * @description Open the approve modal using UI Bootstrap
+     * @param {string} id - Approval id
      */
-    $scope.toggleApproveModal = (state, id) => {
+    $scope.openApproveModal = function (id) {
       $scope.approvalId = id;
-      $scope.approveModal = state;
+
+      var modalInstance = $uibModal.open({
+        animation: true,
+        templateUrl: "approveModal.html",
+        controller: "ApproveModalController",
+        size: "md",
+        backdrop: "static",
+        resolve: {
+          approvalId: function () {
+            return $scope.approvalId;
+          },
+        },
+      });
+
+      modalInstance.result.then(
+        function () {
+          // User clicked OK, proceed with approval
+          $scope.approveUserRequest($scope.approvalId);
+        },
+        function () {
+          // Modal dismissed, do nothing
+          console.log("Approve modal dismissed");
+        }
+      );
     };
+
     /**
-     * @description toggle cancel approve modal
-     * @param {Boolean} state - Modal state
-     * @param {string} id - Bid id
+     * @description Open the cancel modal using UI Bootstrap
+     * @param {string} id - Approval id
      */
-    $scope.toggleCancelApproveModal = (state, id) => {
+    $scope.openCancelModal = function (id) {
       $scope.approvalId = id;
-      $scope.cancelApproveModal = state;
+
+      var modalInstance = $uibModal.open({
+        animation: true,
+        templateUrl: "cancelModal.html",
+        controller: "CancelModalController",
+        size: "md",
+        backdrop: "static",
+        resolve: {
+          approvalId: function () {
+            return $scope.approvalId;
+          },
+        },
+      });
+
+      modalInstance.result.then(
+        function () {
+          // User clicked OK, proceed with rejection
+          $scope.cancelUserRequest($scope.approvalId);
+        },
+        function () {
+          // Modal dismissed, do nothing
+          console.log("Cancel modal dismissed");
+        }
+      );
     };
+
     /**
      * @description Change tab
      * @param {*} tab - Tab name
      */
     $scope.changeTab = function (tab) {
       $scope.currentTab = tab;
+      $scope.currentPage = 1; // Reset to first page on tab change
+
       switch (tab) {
         case "home":
           break;
@@ -116,7 +169,7 @@ angular.module("rentIT").controller("adminController", [
      * @description Set statistics for dashboard
      */
     const setStat = function () {
-      userService
+      return userService
         .getStatsForSuperAdmin()
         .then((result) => {
           $scope.stat = result.data;
@@ -135,7 +188,7 @@ angular.module("rentIT").controller("adminController", [
      * @description Get popular vehicle details
      */
     const getPopluarVehicleDetails = () => {
-      chartService
+      return chartService
         .getPopularVehicleDetails()
         .then((response) => {
           $scope.popularVehicleDetails = response.data;
@@ -151,22 +204,34 @@ angular.module("rentIT").controller("adminController", [
     };
 
     /**
-     * @description Set approvals for dashboard
+     * @description Set approvals for dashboard with enhanced pagination and filtering
      */
     $scope.setApprovals = function () {
       $scope.isLoading = true;
       const filter = {};
       const sort = {};
+
+      // Apply status filter
       if ($scope.approvalFilter.status !== "all") {
         filter.status = $scope.approvalFilter.status;
       }
-      sort["createdAt"] = $scope.approvalFilter.orderBy === "asc" ? 1 : -1;
+
+      // Apply sorting
+      if ($scope.approvalFilter.sortBy === "date") {
+        sort["createdAt"] = $scope.approvalFilter.orderBy === "asc" ? 1 : -1;
+      } else if ($scope.approvalFilter.sortBy === "username") {
+        sort["user.username"] =
+          $scope.approvalFilter.orderBy === "asc" ? 1 : -1;
+      } else if ($scope.approvalFilter.sortBy === "email") {
+        sort["user.email"] = $scope.approvalFilter.orderBy === "asc" ? 1 : -1;
+      }
+
       approvalService
         .getApprovals($scope.currentPage, $scope.pageSize, filter, sort)
         .then((result) => {
-          console.log(result);
           $scope.approvals = result.data.requests;
           $scope.totalPage = result.data.pages;
+          $scope.totalItems = result.data.total;
         })
         .catch((error) => {
           console.log(error);
@@ -182,16 +247,46 @@ angular.module("rentIT").controller("adminController", [
     };
 
     /**
-     * @description Cancel User Request to become a car owner
+     * @description Handle page change for pagination
      */
-    $scope.cancelUserRequest = function () {
-      if (!$scope.approvalId) {
+    $scope.pageChanged = function () {
+      $scope.setApprovals();
+    };
+
+    /**
+     * @description Previous page navigation
+     */
+    $scope.prevPage = function () {
+      if ($scope.currentPage > 1) {
+        $scope.currentPage--;
+        $scope.setApprovals();
+      }
+    };
+
+    /**
+     * @description Next page navigation
+     */
+    $scope.nextPage = function () {
+      if ($scope.currentPage < $scope.totalPage) {
+        $scope.currentPage++;
+        $scope.setApprovals();
+      }
+    };
+
+    /**
+     * @description Cancel User Request to become a car owner
+     * @param {string} approvalId - The ID of the approval to reject
+     */
+    $scope.cancelUserRequest = function (approvalId) {
+      const id = approvalId || $scope.approvalId;
+      if (!id) {
         toaster.pop("error", "Error", "Invalid request");
         return;
       }
+
       $scope.isLoading = true;
       approvalService
-        .rejectApprovalRequest($scope.approvalId)
+        .rejectApprovalRequest(id)
         .then(() => {
           $scope.setApprovals();
           toaster.pop("success", "Success", "Request rejected successfully");
@@ -205,22 +300,24 @@ angular.module("rentIT").controller("adminController", [
           );
         })
         .finally(() => {
-          $scope.toggleCancelApproveModal(false);
           $scope.isLoading = false;
         });
     };
 
     /**
      * @description Approve User Request to become a car owner
+     * @param {string} approvalId - The ID of the approval to approve
      */
-    $scope.approveUserRequest = function () {
-      if (!$scope.approvalId) {
+    $scope.approveUserRequest = function (approvalId) {
+      const id = approvalId || $scope.approvalId;
+      if (!id) {
         toaster.pop("error", "Error", "Invalid request");
         return;
       }
+
       $scope.isLoading = true;
       approvalService
-        .approveApprovalRequest($scope.approvalId)
+        .approveApprovalRequest(id)
         .then(() => {
           $scope.setApprovals();
           toaster.pop("success", "Success", "Request approved successfully");
@@ -233,10 +330,10 @@ angular.module("rentIT").controller("adminController", [
           );
         })
         .finally(() => {
-          $scope.toggleApproveModal(false);
           $scope.isLoading = false;
         });
     };
+
     /**
      * @description To Load car Chart showing the number of cars by analytics field
      */
@@ -430,6 +527,46 @@ angular.module("rentIT").controller("adminController", [
         },
       });
       $scope.chartInstances[id] = chart;
+    };
+  },
+]);
+
+/**
+ * Controller for the Approve Modal
+ */
+angular.module("rentIT").controller("ApproveModalController", [
+  "$scope",
+  "$uibModalInstance",
+  "approvalId",
+  function ($scope, $uibModalInstance, approvalId) {
+    $scope.approvalId = approvalId;
+
+    $scope.ok = function () {
+      $uibModalInstance.close();
+    };
+
+    $scope.cancel = function () {
+      $uibModalInstance.dismiss("cancel");
+    };
+  },
+]);
+
+/**
+ * Controller for the Cancel Modal
+ */
+angular.module("rentIT").controller("CancelModalController", [
+  "$scope",
+  "$uibModalInstance",
+  "approvalId",
+  function ($scope, $uibModalInstance, approvalId) {
+    $scope.approvalId = approvalId;
+
+    $scope.ok = function () {
+      $uibModalInstance.close();
+    };
+
+    $scope.cancel = function () {
+      $uibModalInstance.dismiss("cancel");
     };
   },
 ]);

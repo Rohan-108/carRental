@@ -1,1287 +1,1746 @@
-<div class="dashboard" ng-init="init()">
-  <!-------Sidebar -------------------------------------------------------->
-  <div class="dashboard-sidebar">
-    <p>Dashboard</p>
-    <div class="dashboardPage">
-      <div
-        class="dashboard-page"
-        data-id="home"
-        ng-click="changeTab('home')"
-        ng-class="{ active: currentTab === 'home' }"
-      >
-        Home
-      </div>
-      <div
-        class="dashboard-page"
-        data-id="cars"
-        ng-click="changeTab('cars')"
-        ng-class="{ active: currentTab === 'cars' }"
-      >
-        Cars
-      </div>
-      <div
-        class="dashboard-page"
-        data-id="bookings"
-        ng-click="changeTab('bookings')"
-        ng-class="{ active: currentTab === 'bookings' }"
-      >
-        Bookings
-      </div>
-      <div
-        class="dashboard-page"
-        data-id="biddings"
-        ng-click="changeTab('biddings')"
-        ng-class="{ active: currentTab === 'biddings' }"
-      >
-        Biddings
-      </div>
-      <div
-        class="dashboard-page"
-        data-id="analytics"
-        ng-click="changeTab('analytics')"
-        ng-class="{ active: currentTab === 'analytics' }"
-      >
-        Analytics
-      </div>
+<div
+  class="container-fluid"
+  ng-init="init()"
+  style="min-height: 91vh; overflow-x: hidden"
+>
+  <div class="row">
+    <!-- Sidebar for medium and large screens -->
+    <div
+      class="col-sm-3 col-md-2 hidden-xs"
+      style="
+        background-color: #f5f9ff;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        position: fixed;
+        top: 60px;
+        bottom: 0;
+        left: 0;
+        z-index: 1000;
+        border-right: 1px solid #e1e8f0;
+        overflow-y: auto;
+      "
+    >
+      <h3 class="text-primary" style="margin-left: 15px; margin-bottom: 20px">
+        Dashboard
+      </h3>
+      <ul class="nav nav-pills nav-stacked">
+        <li ng-class="{ active: currentTab === 'home' }">
+          <a href ng-click="changeTab('home')">
+            <i class="glyphicon glyphicon-home"></i> Home
+          </a>
+        </li>
+        <li ng-class="{ active: currentTab === 'cars' }">
+          <a href ng-click="changeTab('cars')">
+            <i class="glyphicon glyphicon-road"></i> Cars
+          </a>
+        </li>
+        <li ng-class="{ active: currentTab === 'bookings' }">
+          <a href ng-click="changeTab('bookings')">
+            <i class="glyphicon glyphicon-calendar"></i> Bookings
+          </a>
+        </li>
+        <li ng-class="{ active: currentTab === 'biddings' }">
+          <a href ng-click="changeTab('biddings')">
+            <i class="glyphicon glyphicon-usd"></i> Biddings
+          </a>
+        </li>
+        <li ng-class="{ active: currentTab === 'analytics' }">
+          <a href ng-click="changeTab('analytics')">
+            <i class="glyphicon glyphicon-stats"></i> Analytics
+          </a>
+        </li>
+      </ul>
     </div>
-  </div>
-  <main class="dashboard-main">
-    <div class="loader-overlay" ng-show="isLoading">
-      <div class="loader"></div>
-    </div>
-    <!-- Home Section -->
-    <div class="dataSection" id="dataSection" ng-if="currentTab==='home'">
-      <h2>Your Numbers</h2>
-      <div class="summary-cards">
-        <div class="card">
-          <h3>Pending Bid</h3>
-          <p id="biddingCount">{{stat.bids}}</p>
-        </div>
-        <div class="card">
-          <h3>Total Booking</h3>
-          <p id="bookingCount">{{stat.bookings}}</p>
-        </div>
-        <div class="card">
-          <h3>Cars</h3>
-          <p><span id="noOfCars">{{stat.cars}}</span></p>
-        </div>
-        <div class="card">
-          <h3>Total Revenue</h3>
-          <p><span id="revenue">{{stat.revenue | currency:"Rs."}}</span></p>
-        </div>
-        <div class="card">
-          <h3>Average Rental Period</h3>
-          <p>
-            <span id="averageRentDay"
-              >{{stat.avgRentalDay}} {{stat.avgRentalDay>1?"days":"day"}}</span
-            >
-          </p>
-        </div>
-        <div class="card">
-          <h3>Rejected Bids</h3>
-          <p><span id="rejectedBids">{{stat.rejectedBids}}</span></p>
-        </div>
+
+    <!-- Collapsible Sidebar for Small Screens -->
+    <div class="visible-xs" style="margin-bottom: 15px">
+      <button
+        class="btn btn-primary"
+        style="margin: 10px"
+        ng-click="isSidebarVisible = !isSidebarVisible"
+      >
+        <i class="glyphicon glyphicon-menu-hamburger"></i> Menu
+      </button>
+      <div
+        ng-show="isSidebarVisible"
+        class="panel panel-default"
+        style="
+          margin-top: 10px;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          background-color: #f5f9ff;
+          border-color: #e1e8f0;
+        "
+      >
+        <ul class="nav nav-pills nav-stacked">
+          <li ng-class="{ active: currentTab === 'home' }">
+            <a href ng-click="changeTab('home')">
+              <i class="glyphicon glyphicon-home"></i> Home
+            </a>
+          </li>
+          <li ng-class="{ active: currentTab === 'cars' }">
+            <a href ng-click="changeTab('cars')">
+              <i class="glyphicon glyphicon-road"></i> Cars
+            </a>
+          </li>
+          <li ng-class="{ active: currentTab === 'bookings' }">
+            <a href ng-click="changeTab('bookings')">
+              <i class="glyphicon glyphicon-calendar"></i> Bookings
+            </a>
+          </li>
+          <li ng-class="{ active: currentTab === 'biddings' }">
+            <a href ng-click="changeTab('biddings')">
+              <i class="glyphicon glyphicon-usd"></i> Biddings
+            </a>
+          </li>
+          <li ng-class="{ active: currentTab === 'analytics' }">
+            <a href ng-click="changeTab('analytics')">
+              <i class="glyphicon glyphicon-stats"></i> Analytics
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
 
-    <!-- Car Cards Section -->
-    <div id="car-cards-section" ng-if="currentTab==='cars'">
-      <div class="card-header">
-        <h2>My Cars</h2>
-        <div style="display: flex; gap: 0.2rem">
-          <button
-            class="btn"
-            id="addCar"
-            style="width: 8rem"
-            ng-click="toggleAddCarModal(true)"
+    <!-- Main Content Area -->
+    <div
+      class="col-sm-9 col-md-10 col-sm-offset-3 col-md-offset-2"
+      style="padding-bottom: 30px"
+    >
+      <!-- Loading Overlay -->
+      <div
+        ng-show="isLoading"
+        style="
+          position: absolute;
+          inset: 0;
+          background-color: rgba(255, 255, 255, 0.7);
+          z-index: 1050;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          backdrop-filter: blur(5px);
+        "
+      >
+        <div class="text-center">
+          <div
+            class="spinner"
+            style="
+              width: 60px;
+              height: 60px;
+              border-radius: 50%;
+              border: 5px solid #f3f3f3;
+              border-top: 5px solid #337ab7;
+              animation: spin 1s linear infinite;
+            "
+          ></div>
+          <p
+            class="lead"
+            style="margin-top: 15px; font-weight: bold; color: #337ab7"
           >
-            Add New Car
-          </button>
+            Loading...
+          </p>
         </div>
       </div>
-      <div id="carCardsGrid">
-        <div class="car-card" ng-repeat="car in cars">
-          <div class="car-image-container">
-            <img
-              ng-src="{{car.images[0]}}"
-              alt="{{car.name}}"
-              class="car-image"
-            />
+
+      <!-- Home Section -->
+      <div ng-show="currentTab === 'home'">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <i class="glyphicon glyphicon-dashboard"></i> Your Numbers
+            </h3>
           </div>
-          <div class="car-details">
-            <h3 class="car-name">{{car.name}}</h3>
-            <p class="car-price">Price per day: Rs {{car.rentalPrice}}</p>
-            <p class="car-plate">Plate Number: {{car.plateNumber}}</p>
-            <p class="car-plate">Location: {{car.location}}</p>
-            <div class="car-actions">
-              <button
-                class="editCarBtn"
-                ng-click="toggleEditCarModal(true,car._id)"
-              >
-                Edit
-              </button>
-              <!-- <button class="deleteCarBtn">Hide</button> -->
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-md-4 col-sm-6">
+                <div class="panel panel-info">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">
+                      <i class="glyphicon glyphicon-time"></i> Pending Bid
+                    </h3>
+                  </div>
+                  <div class="panel-body text-center">
+                    <h3 id="biddingCount">{{stat.bids}}</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-6">
+                <div class="panel panel-info">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">
+                      <i class="glyphicon glyphicon-calendar"></i> Total Booking
+                    </h3>
+                  </div>
+                  <div class="panel-body text-center">
+                    <h3 id="bookingCount">{{stat.bookings}}</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-6">
+                <div class="panel panel-info">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">
+                      <i class="glyphicon glyphicon-road"></i> Cars
+                    </h3>
+                  </div>
+                  <div class="panel-body text-center">
+                    <h3><span id="noOfCars">{{stat.cars}}</span></h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-6">
+                <div class="panel panel-info">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">
+                      <i class="glyphicon glyphicon-usd"></i> Total Revenue
+                    </h3>
+                  </div>
+                  <div class="panel-body text-center">
+                    <h3>
+                      <span id="revenue"
+                        >{{stat.revenue | currency:"Rs."}}</span
+                      >
+                    </h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-6">
+                <div class="panel panel-info">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">
+                      <i class="glyphicon glyphicon-time"></i> Average Rental
+                      Period
+                    </h3>
+                  </div>
+                  <div class="panel-body text-center">
+                    <h3>
+                      <span id="averageRentDay"
+                        >{{stat.avgRentalDay}}
+                        {{stat.avgRentalDay>1?"days":"day"}}</span
+                      >
+                    </h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-6">
+                <div class="panel panel-info">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">
+                      <i class="glyphicon glyphicon-remove"></i> Rejected Bids
+                    </h3>
+                  </div>
+                  <div class="panel-body text-center">
+                    <h3>
+                      <span id="rejectedBids">{{stat.rejectedBids}}</span>
+                    </h3>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="pagination">
-        <button
-          class="pagination-button"
-          ng-disabled="currentPage === 1"
-          ng-click="prevPage('cars')"
-        >
-          Prev
-        </button>
-        <span>Page {{currentPage}} of {{totalPage}}</span>
-        <button
-          class="pagination-button"
-          ng-disabled="currentPage === totalPage"
-          ng-click="nextPage('cars')"
-        >
-          Next
-        </button>
+
+      <!-- Car Cards Section -->
+      <div ng-show="currentTab === 'cars'">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <i class="glyphicon glyphicon-road"></i> My Cars
+            </h3>
+          </div>
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-md-6 col-sm-12" ng-repeat="car in cars">
+                <div
+                  class="panel panel-default car-panel"
+                  style="
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                    transition: all 0.3s ease;
+                    overflow: hidden;
+                    border: none;
+                    margin-bottom: 20px;
+                  "
+                >
+                  <!-- Car Image with Badge -->
+                  <div
+                    style="height: 180px; overflow: hidden; position: relative"
+                  >
+                    <img
+                      ng-src="{{car.images[0]}}"
+                      alt="{{car.name}}"
+                      class="img-responsive"
+                      style="
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                        transition: transform 0.5s;
+                      "
+                    />
+                    <div
+                      style="
+                        position: absolute;
+                        top: 10px;
+                        right: 10px;
+                        background-color: rgba(0, 122, 243, 0.8);
+                        color: white;
+                        padding: 5px 10px;
+                        border-radius: 20px;
+                        font-size: 12px;
+                        font-weight: bold;
+                      "
+                    >
+                      {{car.vehicleType}}
+                    </div>
+                  </div>
+
+                  <div class="panel-body" style="padding: 15px">
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-start;
+                        margin-bottom: 10px;
+                      "
+                    >
+                      <h4
+                        style="
+                          font-size: 18px;
+                          margin: 0;
+                          color: #333;
+                          font-weight: 600;
+                        "
+                      >
+                        {{car.name}}
+                      </h4>
+                      <span class="label label-primary"
+                        >Rs {{car.rentalPrice}}/day</span
+                      >
+                    </div>
+
+                    <!-- Car Details with Icons -->
+                    <div
+                      style="
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 8px;
+                        margin: 12px 0;
+                      "
+                    >
+                      <span
+                        style="
+                          display: flex;
+                          align-items: center;
+                          font-size: 13px;
+                          color: #555;
+                          margin-right: 10px;
+                        "
+                      >
+                        <i
+                          class="glyphicon glyphicon-map-marker"
+                          style="margin-right: 4px; color: #e74c3c"
+                        ></i>
+                        {{car.location}}
+                      </span>
+                      <span
+                        style="
+                          display: flex;
+                          align-items: center;
+                          font-size: 13px;
+                          color: #555;
+                          margin-right: 10px;
+                        "
+                      >
+                        <i
+                          class="glyphicon glyphicon-tint"
+                          style="margin-right: 4px; color: #3498db"
+                        ></i>
+                        {{car.fuelType}}
+                      </span>
+                      <span
+                        style="
+                          display: flex;
+                          align-items: center;
+                          font-size: 13px;
+                          color: #555;
+                          margin-right: 10px;
+                        "
+                      >
+                        <i
+                          class="glyphicon glyphicon-cog"
+                          style="margin-right: 4px; color: #95a5a6"
+                        ></i>
+                        {{car.transmission}}
+                      </span>
+                      <span
+                        style="
+                          display: flex;
+                          align-items: center;
+                          font-size: 13px;
+                          color: #555;
+                        "
+                      >
+                        <i
+                          class="glyphicon glyphicon-user"
+                          style="margin-right: 4px; color: #f39c12"
+                        ></i>
+                        {{car.seats}} seats
+                      </span>
+                    </div>
+
+                    <!-- Additional Details -->
+                    <div
+                      style="
+                        margin-top: 10px;
+                        padding-top: 10px;
+                        border-top: 1px solid #f0f0f0;
+                        font-size: 13px;
+                        color: #666;
+                      "
+                    >
+                      <p style="margin: 0 0 5px">
+                        <i
+                          class="glyphicon glyphicon-credit-card"
+                          style="margin-right: 4px"
+                        ></i>
+                        Plate: {{car.plateNumber}}
+                      </p>
+                      <p style="margin: 0 0 5px">
+                        <i
+                          class="glyphicon glyphicon-time"
+                          style="margin-right: 4px"
+                        ></i>
+                        Rental Period:
+                        {{car.minRentalPeriod}}-{{car.maxRentalPeriod}} days
+                      </p>
+                    </div>
+
+                    <!-- Action Button -->
+                    <div style="margin-top: 15px; text-align: right">
+                      <button
+                        class="btn btn-primary"
+                        ng-click="toggleEditCarModal(true, car._id)"
+                        style="
+                          background-color: #337ab7;
+                          border: none;
+                          padding: 6px 12px;
+                        "
+                      >
+                        <i class="glyphicon glyphicon-pencil"></i> Edit
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Add Car Button -->
+            <div class="row" style="margin-top: 10px">
+              <div class="col-xs-12 text-center">
+                <button
+                  class="btn btn-success"
+                  ng-click="toggleAddCarModal(true)"
+                >
+                  <i class="glyphicon glyphicon-plus"></i> Add New Car
+                </button>
+              </div>
+            </div>
+
+            <!-- Pagination -->
+            <ul class="pagination">
+              <li ng-class="{disabled: currentPage === 1}">
+                <a href ng-click="prevPage('cars')">
+                  <i class="glyphicon glyphicon-chevron-left"></i>
+                </a>
+              </li>
+              <li class="active">
+                <a href>Page {{currentPage}} of {{totalPage}}</a>
+              </li>
+              <li ng-class="{disabled: currentPage === totalPage}">
+                <a href ng-click="nextPage('cars')">
+                  <i class="glyphicon glyphicon-chevron-right"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Biddings Section -->
+      <div ng-if="currentTab === 'biddings'">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <i class="glyphicon glyphicon-usd"></i> Biddings
+            </h3>
+          </div>
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                  <label for="carFilter">Filter by Car:</label>
+                  <select
+                    id="carFilter"
+                    class="form-control"
+                    ng-model="bidFilter.filterByCar"
+                    ng-change="setBiddings()"
+                  >
+                    <option
+                      ng-repeat="car in carsForFilter"
+                      value="{{car._id}}"
+                    >
+                      {{car.name}}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                  <label for="statusFilter">Filter by Status:</label>
+                  <select
+                    id="statusFilter"
+                    class="form-control"
+                    ng-model="bidFilter.filterByStatus"
+                    ng-change="setBiddings()"
+                  >
+                    <option value="all" selected>All</option>
+                    <option value="pending">Pending</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="approved">Approved</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                  <label for="sortFilterBidding">Sort by:</label>
+                  <select
+                    id="sortFilterBidding"
+                    class="form-control"
+                    ng-model="bidFilter.sortBy"
+                    ng-change="setBiddings()"
+                  >
+                    <option value="date" selected>Date Created</option>
+                    <option value="amount">Amount</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                  <label for="sortOrderBidding">Order:</label>
+                  <select
+                    id="sortOrderBidding"
+                    class="form-control"
+                    ng-model="bidFilter.sortOrder"
+                    ng-change="setBiddings()"
+                  >
+                    <option value="asc">Ascending &#9650;</option>
+                    <option value="desc">Descending &#9660;</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <th><i class="glyphicon glyphicon-road"></i> Car Name</th>
+                    <th><i class="glyphicon glyphicon-user"></i> Renter</th>
+                    <th>
+                      <i class="glyphicon glyphicon-credit-card"></i> Adhaar
+                      Number
+                    </th>
+                    <th>
+                      <i class="glyphicon glyphicon-calendar"></i> Start Date
+                    </th>
+                    <th>
+                      <i class="glyphicon glyphicon-calendar"></i> End Date
+                    </th>
+                    <th><i class="glyphicon glyphicon-usd"></i> Amount</th>
+                    <th><i class="glyphicon glyphicon-cog"></i> Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-if="bids.length === 0">
+                    <td colspan="7" class="text-center">There is no data</td>
+                  </tr>
+                  <tr ng-repeat="bid in bids" ng-if="bids.length > 0">
+                    <td>{{bid.vehicle.name}}</td>
+                    <td>{{bid.user.username}}</td>
+                    <td>{{bid.vehicle.plateNumber}}</td>
+                    <td>{{bid.startDate | date}}</td>
+                    <td>{{bid.endDate | date}}</td>
+                    <td>{{bid.amount | currency:"Rs."}}</td>
+                    <td ng-if="bid.status !== 'pending'">
+                      <span
+                        class="label"
+                        ng-class="{
+                          'label-warning': bid.status === 'pending',
+                          'label-danger': bid.status === 'rejected',
+                          'label-success': bid.status === 'approved'
+                        }"
+                      >
+                        {{bid.status}}
+                      </span>
+                    </td>
+                    <td ng-if="bid.status == 'pending'">
+                      <button
+                        class="btn btn-success btn-sm"
+                        ng-click="toggleApproveBidModal(true, bid._id)"
+                      >
+                        <i class="glyphicon glyphicon-ok"></i> Approve
+                      </button>
+                      <button
+                        class="btn btn-danger btn-sm"
+                        ng-click="toggleCancelBidModal(true, bid._id)"
+                      >
+                        <i class="glyphicon glyphicon-remove"></i> Cancel
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- Pagination -->
+            <ul class="pagination">
+              <li ng-class="{disabled: currentPage === 1}">
+                <a href ng-click="prevPage('bids')">
+                  <i class="glyphicon glyphicon-chevron-left"></i>
+                </a>
+              </li>
+              <li class="active">
+                <a href>Page {{currentPage}} of {{totalPage}}</a>
+              </li>
+              <li ng-class="{disabled: currentPage === totalPage}">
+                <a href ng-click="nextPage('bids')">
+                  <i class="glyphicon glyphicon-chevron-right"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Booking Section -->
+      <div ng-if="currentTab === 'bookings'">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <i class="glyphicon glyphicon-calendar"></i> Bookings
+            </h3>
+          </div>
+          <div class="panel-body">
+            <!-- Booking tabs -->
+            <ul class="nav nav-tabs" style="margin-bottom: 20px">
+              <li ng-class="{active: bookingTab === 'all'}">
+                <a href ng-click="changeBookingTab('all')">
+                  <i class="glyphicon glyphicon-list"></i> All Bookings
+                </a>
+              </li>
+              <li ng-class="{active: bookingTab === 'active'}">
+                <a href ng-click="changeBookingTab('active')">
+                  <i class="glyphicon glyphicon-play"></i> Active Bookings
+                </a>
+              </li>
+              <li ng-class="{active: bookingTab === 'completed'}">
+                <a href ng-click="changeBookingTab('completed')">
+                  <i class="glyphicon glyphicon-ok-circle"></i> Completed
+                  Bookings
+                </a>
+              </li>
+            </ul>
+            <div class="row">
+              <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                  <label for="carFilterBooking">Filter by Car:</label>
+                  <select
+                    id="carFilterBooking"
+                    class="form-control"
+                    ng-model="bookingFilter.filterByCar"
+                    ng-change="setBookings()"
+                  >
+                    <option
+                      ng-repeat="car in carsForFilter"
+                      value="{{car._id}}"
+                    >
+                      {{car.name}}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                  <label for="sortFilterBooking">Sort by:</label>
+                  <select
+                    id="sortFilterBooking"
+                    class="form-control"
+                    ng-model="bookingFilter.sortBy"
+                    ng-change="setBookings()"
+                  >
+                    <option value="date" selected>Date Created</option>
+                    <option value="amount">Amount</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                  <label for="sortOrderBooking">Order:</label>
+                  <select
+                    id="sortOrderBooking"
+                    class="form-control"
+                    ng-model="bookingFilter.sortOrder"
+                    ng-change="setBookings()"
+                  >
+                    <option value="asc">Ascending &#9650;</option>
+                    <option value="desc" selected>Descending &#9660;</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <th><i class="glyphicon glyphicon-road"></i> Car Name</th>
+                    <th><i class="glyphicon glyphicon-user"></i> Renter</th>
+                    <th>
+                      <i class="glyphicon glyphicon-credit-card"></i> Adhaar
+                      Number
+                    </th>
+                    <th>
+                      <i class="glyphicon glyphicon-calendar"></i> Start Date
+                    </th>
+                    <th>
+                      <i class="glyphicon glyphicon-calendar"></i> End Date
+                    </th>
+                    <th><i class="glyphicon glyphicon-usd"></i> Amount</th>
+                    <th ng-if="bookingTab==='active'">
+                      <i class="glyphicon glyphicon-dashboard"></i> Action
+                    </th>
+                    <th ng-if="bookingTab==='completed'">
+                      <i class="glyphicon glyphicon-file"></i> Invoice
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-if="bookings.length === 0">
+                    <td
+                      colspan="{{bookingTab==='active'?'7':'6'}}"
+                      class="text-center"
+                    >
+                      There is no data
+                    </td>
+                  </tr>
+                  <tr ng-repeat="booking in bookings">
+                    <td>{{booking.vehicle.name}}</td>
+                    <td>{{booking.user.username}}</td>
+                    <td>{{booking.user.adhaar}}</td>
+                    <td>{{booking.startDate |date}}</td>
+                    <td>{{booking.endDate | date}}</td>
+                    <td>{{booking.amount | currency:"Rs."}}</td>
+                    <td ng-if="bookingTab=='active'">
+                      <button
+                        class="btn btn-primary btn-sm"
+                        ng-if="!booking.startOdometer"
+                        ng-click="toggleOdometerModal(true, booking._id,'start')"
+                      >
+                        Add Current Odometer
+                      </button>
+                      <button
+                        class="btn btn-danger btn-sm"
+                        ng-if="booking.startOdometer && !booking.finalOdometer"
+                        ng-click="toggleOdometerModal(true, booking._id,'final')"
+                      >
+                        Add Final Odometer
+                      </button>
+                    </td>
+                    <td ng-if="bookingTab==='completed'">
+                      <a ng-href="{{booking.invoice}}" target="_blank">
+                        <button class="btn btn-primary btn-sm">
+                          Download Invoice
+                        </button>
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- Pagination -->
+            <ul class="pagination">
+              <li ng-class="{disabled: currentPage === 1}">
+                <a href ng-click="prevPage('bookings')">
+                  <i class="glyphicon glyphicon-chevron-left"></i>
+                </a>
+              </li>
+              <li class="active">
+                <a href
+                  >Page {{currentPage}} of {{totalPage===0?1:totalPage}}</a
+                >
+              </li>
+              <li ng-class="{disabled: currentPage === totalPage}">
+                <a href ng-click="nextPage('bookings')">
+                  <i class="glyphicon glyphicon-chevron-right"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Revenue Analytics Section -->
+      <div ng-show="currentTab === 'analytics'">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <i class="glyphicon glyphicon-stats"></i> Revenue Analytics
+            </h3>
+          </div>
+          <div class="panel-body text-center">
+            <div class="row">
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label for="days">No Of Days:</label>
+                  <select
+                    name="days"
+                    id="days"
+                    class="form-control"
+                    ng-model="revenueChartFilter.days"
+                    ng-change="revenueChart()"
+                  >
+                    <option value="7" selected>Last 7 Days</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="90">Last 90 Days</option>
+                    <option value="180">Last 180 Days</option>
+                    <option value="365">Last 365 Days</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label for="revenueFilter">Filter:</label>
+                  <select
+                    name="revenueFilter"
+                    id="revenueFilter"
+                    class="form-control"
+                    ng-model="revenueChartFilter.dataBy"
+                    ng-change="revenueChart()"
+                  >
+                    <option value="vehicle.vehicleType">By Car Type</option>
+                    <option value="vehicle.fuelType">By FuelType</option>
+                    <option value="vehicle.transmission">
+                      By Transmission Type
+                    </option>
+                    <option value="vehicle.location">By Location</option>
+                    <option value="vehicle.plateNumber">By CarID</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label for="revenueChartType">Chart:</label>
+                  <select
+                    name="revenueChartType"
+                    id="revenueChartType"
+                    class="form-control"
+                    ng-model="revenueChartFilter.typeOfChart"
+                    ng-change="revenueChart()"
+                  >
+                    <option value="bar" selected>Bar</option>
+                    <option value="pie">Pie</option>
+                    <option value="doughnut">DoughNut</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-10 col-md-offset-1">
+                <div
+                  class="chart-container"
+                  style="
+                    position: relative;
+                    height: 45vh;
+                    max-height: 400px;
+                    margin: 0 auto;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                  "
+                >
+                  <canvas id="revenueChart"></canvas>
+                </div>
+              </div>
+            </div>
+            <p style="text-align: center; font-size: 0.8rem; margin-top: 15px">
+              *Revenue is calculated for confirmed bookings only.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison Chart Section -->
+      <div ng-show="currentTab === 'home'">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <i class="glyphicon glyphicon-stats"></i> Comparision
+            </h3>
+          </div>
+          <div class="panel-body text-center">
+            <div class="row">
+              <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                  <label for="days">No Of Days:</label>
+                  <select
+                    name="days"
+                    id="days"
+                    class="form-control"
+                    ng-model="comparisionChartFilter.days"
+                    ng-change="comparisionChart()"
+                  >
+                    <option value="7" selected>Last 7 Days</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="90">Last 90 Days</option>
+                    <option value="180">Last 180 Days</option>
+                    <option value="365">Last 365 Days</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                  <label for="comparisionChartType">Chart:</label>
+                  <select
+                    name="comparisionChartType"
+                    id="comparisionChartType"
+                    class="form-control"
+                    ng-model="comparisionChartFilter.typeOfChart"
+                    ng-change="comparisionChart()"
+                  >
+                    <option value="bar" selected>Bar</option>
+                    <option value="pie">Pie</option>
+                    <option value="doughnut">DoughNut</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-10 col-md-offset-1">
+                <div
+                  class="chart-container"
+                  style="
+                    position: relative;
+                    height: 45vh;
+                    max-height: 400px;
+                    margin: 0 auto;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                  "
+                >
+                  <canvas id="comparisionChart"></canvas>
+                </div>
+              </div>
+            </div>
+            <p style="text-align: center; font-size: 0.8rem; margin-top: 15px">
+              *Revenue is calculated for confirmed bookings only.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Booking Analytics Section -->
+      <div ng-show="currentTab === 'analytics'">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <i class="glyphicon glyphicon-stats"></i> Booking Analytics
+            </h3>
+          </div>
+          <div class="panel-body text-center">
+            <div class="row">
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label for="days">No Of Days:</label>
+                  <select
+                    name="days"
+                    id="days"
+                    class="form-control"
+                    ng-model="bookingChartFilter.days"
+                    ng-change="bookingChart()"
+                  >
+                    <option value="7" selected>Last 7 Days</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="90">Last 90 Days</option>
+                    <option value="180">Last 180 Days</option>
+                    <option value="365">Last 365 Days</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label for="bookingFilter">Filter:</label>
+                  <select
+                    name="bookingFilter"
+                    id="bookingFilter"
+                    class="form-control"
+                    ng-model="bookingChartFilter.dataBy"
+                    ng-change="bookingChart()"
+                  >
+                    <option value="vehicle.vehicleType">By Car Type</option>
+                    <option value="status">By Status</option>
+                    <option value="vehicle.fuelType">By FuelType</option>
+                    <option value="vehicle.transmission">
+                      By Transmission Type
+                    </option>
+                    <option value="vehicle.location">By Location</option>
+                    <option value="vehicle.plateNumber">By CarID</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label for="bookChartType">Chart:</label>
+                  <select
+                    name="bookChartType"
+                    id="bookChartType"
+                    class="form-control"
+                    ng-model="bookingChartFilter.typeOfChart"
+                    ng-change="bookingChart()"
+                  >
+                    <option value="bar">Bar</option>
+                    <option value="pie">Pie</option>
+                    <option value="doughnut">DoughNut</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-10 col-md-offset-1">
+                <div
+                  class="chart-container"
+                  style="
+                    position: relative;
+                    height: 45vh;
+                    max-height: 400px;
+                    margin: 0 auto;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                  "
+                >
+                  <canvas id="bookChart"></canvas>
+                </div>
+              </div>
+            </div>
+            <p style="text-align: center; font-size: 0.8rem; margin-top: 15px">
+              *Bidding count includes the bids with status 'pending' and
+              'rejected'.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- Bidding Section -->
-    <div
-      id="bidding-section"
-      class="tableSection"
-      ng-if="currentTab==='biddings'"
+<!-- UI Bootstrap Modal Templates -->
+<!-- Add Car Modal Template -->
+<script type="text/ng-template" id="addCarModal.html">
+  <div class="modal-header" style="background-color: #f8f9fa; border-bottom: 2px solid #007bff; padding: 15px 20px;">
+    <h3 class="modal-title" style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #2c3e50; font-weight: 600;">
+      <i class="glyphicon glyphicon-plus-sign" style="color: #007bff; margin-right: 10px;"></i>Register Your Car
+    </h3>
+    <button type="button" class="close" ng-click="cancel()" style="font-size: 24px;">&times;</button>
+  </div>
+  <div class="modal-body" style="padding: 20px; background-color: #fdfdfd;">
+    <form id="addCarForm" name="addCarForm" class="form" novalidate>
+      <div class="panel panel-default" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px;">
+        <div class="panel-heading" style="background-color: #f1f8ff; border-bottom: 1px solid #dae5f2; padding: 12px 15px; border-radius: 8px 8px 0 0;">
+          <h4 style="margin: 0; color: #3a5a7a; font-size: 16px; font-weight: 600;">
+            <i class="glyphicon glyphicon-info-sign" style="margin-right: 8px; color: #007bff;"></i>Basic Information
+          </h4>
+        </div>
+        <div class="panel-body" style="padding: 15px 20px;">
+          <div class="form-group">
+            <label for="carName" style="font-weight: 600; color: #495057;">
+              <i class="glyphicon glyphicon-tag" style="margin-right: 8px; color: #5c6bc0;"></i>Car Name
+            </label>
+            <input
+              type="text"
+              name="carName"
+              id="carName"
+              class="form-control"
+              placeholder="Enter car name"
+              pattern="^[A-Za-z0-9\s\-]{3,20}$"
+              title="Car name must be 3-20 characters long and can include letters, numbers, and hyphens."
+              ng-model="carFormData.name"
+              ng-required="true"
+              autocomplete="off"
+              style="border-radius: 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+            />
+            <span
+              class="text-danger"
+              ng-if="addCarForm.carName.$touched && addCarForm.carName.$invalid"
+              style="font-size: 12px; display: block; margin-top: 5px;"
+            >
+              <i class="glyphicon glyphicon-exclamation-sign"></i> Car name is not valid
+            </span>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="vehicleType" style="font-weight: 600; color: #495057;">
+                  <i class="glyphicon glyphicon-road" style="margin-right: 8px; color: #26a69a;"></i>Vehicle Type
+                </label>
+                <select
+                  name="vehicleType"
+                  id="vehicleType"
+                  class="form-control"
+                  ng-required="true"
+                  ng-model="carFormData.vehicleType"
+                  style="border-radius: 4px; border: 1px solid #ced4da; padding: 9px 12px; height: 42px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                >
+                  <option ng-repeat="type in vehicleTypes" value="{{type}}">
+                    {{type}}
+                  </option>
+                </select>
+                <span
+                  class="text-danger"
+                  ng-if="addCarForm.vehicleType.$touched && addCarForm.vehicleType.$invalid"
+                  style="font-size: 12px; display: block; margin-top: 5px;"
+                >
+                  <i class="glyphicon glyphicon-exclamation-sign"></i> Please select a vehicle type
+                </span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="plateNumber" style="font-weight: 600; color: #495057;">
+                  <i class="glyphicon glyphicon-credit-card" style="margin-right: 8px; color: #ef5350;"></i>Plate Number
+                </label>
+                <input
+                  type="text"
+                  name="plateNumber"
+                  id="plateNumber"
+                  class="form-control"
+                  placeholder="Enter plate number"
+                  pattern="^[A-Z0-9\s\-]{5,10}$"
+                  title="Plate number must be 5-10 characters long and can include uppercase letters, numbers, spaces, and hyphens."
+                  ng-model="carFormData.plateNumber"
+                  ng-required="true"
+                  autocomplete="off"
+                  style="border-radius: 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                />
+                <span
+                  class="text-danger"
+                  ng-if="addCarForm.plateNumber.$touched && addCarForm.plateNumber.$invalid"
+                  style="font-size: 12px; display: block; margin-top: 5px;"
+                >
+                  <i class="glyphicon glyphicon-exclamation-sign"></i> Plate number is not valid
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="fuelType" style="font-weight: 600; color: #495057;">
+                  <i class="glyphicon glyphicon-tint" style="margin-right: 8px; color: #3498db;"></i>Fuel Type
+                </label>
+                <select
+                  name="fuelType"
+                  id="fuelType"
+                  class="form-control"
+                  ng-required="true"
+                  ng-model="carFormData.fuelType"
+                  style="border-radius: 4px; border: 1px solid #ced4da; padding: 9px 12px; height: 42px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                >
+                  <option value="Petrol">Petrol</option>
+                  <option value="Diesel">Diesel</option>
+                  <option value="Electric">Electric</option>
+                  <option value="Hybrid">Hybrid</option>
+                  <option value="CNG">CNG</option>
+                </select>
+                <span
+                  class="text-danger"
+                  ng-if="addCarForm.fuelType.$touched && addCarForm.fuelType.$invalid"
+                  style="font-size: 12px; display: block; margin-top: 5px;"
+                >
+                  <i class="glyphicon glyphicon-exclamation-sign"></i> Please select a fuel type
+                </span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="transmission" style="font-weight: 600; color: #495057;">
+                  <i class="glyphicon glyphicon-cog" style="margin-right: 8px; color: #7f8c8d;"></i>Transmission
+                </label>
+                <select
+                  name="transmission"
+                  id="transmission"
+                  class="form-control"
+                  ng-required="true"
+                  ng-model="carFormData.transmission"
+                  style="border-radius: 4px; border: 1px solid #ced4da; padding: 9px 12px; height: 42px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                >
+                  <option value="Manual">Manual</option>
+                  <option value="Automatic">Automatic</option>
+                </select>
+                <span
+                  class="text-danger"
+                  ng-if="addCarForm.transmission.$touched && addCarForm.transmission.$invalid"
+                  style="font-size: 12px; display: block; margin-top: 5px;"
+                >
+                  <i class="glyphicon glyphicon-exclamation-sign"></i> Please select a transmission type
+                </span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="seats" style="font-weight: 600; color: #495057;">
+                  <i class="glyphicon glyphicon-user" style="margin-right: 8px; color: #f39c12;"></i>Seats
+                </label>
+                <input
+                  type="number"
+                  name="seats"
+                  id="seats"
+                  class="form-control"
+                  placeholder="Enter number of seats"
+                  min="2"
+                  max="10"
+                  ng-model="carFormData.seats"
+                  ng-required="true"
+                  style="border-radius: 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                />
+                <span
+                  class="text-danger"
+                  ng-if="addCarForm.seats.$touched && addCarForm.seats.$invalid"
+                  style="font-size: 12px; display: block; margin-top: 5px;"
+                >
+                  <i class="glyphicon glyphicon-exclamation-sign"></i> Number of seats must be between 2 and 10
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-default" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px;">
+        <div class="panel-heading" style="background-color: #f1f8ff; border-bottom: 1px solid #dae5f2; padding: 12px 15px; border-radius: 8px 8px 0 0;">
+          <h4 style="margin: 0; color: #3a5a7a; font-size: 16px; font-weight: 600;">
+            <i class="glyphicon glyphicon-usd" style="margin-right: 8px; color: #28a745;"></i>Rental Details
+          </h4>
+        </div>
+        <div class="panel-body" style="padding: 15px 20px;">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="rentalPrice" style="font-weight: 600; color: #495057;">
+                  <i class="glyphicon glyphicon-tag" style="margin-right: 8px; color: #28a745;"></i>Rental Price (Rs/day)
+                </label>
+                <div class="input-group">
+                  <span class="input-group-addon" style="background-color: #f8f9fa; border-color: #ced4da;">Rs.</span>
+                  <input
+                    type="number"
+                    name="rentalPrice"
+                    id="rentalPrice"
+                    class="form-control"
+                    placeholder="Enter rental price per day"
+                    min="100"
+                    max="100000"
+                    ng-model="carFormData.rentalPrice"
+                    ng-required="true"
+                    style="border-radius: 0 4px 4px 0; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                  />
+                </div>
+                <span
+                  class="text-danger"
+                  ng-if="addCarForm.rentalPrice.$touched && addCarForm.rentalPrice.$invalid"
+                  style="font-size: 12px; display: block; margin-top: 5px;"
+                >
+                  <i class="glyphicon glyphicon-exclamation-sign"></i> Rental price must be between Rs. 100 and Rs. 100,000
+                </span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="location" style="font-weight: 600; color: #495057;">
+                  <i class="glyphicon glyphicon-map-marker" style="margin-right: 8px; color: #e74c3c;"></i>Location
+                </label>
+                <input
+                  type="text"
+                  name="location"
+                  id="location"
+                  class="form-control"
+                  placeholder="Enter car location"
+                  ng-model="carFormData.location"
+                  ng-required="true"
+                  autocomplete="off"
+                  style="border-radius: 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                />
+                <span
+                  class="text-danger"
+                  ng-if="addCarForm.location.$touched && addCarForm.location.$invalid"
+                  style="font-size: 12px; display: block; margin-top: 5px;"
+                >
+                  <i class="glyphicon glyphicon-exclamation-sign"></i> Location is required
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="minRentalPeriod" style="font-weight: 600; color: #495057;">
+                  <i class="glyphicon glyphicon-time" style="margin-right: 8px; color: #9b59b6;"></i>Min. Rental Period
+                </label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    name="minRentalPeriod"
+                    id="minRentalPeriod"
+                    class="form-control"
+                    placeholder="Minimum days"
+                    min="1"
+                    max="30"
+                    ng-model="carFormData.minRentalPeriod"
+                    ng-required="true"
+                    style="border-radius: 4px 0 0 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                  />
+                  <span class="input-group-addon" style="background-color: #f8f9fa; border-color: #ced4da;">days</span>
+                </div>
+                <span
+                  class="text-danger"
+                  ng-if="addCarForm.minRentalPeriod.$touched && addCarForm.minRentalPeriod.$invalid"
+                  style="font-size: 12px; display: block; margin-top: 5px;"
+                >
+                  <i class="glyphicon glyphicon-exclamation-sign"></i> Minimum rental period must be between 1 and 30 days
+                </span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="maxRentalPeriod" style="font-weight: 600; color: #495057;">
+                  <i class="glyphicon glyphicon-calendar" style="margin-right: 8px; color: #9b59b6;"></i>Max. Rental Period
+                </label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    name="maxRentalPeriod"
+                    id="maxRentalPeriod"
+                    class="form-control"
+                    placeholder="Maximum days"
+                    min="1"
+                    max="365"
+                    ng-model="carFormData.maxRentalPeriod"
+                    ng-required="true"
+                    style="border-radius: 4px 0 0 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                  />
+                  <span class="input-group-addon" style="background-color: #f8f9fa; border-color: #ced4da;">days</span>
+                </div>
+                <span
+                  class="text-danger"
+                  ng-if="addCarForm.maxRentalPeriod.$touched && addCarForm.maxRentalPeriod.$invalid"
+                  style="font-size: 12px; display: block; margin-top: 5px;"
+                >
+                  <i class="glyphicon glyphicon-exclamation-sign"></i> Maximum rental period must be between 1 and 365 days
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-default" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+        <div class="panel-heading" style="background-color: #f1f8ff; border-bottom: 1px solid #dae5f2; padding: 12px 15px; border-radius: 8px 8px 0 0;">
+          <h4 style="margin: 0; color: #3a5a7a; font-size: 16px; font-weight: 600;">
+            <i class="glyphicon glyphicon-picture" style="margin-right: 8px; color: #007bff;"></i>Car Images
+          </h4>
+        </div>
+        <div class="panel-body" style="padding: 15px 20px;">
+          <div class="form-group">
+            <label for="carImages" style="font-weight: 600; color: #495057;">Upload Images</label>
+            <div class="input-group">
+              <span class="input-group-addon" style="background-color: #f8f9fa; border-color: #ced4da;">
+                <i class="glyphicon glyphicon-camera"></i>
+              </span>
+              <input
+                type="file"
+                name="carImages"
+                id="carImages"
+                class="form-control"
+                accept="image/*"
+                multiple
+                ng-model="carFormData.images"
+                ng-required="true"
+                style="border-radius: 0 4px 4px 0; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+              />
+            </div>
+            <span
+              class="text-danger"
+              ng-if="addCarForm.carImages.$touched && addCarForm.carImages.$invalid"
+              style="font-size: 12px; display: block; margin-top: 5px;"
+            >
+              <i class="glyphicon glyphicon-exclamation-sign"></i> Please select at least one image
+            </span>
+            <p class="help-block" style="margin-top: 10px; color: #6c757d; font-style: italic;">
+              <i class="glyphicon glyphicon-info-sign"></i> Upload clear images of your car (max 5 images)
+            </p>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer" style="background-color: #f8f9fa; border-top: 1px solid #e9ecef; padding: 15px 20px; border-radius: 0 0 6px 6px;">
+    <button class="btn btn-default" ng-click="cancel()" style="box-shadow: 0 2px 4px rgba(0,0,0,0.08); padding: 8px 16px; border-radius: 4px;">
+      <i class="glyphicon glyphicon-remove"></i> Cancel
+    </button>
+    <button
+      class="btn btn-primary"
+      ng-click="ok()"
+      ng-disabled="addCarForm.$invalid"
+      style="box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-weight: 600; padding: 8px 16px; border-radius: 4px;"
     >
-      <div class="chartHeader">
-        <h2>Biddings</h2>
-        <div class="analytics">
-          <div>
-            <label for="carFilter">Filter by Car:</label>
-            <select
-              id="carFilter"
-              ng-model="bidFilter.filterByCar"
-              ng-change="setBiddings()"
+      <i class="glyphicon glyphicon-ok"></i> Register Car
+    </button>
+  </div>
+</script>
+
+<!-- Edit Car Modal Template -->
+<script type="text/ng-template" id="editCarModal.html">
+  <div class="modal-header" style="background-color: #f8f9fa; border-bottom: 2px solid #fd7e14; padding: 15px 20px;">
+    <h3 class="modal-title" style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #2c3e50; font-weight: 600;">
+      <i class="glyphicon glyphicon-pencil" style="color: #fd7e14; margin-right: 10px;"></i>Update Your Car
+    </h3>
+    <button type="button" class="close" ng-click="cancel()" style="font-size: 24px;">&times;</button>
+  </div>
+  <div class="modal-body" style="padding: 20px; background-color: #fdfdfd;">
+    <form id="editCarForm" name="editCarForm" class="form" novalidate>
+      <div class="panel panel-default" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px;">
+        <div class="panel-heading" style="background-color: #fff8f1; border-bottom: 1px solid #f2e5da; padding: 12px 15px; border-radius: 8px 8px 0 0;">
+          <h4 style="margin: 0; color: #3a5a7a; font-size: 16px; font-weight: 600;">
+            <i class="glyphicon glyphicon-info-sign" style="margin-right: 8px; color: #fd7e14;"></i>Basic Information
+          </h4>
+        </div>
+        <div class="panel-body" style="padding: 15px 20px;">
+          <div class="form-group">
+            <label for="editCarName" style="font-weight: 600; color: #495057;">
+              <i class="glyphicon glyphicon-tag" style="margin-right: 8px; color: #5c6bc0;"></i>Car Name
+            </label>
+            <input
+              type="text"
+              name="editCarName"
+              id="editCarName"
+              class="form-control"
+              placeholder="Enter car name"
+              pattern="^[A-Za-z0-9\s\-]{3,20}$"
+              title="Car name must be 3-20 characters long and can include letters, numbers, and hyphens."
+              ng-model="editCarFormData.name"
+              ng-required="true"
+              autocomplete="off"
+              style="border-radius: 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+            />
+            <span
+              class="text-danger"
+              ng-if="editCarForm.editCarName.$touched && editCarForm.editCarName.$invalid"
+              style="font-size: 12px; display: block; margin-top: 5px;"
             >
-              <option ng-repeat="car in carsForFilter" value="{{car._id}}">
-                {{car.name}}
-              </option>
-            </select>
-          </div>
-          <div>
-            <label for="statusFilter">Filter by Status:</label>
-            <select
-              id="statusFilter"
-              ng-model="bidFilter.filterByStatus"
-              ng-change="setBiddings()"
-            >
-              <option value="all" selected>All</option>
-              <option value="pending">Pending</option>
-              <option value="rejected">Rejected</option>
-              <option value="approved">Approved</option>
-            </select>
-          </div>
-          <div>
-            <label for="sortFilterBidding">Sort by:</label>
-            <select
-              id="sortFilterBidding"
-              ng-model="bidFilter.sortBy"
-              ng-change="setBiddings()"
-            >
-              <option value="date" selected>Date Created</option>
-              <option value="amount">Amount</option>
-            </select>
-          </div>
-          <div>
-            <label for="sortOrderBidding">Order:</label>
-            <select
-              id="sortOrderBidding"
-              ng-model="bidFilter.sortOrder"
-              ng-change="setBiddings()"
-            >
-              <option value="asc">Ascending &#9650;</option>
-              <option value="desc">Descending &#9660;</option>
-            </select>
+              <i class="glyphicon glyphicon-exclamation-sign"></i> Car name is not valid
+            </span>
           </div>
         </div>
       </div>
-      <table id="biddingTable">
-        <thead>
-          <tr>
-            <th scope="col">Car Name</th>
-            <th scope="col">Renter</th>
-            <th scope="col">Adhaar Number</th>
-            <th scope="col">Start Date</th>
-            <th scope="col">End Date</th>
-            <th scope="col">Amount</th>
-            <th scope="col">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="biddingContainer">
-          <tr ng-if="bids.length === 0">
-            <td colspan="7" class="no-data">There is no data</td>
-          </tr>
-          <tr ng-repeat="bid in bids" ng-if="bids.length > 0">
-            <td data-label="Car Name">{{bid.vehicle.name}}</td>
-            <td data-label="Renter">{{bid.user.username}}</td>
-            <td data-label="Plate Number">{{bid.vehicle.plateNumber}}</td>
-            <td data-label="Start Date">{{bid.startDate | date}}</td>
-            <td data-label="End Date">{{bid.endDate | date}}</td>
-            <td data-label="Amount">{{bid.amount | currency:"Rs."}}</td>
-            <td data-label="Status" ng-if="bid.status!=='pending'">
-              {{bid.status}}
-            </td>
-            <td data-label="Actions" ng-if="bid.status=='pending'">
-              <button
-                class="approveBid"
-                style="
-                  background-color: green;
-                  color: #fff;
-                  border-radius: 1rem;
-                  cursor: pointer;
-                "
-                ng-click="toggleApproveBidModal(true, bid._id)"
-              >
-                Approve
-              </button>
-              <button
-                class="cancelBid"
-                style="
-                  background-color: red;
-                  color: #fff;
-                  border-radius: 1rem;
-                  cursor: pointer;
-                "
-                ng-click="toggleCancelBidModal(true, bid._id)"
-              >
-                Cancel
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="pagination">
-        <button
-          class="pagination-button"
-          ng-disabled="currentPage === 1"
-          ng-click="prevPage('bids')"
-        >
-          Prev
-        </button>
-        <span>Page {{currentPage}} of {{totalPage}}</span>
-        <button
-          class="pagination-button"
-          ng-disabled="currentPage === totalPage"
-          ng-click="nextPage('bids')"
-        >
-          Next
-        </button>
+
+      <div class="panel panel-default" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px;">
+        <div class="panel-heading" style="background-color: #fff8f1; border-bottom: 1px solid #f2e5da; padding: 12px 15px; border-radius: 8px 8px 0 0;">
+          <h4 style="margin: 0; color: #3a5a7a; font-size: 16px; font-weight: 600;">
+            <i class="glyphicon glyphicon-usd" style="margin-right: 8px; color: #fd7e14;"></i>Rental Details
+          </h4>
+        </div>
+        <div class="panel-body" style="padding: 15px 20px;">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="editRentalPrice" style="font-weight: 600; color: #495057;">
+                  <i class="glyphicon glyphicon-tag" style="margin-right: 8px; color: #28a745;"></i>Rental Price (Rs/day)
+                </label>
+                <div class="input-group">
+                  <span class="input-group-addon" style="background-color: #f8f9fa; border-color: #ced4da;">Rs.</span>
+                  <input
+                    type="number"
+                    name="editRentalPrice"
+                    id="editRentalPrice"
+                    class="form-control"
+                    placeholder="Enter rental price per day"
+                    min="100"
+                    max="100000"
+                    ng-model="editCarFormData.rentalPrice"
+                    ng-required="true"
+                    style="border-radius: 0 4px 4px 0; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                  />
+                </div>
+                <span
+                  class="text-danger"
+                  ng-if="editCarForm.editRentalPrice.$touched && editCarForm.editRentalPrice.$invalid"
+                  style="font-size: 12px; display: block; margin-top: 5px;"
+                >
+                  <i class="glyphicon glyphicon-exclamation-sign"></i> Rental price must be between Rs. 100 and Rs. 100,000
+                </span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="editLocation" style="font-weight: 600; color: #495057;">
+                  <i class="glyphicon glyphicon-map-marker" style="margin-right: 8px; color: #e74c3c;"></i>Location
+                </label>
+                <input
+                  type="text"
+                  name="editLocation"
+                  id="editLocation"
+                  class="form-control"
+                  placeholder="Enter car location"
+                  ng-model="editCarFormData.location"
+                  ng-required="true"
+                  autocomplete="off"
+                  style="border-radius: 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                />
+                <span
+                  class="text-danger"
+                  ng-if="editCarForm.editLocation.$touched && editCarForm.editLocation.$invalid"
+                  style="font-size: 12px; display: block; margin-top: 5px;"
+                >
+                  <i class="glyphicon glyphicon-exclamation-sign"></i> Location is required
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="editMinRentalPeriod" style="font-weight: 600; color: #495057;">
+                  <i class="glyphicon glyphicon-time" style="margin-right: 8px; color: #9b59b6;"></i>Min. Rental Period
+                </label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    name="editMinRentalPeriod"
+                    id="editMinRentalPeriod"
+                    class="form-control"
+                    placeholder="Minimum days"
+                    min="1"
+                    max="30"
+                    ng-model="editCarFormData.minRentalPeriod"
+                    ng-required="true"
+                    style="border-radius: 4px 0 0 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                  />
+                  <span class="input-group-addon" style="background-color: #f8f9fa; border-color: #ced4da;">days</span>
+                </div>
+                <span
+                  class="text-danger"
+                  ng-if="editCarForm.editMinRentalPeriod.$touched && editCarForm.editMinRentalPeriod.$invalid"
+                  style="font-size: 12px; display: block; margin-top: 5px;"
+                >
+                  <i class="glyphicon glyphicon-exclamation-sign"></i> Minimum rental period must be between 1 and 30 days
+                </span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="editMaxRentalPeriod" style="font-weight: 600; color: #495057;">
+                  <i class="glyphicon glyphicon-calendar" style="margin-right: 8px; color: #9b59b6;"></i>Max. Rental Period
+                </label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    name="editMaxRentalPeriod"
+                    id="editMaxRentalPeriod"
+                    class="form-control"
+                    placeholder="Maximum days"
+                    min="1"
+                    max="365"
+                    ng-model="editCarFormData.maxRentalPeriod"
+                    ng-required="true"
+                    style="border-radius: 4px 0 0 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                  />
+                  <span class="input-group-addon" style="background-color: #f8f9fa; border-color: #ced4da;">days</span>
+                </div>
+                <span
+                  class="text-danger"
+                  ng-if="editCarForm.editMaxRentalPeriod.$touched && editCarForm.editMaxRentalPeriod.$invalid"
+                  style="font-size: 12px; display: block; margin-top: 5px;"
+                >
+                  <i class="glyphicon glyphicon-exclamation-sign"></i> Maximum rental period must be between 1 and 365 days
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    <!-- Booking Section -->
-    <div
-      id="booking-section"
-      class="tableSection"
-      ng-if="currentTab==='bookings'"
+
+      <div class="panel panel-default" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+        <div class="panel-heading" style="background-color: #fff8f1; border-bottom: 1px solid #f2e5da; padding: 12px 15px; border-radius: 8px 8px 0 0;">
+          <h4 style="margin: 0; color: #3a5a7a; font-size: 16px; font-weight: 600;">
+            <i class="glyphicon glyphicon-picture" style="margin-right: 8px; color: #fd7e14;"></i>Car Images
+          </h4>
+        </div>
+        <div class="panel-body" style="padding: 15px 20px;">
+          <div class="form-group">
+            <label style="font-weight: 600; color: #495057;">
+              <i class="glyphicon glyphicon-th-large" style="margin-right: 8px; color: #6c757d;"></i>Current Images
+            </label>
+            <div class="row" style="margin-bottom: 15px;">
+              <div class="col-xs-4 col-sm-3" ng-repeat="image in editCarFormData.images">
+                <div style="position: relative; margin-bottom: 15px; box-shadow: 0 3px 8px rgba(0,0,0,0.15); border-radius: 4px; overflow: hidden;">
+                  <img
+                    ng-src="{{image}}"
+                    class="img-responsive"
+                    style="height: 100px; width: 100%; object-fit: cover;"
+                  >
+                  <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; text-align: center; padding: 3px; font-size: 12px;">
+                    Image {{$index + 1}}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="editCarImages" style="font-weight: 600; color: #495057;">
+              <i class="glyphicon glyphicon-upload" style="margin-right: 8px; color: #fd7e14;"></i>Update Car Images
+            </label>
+            <div class="input-group">
+              <span class="input-group-addon" style="background-color: #f8f9fa; border-color: #ced4da;">
+                <i class="glyphicon glyphicon-camera"></i>
+              </span>
+              <input
+                type="file"
+                name="editCarImages"
+                id="editCarImages"
+                class="form-control"
+                accept="image/*"
+                multiple
+                style="border-radius: 0 4px 4px 0; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+              />
+            </div>
+            <p class="help-block" style="margin-top: 10px; color: #6c757d; font-style: italic;">
+              <i class="glyphicon glyphicon-info-sign"></i> Upload new images or leave empty to keep current ones (max 5 images)
+            </p>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer" style="background-color: #f8f9fa; border-top: 1px solid #e9ecef; padding: 15px 20px; border-radius: 0 0 6px 6px;">
+    <button class="btn btn-default" ng-click="cancel()" style="box-shadow: 0 2px 4px rgba(0,0,0,0.08); padding: 8px 16px; border-radius: 4px;">
+      <i class="glyphicon glyphicon-remove"></i> Cancel
+    </button>
+    <button
+      class="btn btn-warning"
+      ng-click="ok()"
+      ng-disabled="editCarForm.$invalid"
+      style="box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-weight: 600; padding: 8px 16px; border-radius: 4px; background-color: #fd7e14; border-color: #fd7e14; color: white;"
     >
-      <div class="chartHeader">
-        <h2>Bookings</h2>
-        <!-- Tabs -->
-        <div class="tabs">
-          <button
-            class="tab-button"
-            ng-click="changeBookingTab('all')"
-            ng-class="{active: bookingTab==='all'}"
-          >
-            All Bookings
-          </button>
-          <button
-            class="tab-button"
-            ng-click="changeBookingTab('active')"
-            ng-class="{active: bookingTab==='active'}"
-          >
-            Active Bookings
-          </button>
-          <button
-            class="tab-button"
-            ng-click="changeBookingTab('completed')"
-            ng-class="{active: bookingTab==='completed'}"
-          >
-            Completed Bookings
-          </button>
-        </div>
-        <!-- Filters -->
-        <div class="analytics">
-          <div>
-            <label for="carFilterBooking">Filter by Car:</label>
-            <select
-              id="carFilterBooking"
-              ng-model="bookingFilter.filterByCar"
-              ng-change="setBookings()"
-            >
-              <option ng-repeat="car in carsForFilter" value="{{car._id}}">
-                {{car.name}}
-              </option>
-            </select>
-          </div>
-          <div>
-            <label for="sortFilterBooking">Sort by:</label>
-            <select
-              id="sortFilterBooking"
-              ng-model="bookingFilter.sortBy"
-              ng-change="setBookings()"
-            >
-              <option value="date" selected>Date Created</option>
-              <option value="amount">Amount</option>
-            </select>
-          </div>
-          <div>
-            <label for="sortOrderBooking">Order:</label>
-            <select
-              id="sortOrderBooking"
-              ng-model="bookingFilter.sortOrder"
-              ng-change="setBookings()"
-            >
-              <option value="asc">Ascending &#9650;</option>
-              <option value="desc" selected>Descending &#9660;</option>
-            </select>
-          </div>
-        </div>
+      <i class="glyphicon glyphicon-refresh"></i> Update Car
+    </button>
+  </div>
+</script>
+
+<!-- Approve Bid Modal Template -->
+<script type="text/ng-template" id="approveBidModal.html">
+  <div class="modal-header">
+    <h3 class="modal-title">Approve the Bid</h3>
+    <button type="button" class="close" ng-click="cancel()">&times;</button>
+  </div>
+  <div class="modal-body">
+    <p class="text-center">
+      Approving this bid will cancel all other overlapping bids for this car.
+    </p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-success" ng-click="ok()">Approve</button>
+  </div>
+</script>
+
+<!-- Cancel Bid Modal Template -->
+<script type="text/ng-template" id="cancelBidModal.html">
+  <div class="modal-header">
+    <h3 class="modal-title">Cancel the Bid</h3>
+    <button type="button" class="close" ng-click="cancel()">&times;</button>
+  </div>
+  <div class="modal-body">
+    <p class="text-center">
+      Are you sure you want to cancel this bid?
+    </p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-default" ng-click="cancel()">No</button>
+    <button class="btn btn-danger" ng-click="ok()">Yes, Cancel</button>
+  </div>
+</script>
+
+<!-- Odometer Modal Template -->
+<script type="text/ng-template" id="odometerModal.html">
+  <div class="modal-header">
+    <h3 class="modal-title">{{type==='start'?'Add Start Odometer Value':'Add Final Odometer Value'}}</h3>
+    <button type="button" class="close" ng-click="cancel()">&times;</button>
+  </div>
+  <div class="modal-body">
+    <form id="odometerForm" name="odometerForm" novalidate>
+      <div class="form-group" ng-if="startOdometer">
+        <p>Start Odometer Reading is: {{startOdometer}}</p>
       </div>
-      <table id="bookingTable">
-        <thead>
-          <tr>
-            <th scope="col">Car Name</th>
-            <th scope="col">Renter</th>
-            <th scope="col">Adhaar Number</th>
-            <th scope="col">Start Date</th>
-            <th scope="col">End Date</th>
-            <th scope="col">Amount</th>
-            <th scope="col" ng-if="bookingTab==='active'">Action</th>
-            <th scope="col" ng-if="bookingTab==='completed'">Invoice</th>
-          </tr>
-        </thead>
-        <tbody id="bookingContainer">
-          <tr ng-if="bookings.length === 0">
-            <td colspan="{{bookingTab==='active'?'7':'6'}}" class="no-data">
-              There is no data
-            </td>
-          </tr>
-          <tr ng-repeat="booking in bookings">
-            <td data-label="Car Name">{{booking.vehicle.name}}</td>
-            <td data-label="Renter">{{booking.user.username}}</td>
-            <td data-label="Adhaar Number">{{booking.user.adhaar}}</td>
-            <td data-label="Start Date">{{booking.startDate |date}}</td>
-            <td data-label="End Date">{{booking.endDate | date}}</td>
-            <td data-label="Amount">{{booking.amount | currency:"Rs."}}</td>
-            <td data-label="Action" ng-if="bookingTab=='active'">
-              <button
-                class="add-odometer"
-                ng-if="!booking.startOdometer"
-                ng-click="toggleOdometerModal(true, booking._id,'start')"
-              >
-                Add Current Odometer
-              </button>
-              <button
-                class="add-odometer"
-                style="background-color: rgb(223, 47, 47)"
-                ng-if="booking.startOdometer && !booking.finalOdometer"
-                ng-click="toggleOdometerModal(true, booking._id,'final')"
-              >
-                Add Final Odometer
-              </button>
-            </td>
-            <td data-label="Invoice" ng-if="bookingTab==='completed'">
-              <a ng-href="{{booking.invoice}}" target="_blank">
-                <button class="add-odometer">Download Invoice</button>
-              </a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="pagination">
-        <button
-          class="pagination-button"
-          ng-disabled="currentPage === 1"
-          ng-click="prevPage('bookings')"
+      <div class="form-group">
+        <label for="odometerValue">Odometer Reading</label>
+        <input
+          type="number"
+          name="odometerValue"
+          id="odometerValue"
+          class="form-control"
+          placeholder="Enter odometer value"
+          min="1"
+          max="100000"
+          ng-required="true"
+          ng-model="odometerFormData.odometerValue"
+          valid-Number
+        />
+        <span
+          class="text-danger"
+          ng-if="odometerForm.odometerValue.$touched && odometerForm.odometerValue.$error.required"
         >
-          Prev
-        </button>
-        <span>Page {{currentPage}} of {{totalPage===0?1:totalPage}}</span>
-        <button
-          class="pagination-button"
-          ng-disabled="currentPage === totalPage"
-          ng-click="nextPage('bookings')"
+          Odometer value is required.
+        </span>
+        <span
+          class="text-danger"
+          ng-if="odometerForm.odometerValue.$touched && odometerForm.odometerValue.$error.validNumber"
         >
-          Next
-        </button>
+          Odometer value is not valid.
+        </span>
       </div>
-    </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-primary" ng-click="ok()" ng-disabled="odometerForm.$invalid">Submit</button>
+  </div>
+</script>
 
-    <!-- Revenue Analytics Section -->
-    <div id="revenue-chart" class="chart" ng-if="currentTab==='analytics'">
-      <div class="chartHeader">
-        <h2>Revenue Analytics</h2>
-        <div class="analytics">
-          <div class="fields">
-            <label for="days">No Of Days:</label>
-            <select
-              name="days"
-              id="days"
-              ng-model="revenueChartFilter.days"
-              ng-change="revenueChart()"
-            >
-              <option value="7" selected>Last 7 Days</option>
-              <option value="30">Last 30 Days</option>
-              <option value="90">Last 90 Days</option>
-              <option value="180">Last 180 Days</option>
-              <option value="365">Last 365 Days</option>
-            </select>
-          </div>
-          <div class="fields">
-            <label for="revenueFilter">Filter:</label>
-            <select
-              name="revenueFilter"
-              id="revenueFilter"
-              ng-model="revenueChartFilter.dataBy"
-              ng-change="revenueChart()"
-            >
-              <option value="vehicle.vehicleType">By Car Type</option>
-              <option value="vehicle.fuelType">By FuelType</option>
-              <option value="vehicle.transmission">By Transmission Type</option>
-              <option value="vehicle.location">By Location</option>
-              <option value="vehicle.plateNumber">By CarID</option>
-            </select>
-          </div>
-          <div class="fields">
-            <label for="revenueChartType">Chart:</label>
-            <select
-              name="revenueChartType"
-              id="revenueChartType"
-              ng-model="revenueChartFilter.typeOfChart"
-              ng-change="revenueChart()"
-            >
-              <option value="bar" selected>Bar</option>
-              <option value="pie">Pie</option>
-              <option value="doughnut">DoughNut</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="chart-container">
-        <canvas id="revenueChart"></canvas>
-      </div>
-      <div>
-        <p style="text-align: center; font-size: 0.8rem">
-          *Revenue is calculated for confirmed bokkings only.
-        </p>
-      </div>
-    </div>
-    <!-- Comparison Chart Section -->
-    <div id="revenue-chart" class="chart" ng-if="currentTab==='home'">
-      <div class="chartHeader">
-        <h2>Comparision</h2>
-        <div class="analytics">
-          <div class="fields">
-            <label for="days">No Of Days:</label>
-            <select
-              name="days"
-              id="days"
-              ng-model="comparisionChartFilter.days"
-              ng-change="comparisionChart()"
-            >
-              <option value="7" selected>Last 7 Days</option>
-              <option value="30">Last 30 Days</option>
-              <option value="90">Last 90 Days</option>
-              <option value="180">Last 180 Days</option>
-              <option value="365">Last 365 Days</option>
-            </select>
-          </div>
-          <div class="fields">
-            <label for="comparisionChartType">Chart:</label>
-            <select
-              name="comparisionChartType"
-              id="comparisionChartType"
-              ng-model="comparisionChartFilter.typeOfChart"
-              ng-change="comparisionChart()"
-            >
-              <option value="bar" selected>Bar</option>
-              <option value="pie">Pie</option>
-              <option value="doughnut">DoughNut</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="chart-container">
-        <canvas id="comparisionChart"></canvas>
-      </div>
-      <div>
-        <p style="text-align: center; font-size: 0.8rem">
-          *Revenue is calculated for confirmed bokkings only.
-        </p>
-      </div>
-    </div>
+<style>
+  .car-panel:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15) !important;
+  }
 
-    <!-- Booking Analytics Section -->
-    <div id="booking-chart" class="chart" ng-if="currentTab==='analytics'">
-      <div class="chartHeader">
-        <h2>Booking Analytics</h2>
-        <div class="analytics">
-          <div class="fields">
-            <label for="days">No Of Days:</label>
-            <select
-              name="days"
-              id="days"
-              ng-model="bookingChartFilter.days"
-              ng-change="bookingChart()"
-            >
-              <option value="7" selected>Last 7 Days</option>
-              <option value="30">Last 30 Days</option>
-              <option value="90">Last 90 Days</option>
-              <option value="180">Last 180 Days</option>
-              <option value="365">Last 365 Days</option>
-            </select>
-          </div>
-          <div class="fields">
-            <label for="bookingFilter">Filter:</label>
-            <select
-              name="bookingFilter"
-              id="bookingFilter"
-              ng-model="bookingChartFilter.dataBy"
-              ng-change="bookingChart()"
-            >
-              <option value="vehicle.vehicleType">By Car Type</option>
-              <option value="status">By Status</option>
-              <option value="vehicle.fuelType">By FuelType</option>
-              <option value="vehicle.transmission">By Transmission Type</option>
-              <option value="vehicle.location">By Location</option>
-              <option value="vehicle.plateNumber">By CarID</option>
-            </select>
-          </div>
-          <div class="fields">
-            <label for="bookChartType">Chart:</label>
-            <select
-              name="bookChartType"
-              id="bookChartType"
-              ng-model="bookingChartFilter.typeOfChart"
-              ng-change="bookingChart()"
-            >
-              <option value="bar">Bar</option>
-              <option value="pie">Pie</option>
-              <option value="doughnut">DoughNut</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="chart-container">
-        <canvas id="bookChart"></canvas>
-      </div>
-      <div>
-        <p style="text-align: center; font-size: 0.8rem">
-          *Bidding count include the bids with status 'pending' and 'rejected'.
-        </p>
-      </div>
-    </div>
-  </main>
-</div>
-
-<!------------------------------------------ Modals  ------------------------------------------------>
-
-<!-- Car Modal -->
-<div class="custom-modal" id="carModal" ng-if="carModal && carModal==true">
-  <div class="custom-modal-inner">
-    <div class="custom-modal-header">
-      <button
-        class="custom-modal-close"
-        id="closeButton"
-        ng-click="toggleAddCarModal(false)"
-      >
-        <img src="../../asset/images/exit.svg" alt="Close" />
-      </button>
-    </div>
-    <div class="custom-modal-body">
-      <p class="custom-modal-title">Register Your Car Details</p>
-      <form
-        id="addCarForm"
-        name="addCarForm"
-        class="custom-form grid-form"
-        novalidate
-        ng-submit="addCar()"
-        enctype="multipart/form-data"
-      >
-        <div class="form-group">
-          <label for="carName">Car Name</label>
-          <input
-            type="text"
-            name="carName"
-            id="carName"
-            placeholder="Enter car name"
-            pattern="^[A-Za-z0-9\s\-]{3,20}$"
-            title="Car name must be 3-20 characters long and can include letters, numbers, and hyphens."
-            ng-model="carFormData.name"
-            ng-required="true"
-            autocomplete="off"
-          />
-          <span
-            style="color: red"
-            ng-if="addCarForm.carName.$touched && addCarForm.carName.$invalid"
-          >
-            Car name is not valid
-          </span>
-        </div>
-        <div class="form-group select-group">
-          <label for="vehicleType">Vehicle Type</label>
-          <select
-            name="vehicleType"
-            id="vehicleType"
-            ng-required="true"
-            ng-model="carFormData.vehicleType"
-          >
-            <option ng-repeat="type in vehicleTypes" value="{{type}}">
-              {{type}}
-            </option>
-          </select>
-          <span
-            style="color: red"
-            ng-if="addCarForm.vehicleType.$touched && addCarForm.vehicleType.$invalid"
-          >
-            Please select a vehicle type
-          </span>
-        </div>
-        <div class="form-group">
-          <label for="seats">Number of Seats</label>
-          <input
-            type="number"
-            name="seats"
-            id="seats"
-            placeholder="Enter number of seats"
-            min="2"
-            max="5"
-            ng-required="true"
-            ng-model="carFormData.seats"
-            valid-Number
-          />
-          <span
-            style="color: red"
-            ng-if="addCarForm.seats.$touched && addCarForm.seats.$error.required"
-          >
-            Number of seats is required
-          </span>
-          <span
-            style="color: red"
-            ng-if="addCarForm.seats.$touched && addCarForm.seats.$error.validNumber"
-          >
-            Number of seats is not valid
-          </span>
-        </div>
-        <div class="form-group select-group">
-          <label for="fuelType">Fuel Type</label>
-          <select
-            name="fuelType"
-            id="fuelType"
-            ng-required="true"
-            ng-model="carFormData.fuelType"
-          >
-            <option ng-repeat="type in fuelTypes" value="{{type}}">
-              {{type}}
-            </option>
-          </select>
-          <span
-            style="color: red"
-            ng-if="addCarForm.fuelType.$touched && addCarForm.fuelType.$invalid"
-          >
-            Please select a fuel type
-          </span>
-        </div>
-        <div class="form-group select-group">
-          <label for="transmission">Transmission</label>
-          <select
-            name="transmission"
-            id="transmission"
-            ng-required="true"
-            ng-model="carFormData.transmission"
-          >
-            <option ng-repeat="type in transmissionTypes" value="{{type}}">
-              {{type}}
-            </option>
-          </select>
-          <span
-            style="color: red"
-            ng-if="addCarForm.transmission.$touched && addCarForm.transmission.$invalid"
-          >
-            Please select a transmission type
-          </span>
-        </div>
-        <div class="form-group">
-          <label for="plateNumber">Plate Number</label>
-          <input
-            type="text"
-            name="plateNumber"
-            id="plateNumber"
-            placeholder="XX-XX-XX-XXXX || XX-XX-XXXX"
-            title="Plate number should be in the format XX-XX-XXXX or XX-XX-XX-XXXX"
-            ng-required="true"
-            ng-model="carFormData.plateNumber"
-            valid-Plate
-          />
-          <span
-            style="color: red"
-            ng-if="addCarForm.plateNumber.$touched && addCarForm.plateNumber.$error.required"
-          >
-            Plate number is required
-          </span>
-          <span
-            style="color: red"
-            ng-if="addCarForm.plateNumber.$touched && addCarForm.plateNumber.$error.validPlate"
-          >
-            Plate number is not valid
-          </span>
-        </div>
-        <div class="form-group">
-          <label for="rentalPrice">Base Rental Price (Rs/day)(Local)</label>
-          <input
-            type="number"
-            name="rentalPrice"
-            id="rentalPrice"
-            placeholder="Enter rental price per day"
-            min="100"
-            max="100000"
-            title="Rental price should be between 100 and 100000"
-            ng-required="true"
-            ng-model="carFormData.rentalPrice"
-            valid-Number
-          />
-          <span
-            style="color: red"
-            ng-if="addCarForm.rentalPrice.$touched && addCarForm.rentalPrice.$error.required"
-          >
-            Rental price is required
-          </span>
-          <span
-            style="color: red"
-            ng-if="addCarForm.rentalPrice.$touched && addCarForm.rentalPrice.$error.validNumber"
-          >
-            Rental price is not valid
-          </span>
-        </div>
-        <div class="form-group">
-          <label for="rentalPriceOutStation"
-            >Base Rental Price (Rs/day)(OutStation)</label
-          >
-          <input
-            type="number"
-            name="rentalPriceOutStation"
-            id="rentalPriceOutStation"
-            placeholder="Enter rental price per day"
-            min="100"
-            max="100000"
-            title="Rental price should be between 100 and 100000"
-            ng-required="true"
-            ng-model="carFormData.rentalPriceOutStation"
-            valid-Number
-          />
-          <span
-            style="color: red"
-            ng-if="addCarForm.rentalPriceOutStation.$touched && addCarForm.rentalPriceOutStation.$error.required"
-          >
-            OutStation Rental price is required
-          </span>
-          <span
-            style="color: red"
-            ng-if="addCarForm.rentalPriceOutStation.$touched && addCarForm.rentalPriceOutStation.$error.validNumber"
-          >
-            Outstation Rental price is not valid
-          </span>
-        </div>
-        <div class="form-group">
-          <label for="ratePerKm"
-            >Rate per Kilometer (Rs/Km) (Service Charges)</label
-          >
-          <input
-            type="number"
-            name="ratePerKm"
-            id="ratePerKm"
-            placeholder="Enter per kilometer rate"
-            min="1"
-            max="10"
-            title="you can charge between 1 to 10 Rs/km"
-            ng-required="true"
-            ng-model="carFormData.ratePerKm"
-            valid-Number
-          />
-          <span
-            style="color: red"
-            ng-if="addCarForm.ratePerKm.$touched && addCarForm.ratePerKm.$error.required"
-          >
-            Rate per kilometer is required
-          </span>
-          <span
-            style="color: red"
-            ng-if="addCarForm.ratePerKm.$touched && addCarForm.ratePerKm.$error.validNumber"
-          >
-            Rate per kilometer is not valid
-          </span>
-        </div>
-        <div class="form-group">
-          <label for="fixedKilometer">Fixed Kilometer</label>
-          <input
-            type="number"
-            name="fixedKilometer"
-            id="fixedKilometer"
-            placeholder="Enter Kilometer after which additional charges will be applied"
-            min="200"
-            max="1000"
-            title="You can charge additional service charges after 200km"
-            ng-required="true"
-            ng-model="carFormData.fixedKilometer"
-            valid-Number
-          />
-          <span
-            style="color: red"
-            ng-if="addCarForm.fixedKilometer.$touched && addCarForm.fixedKilometer.$error.required"
-          >
-            Fixed Kilometer is required
-          </span>
-          <span
-            style="color: red"
-            ng-if="addCarForm.fixedKilometer.$touched && addCarForm.fixedKilometer.$error.validNumber"
-          >
-            Fixed Kilometer is not valid
-          </span>
-        </div>
-        <div class="form-group select-group">
-          <label for="location">Location</label>
-          <select
-            name="location"
-            id="location"
-            ng-required="true"
-            ng-model="carFormData.location"
-          >
-            <option ng-repeat="city in cities" value="{{city}}">
-              {{city}}
-            </option>
-          </select>
-          <span
-            style="color: red"
-            ng-if="addCarForm.location.$touched && addCarForm.location.$invalid"
-          >
-            Please select a location
-          </span>
-        </div>
-        <div class="form-group">
-          <label for="minRental">Minimum Rental Period (Days)</label>
-          <input
-            type="number"
-            name="minRental"
-            id="minRental"
-            placeholder="Minimum rental period in days"
-            min="1"
-            max="365"
-            title="Minimum rental period should be between 1 and 365 days"
-            ng-required="true"
-            ng-model="carFormData.minRentalPeriod"
-            valid-Number
-          />
-          <span
-            style="color: red"
-            ng-if="addCarForm.minRental.$touched && addCarForm.minRental.$error.required"
-          >
-            Minimum rental period is required
-          </span>
-          <span
-            style="color: red"
-            ng-if="addCarForm.minRental.$touched && addCarForm.minRental.$error.validNumber"
-          >
-            Minimum rental period is not valid</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="maxRental">Maximum Rental Period (Days)</label>
-          <input
-            type="number"
-            name="maxRental"
-            id="maxRental"
-            placeholder="Maximum rental period in days"
-            min="1"
-            max="365"
-            title="Maximum rental period should be between 1 and 365 days"
-            ng-required="true"
-            ng-model="carFormData.maxRentalPeriod"
-            valid-Number
-          />
-          <span
-            style="color: red"
-            ng-if="addCarForm.maxRental.$touched && addCarForm.maxRental.$error.required"
-          >
-            Maximum rental period is required
-          </span>
-          <span
-            style="color: red"
-            ng-if="addCarForm.maxRental.$touched && addCarForm.maxRental.$error.validNumber"
-          >
-            Maximum rental period is not valid</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="carImage">Car Image</label>
-          <input
-            type="file"
-            name="carImage"
-            id="carImage"
-            accept="image/jpg, image/jpeg, image/png"
-            multiple
-            title="Upload a new image to change the existing one (size less than 500kb)"
-            ng-required="true"
-            ng-model="carFormData.images"
-            valid-Images
-          />
-          <span
-            style="color: red"
-            ng-if="addCarForm.carImage.$touched && addCarForm.carImage.$error.required"
-          >
-            Car image is required
-          </span>
-          <span
-            style="color: red"
-            ng-if="addCarForm.carImage.$touched && addCarForm.carImage.$error.validImages"
-          >
-            Car image is not valid</span
-          >
-        </div>
-        <div class="form-group full-width">
-          <input
-            type="submit"
-            name="submit"
-            value="Register Car"
-            ng-disabled="addCarForm.$invalid"
-          />
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-<!--edit car modal -------------------------------------------------------------->
-<div
-  class="custom-modal"
-  id="editModal"
-  ng-if="editCarModal && editCarModal==true"
->
-  <div class="custom-modal-inner">
-    <div class="custom-modal-header">
-      <button
-        class="custom-modal-close"
-        ng-click="toggleEditCarModal(false,null)"
-      >
-        <img src="../../asset/images/exit.svg" alt="Close" />
-      </button>
-    </div>
-    <div class="custom-modal-body">
-      <p class="custom-modal-title">Change Your Car Details</p>
-      <form
-        id="editCarForm"
-        class="custom-form"
-        name="editCarForm"
-        novalidate
-        ng-submit="editCar()"
-        style="height: auto"
-        enctype="multipart/form-data"
-      >
-        <div class="form-group">
-          <label for="rentalPrice">Base Rental Price (Rs/day)(Local)</label>
-          <input
-            type="number"
-            name="rentalPrice"
-            id="rentalPrice"
-            placeholder="Enter rental price per day"
-            min="100"
-            max="100000"
-            title="Rental price should be between 100 and 100000"
-            ng-required="true"
-            ng-model="editCarFormData.rentalPrice"
-            valid-Number
-          />
-          <span
-            style="color: red"
-            ng-if="editCarForm.rentalPrice.$touched && editCarForm.rentalPrice.$invalid"
-          >
-            Please enter a valid rental price
-          </span>
-        </div>
-        <div class="form-group">
-          <label for="rentalPriceOutStation"
-            >Base Rental Price (Rs/day)(OutStation)</label
-          >
-          <input
-            type="number"
-            name="rentalPriceOutStation"
-            id="rentalPriceOutStation"
-            placeholder="Enter rental price per day"
-            min="100"
-            max="100000"
-            title="Rental price should be between 100 and 100000"
-            ng-required="true"
-            ng-model="editCarFormData.rentalPriceOutStation"
-            valid-Number
-          />
-          <span
-            style="color: red"
-            ng-if="editCarForm.rentalPriceOutStation.$touched && editCarForm.rentalPriceOutStation.$invalid"
-            >Please enter valid price</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="ratePerKm"
-            >Rate per Kilometer (Rs/Km) (Service Charges)</label
-          >
-          <input
-            type="number"
-            name="ratePerKm"
-            id="ratePerKm"
-            placeholder="Enter per kilometer rate"
-            min="1"
-            max="10"
-            title="you can charge between 1 to 10 Rs/km"
-            ng-required="true"
-            ng-model="editCarFormData.ratePerKm"
-            valid-Number
-          />
-          <span
-            style="color: red"
-            ng-if="editCarForm.ratePerKm.$touched && editCarForm.ratePerKm.$invalid"
-            >Please enter valid rate</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="fixedKilometer">Fixed Kilometer</label>
-          <input
-            type="number"
-            name="fixedKilometer"
-            id="fixedKilometer"
-            placeholder="Enter Kilometer after which additional charges will be applied"
-            min="200"
-            max="1000"
-            title="You can charge additional service charges after 200km"
-            ng-required="true"
-            ng-model="editCarFormData.fixedKilometer"
-            valid-Number
-          />
-          <span
-            style="color: red"
-            ng-if="editCarForm.fixedKilometer.$touched && editCarForm.fixedKilometer.$invalid"
-            >Please enter valid kilometer</span
-          >
-        </div>
-        <div class="form-group select-group">
-          <label for="location">Location</label>
-          <select
-            name="location"
-            id="location"
-            ng-required="true"
-            ng-model="editCarFormData.location"
-          >
-            <option ng-repeat="city in cities" value="{{city}}">
-              {{city}}
-            </option>
-          </select>
-          <span
-            style="color: red"
-            ng-if="editCarForm.location.$touched && editCarForm.location.$invalid"
-            >Please select a location</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="minRental">Minimum Rental Period (Days)</label>
-          <input
-            type="number"
-            name="minRental"
-            id="minRental"
-            placeholder="Minimum rental period in days"
-            min="1"
-            max="365"
-            title="Minimum rental period should be between 1 and 365 days"
-            ng-required="true"
-            ng-model="editCarFormData.minRentalPeriod"
-            valid-Number
-          />
-          <span
-            style="color: red"
-            ng-if="editCarForm.minRental.$touched && editCarForm.minRental.$invalid"
-            >Please enter valid rental period</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="maxRental">Maximum Rental Period (Days)</label>
-          <input
-            type="number"
-            name="maxRental"
-            id="maxRental"
-            placeholder="Maximum rental period in days"
-            min="1"
-            max="365"
-            title="Maximum rental period should be between 1 and 365 days"
-            ng-required="true"
-            ng-model="editCarFormData.maxRentalPeriod"
-            valid-Number
-          />
-          <span
-            style="color: red"
-            ng-if="editCarForm.maxRental.$touched && editCarForm.maxRental.$invalid"
-            >Please enter valid rental period</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="carImage">Car Image</label>
-          <input
-            type="file"
-            name="carImage"
-            id="carImage"
-            accept="image/jpg, image/jpeg, image/png"
-            title="Upload a new image to change the existing one (size less than 500kb)"
-            multiple
-            ng-required="true"
-            ng-model="editCarFormData.images"
-            valid-Images
-          />
-          <span
-            style="color: red"
-            ng-if="editCarForm.carImage.$touched && editCarForm.carImage.$invalid"
-            >Please select a valid image</span
-          >
-        </div>
-        <div class="form-group full-width">
-          <input
-            type="submit"
-            name="submit"
-            value="Change"
-            ng-disabled="editCarForm.$invalid"
-          />
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-<!-- approve bide modal  ------------------------------------------------>
-<div class="custom-modal" id="approveBidModal" ng-if="approveBidModal==true">
-  <div class="custom-modal-inner">
-    <div class="custom-modal-header">
-      <button
-        class="custom-modal-close"
-        id="closeButtonApprove"
-        ng-click="toggleApproveBidModal(false,null)"
-      >
-        <img src="../../asset/images/exit.svg" alt="Close" />
-      </button>
-    </div>
-    <div class="custom-modal-body">
-      <p class="custom-modal-title">Approve the Bid</p>
-      <form
-        id="approveBidForm"
-        name="approveBidForm"
-        class="custom-form"
-        ng-submit="approveBid()"
-        style="height: auto"
-      >
-        <div class="form-group">
-          <label for="confirmation" style="text-align: center">
-            Approving this bid , will cancel all other overlapping bids for this
-            car.
-          </label>
-        </div>
-        <div class="form-group full-width">
-          <input type="submit" name="submit" value="Approve" />
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-<!-- cancel bid modal ------------------------------------------------------>
-<div class="custom-modal" id="cancelBidModal" ng-if="cancelBidModal==true">
-  <div class="custom-modal-inner">
-    <div class="custom-modal-header">
-      <button
-        class="custom-modal-close"
-        id="closeButtonCancel"
-        ng-click="toggleCancelBidModal(false,null)"
-      >
-        <img src="../../asset/images/exit.svg" alt="Close" />
-      </button>
-    </div>
-    <div class="custom-modal-body">
-      <p class="custom-modal-title">Cancel the Bid</p>
-      <form
-        id="cancelBidForm"
-        class="custom-form"
-        name="cancelBidForm"
-        style="height: auto"
-        ng-submit="cancelBid()"
-      >
-        <div class="form-group full-width">
-          <input type="submit" name="submit" value="Cancel" />
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-<!--------------Add Odomter modal-->
-<div class="custom-modal" id="odometerModal" ng-if="odometerModal==true">
-  <div class="custom-modal-inner">
-    <div class="custom-modal-header">
-      <button
-        class="custom-modal-close"
-        id="closeButtonCancel"
-        ng-click="toggleOdometerModal(false,null,null)"
-      >
-        <img src="../../asset/images/exit.svg" alt="Close" />
-      </button>
-    </div>
-    <div class="custom-modal-body">
-      <p class="custom-modal-title">
-        {{type==='start'?'Add Start Odomter Value':'Add Final Odometer Value'}}
-      </p>
-      <form
-        id="odometerForm"
-        class="custom-form"
-        name="odometerForm"
-        style="height: auto"
-        novalidate
-        ng-submit="addOdometerValue()"
-      >
-        <div class="form-group" ng-if="startOdometer">
-          <p>Start Odometer Reading is: {{startOdometer}}</p>
-        </div>
-        <div class="form-group">
-          <label for="rating">Odometer Reading</label>
-          <input
-            type="number"
-            name="rating"
-            id="rating"
-            placeholder="Enter odometer value"
-            min="1"
-            max="100000"
-            ng-required="true"
-            ng-model="odometerFormData.odometerValue"
-            valid-Number
-          />
-          <span
-            style="color: red"
-            ng-if="odometerForm.rating.$touched && odometerForm.rating.$error.required"
-          >
-            Odometer value is required.
-          </span>
-          <span
-            style="color: red"
-            ng-if="odometerForm.rating.$touched && odometerForm.rating.$error.validNumber"
-          >
-            Odometer value is not valid.
-          </span>
-        </div>
-        <div class="form-group full-width">
-          <input
-            type="submit"
-            name="submit"
-            value="Submit"
-            ng-disabled="odometerForm.$invalid"
-          />
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-<!---    -->
+  .car-panel:hover img {
+    transform: scale(1.05);
+  }
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+</style>

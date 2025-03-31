@@ -1,502 +1,695 @@
-<div class="dashboard" ng-init="init()">
-  <div class="dashboard-sidebar">
-    <p>Profile</p>
-    <div class="dashboardPage">
-      <div
-        class="dashboard-page"
-        ng-click="changeTab('home')"
-        ng-class="{ active: currentTab === 'home' }"
-        data-id="home"
+<div class="container-fluid" ng-init="init()" style="min-height: 91vh">
+  <div class="row">
+    <!-- Sidebar -->
+    <div
+      class="col-sm-3 col-md-2 hidden-xs"
+      id="sidebar"
+      style="
+        background-color: #f5f9ff;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        min-height: 100vh;
+        border-right: 1px solid #e1e8f0;
+      "
+    >
+      <h3 class="text-primary" style="margin-left: 15px; margin-bottom: 20px">
+        Profile
+      </h3>
+      <ul class="nav nav-pills nav-stacked">
+        <li ng-class="{ active: currentTab === 'home' }">
+          <a
+            href
+            ng-click="changeTab('home')"
+            ng-style="{color: currentTab === 'home' ? 'rgb(255,255,255)' : '#337ab7'}"
+          >
+            <i class="glyphicon glyphicon-home"></i> Home
+          </a>
+        </li>
+        <li ng-class="{ active: currentTab === 'bookings' }">
+          <a
+            href
+            ng-click="changeTab('bookings')"
+            ng-style="{color: currentTab === 'bookings' ? 'rgb(255,255,255)' : '#337ab7'}"
+          >
+            <i class="glyphicon glyphicon-calendar"></i> Bookings
+          </a>
+        </li>
+        <li ng-class="{ active: currentTab === 'biddings' }">
+          <a
+            href
+            ng-click="changeTab('biddings')"
+            ng-style="{color: currentTab === 'biddings' ? 'rgb(255,255,255)' : '#337ab7'}"
+          >
+            <i class="glyphicon glyphicon-usd"></i> Biddings
+          </a>
+        </li>
+        <li ng-class="{ active: currentTab === 'approval' }">
+          <a
+            href
+            ng-click="changeTab('approval')"
+            ng-style="{color: currentTab === 'approval' ? 'rgb(255,255,255)' : '#337ab7'}"
+          >
+            <i class="glyphicon glyphicon-user"></i> Approval
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Collapsible Sidebar for Small Screens -->
+    <div class="visible-xs" style="margin-bottom: 15px">
+      <button
+        class="btn btn-primary"
+        style="width: auto; margin-left: 10px; margin-top: 10px"
+        ng-click="isSidebarVisible = !isSidebarVisible"
       >
-        Home
+        <i class="glyphicon glyphicon-menu-hamburger"></i> Menu
+      </button>
+      <div
+        ng-show="isSidebarVisible"
+        class="panel panel-default"
+        style="
+          margin-top: 10px;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          background-color: #f5f9ff;
+          border-color: #e1e8f0;
+        "
+      >
+        <ul class="nav nav-pills nav-stacked">
+          <li ng-class="{ active: currentTab === 'home' }">
+            <a href ng-click="changeTab('home')">
+              <i class="glyphicon glyphicon-home"></i> Home
+            </a>
+          </li>
+          <li ng-class="{ active: currentTab === 'bookings' }">
+            <a href ng-click="changeTab('bookings')">
+              <i class="glyphicon glyphicon-calendar"></i> Bookings
+            </a>
+          </li>
+          <li ng-class="{ active: currentTab === 'biddings' }">
+            <a href ng-click="changeTab('biddings')">
+              <i class="glyphicon glyphicon-usd"></i> Biddings
+            </a>
+          </li>
+          <li ng-class="{ active: currentTab === 'approval' }">
+            <a href ng-click="changeTab('approval')">
+              <i class="glyphicon glyphicon-user"></i> Approval
+            </a>
+          </li>
+        </ul>
       </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="col-sm-9 col-md-10" style="position: relative">
+      <!-- Loading Overlay -->
       <div
-        class="dashboard-page"
-        ng-click="changeTab('bookings')"
-        ng-class="{ active: currentTab === 'bookings' }"
-        data-id="bookings"
+        ng-show="isLoading"
+        style="
+          position: absolute;
+          inset: 0;
+          background-color: rgba(255, 255, 255, 0.7);
+          z-index: 1050;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          backdrop-filter: blur(5px);
+        "
       >
-        Bookings
+        <div class="text-center">
+          <div
+            class="spinner"
+            style="
+              width: 60px;
+              height: 60px;
+              border-radius: 50%;
+              border: 5px solid #f3f3f3;
+              border-top: 5px solid #337ab7;
+              animation: spin 1s linear infinite;
+            "
+          ></div>
+          <p
+            class="lead"
+            style="margin-top: 15px; font-weight: bold; color: #337ab7"
+          >
+            Loading...
+          </p>
+        </div>
       </div>
-      <div
-        class="dashboard-page"
-        ng-click="changeTab('biddings')"
-        ng-class="{ active: currentTab === 'biddings' }"
-        data-id="biddings"
-      >
-        Biddings
+
+      <style>
+        @keyframes spin {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+      </style>
+
+      <!-- Loading spinner -->
+      <div class="text-center" ng-show="isLoading">
+        <i class="fa fa-spinner fa-spin fa-3x text-primary"></i>
+        <p>Loading...</p>
       </div>
-      <div
-        class="dashboard-page"
-        ng-click="changeTab('approval')"
-        ng-class="{ active: currentTab === 'approval' }"
-        data-id="approval"
-      >
-        Approval
+
+      <!-- Profile Home Section -->
+      <div ng-show="currentTab==='home'">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <i class="glyphicon glyphicon-user"></i> Your Details
+            </h3>
+          </div>
+          <div
+            class="panel-body"
+            style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px"
+          >
+            <div class="row">
+              <div class="col-sm-12 text-center">
+                <img
+                  ng-src="{{user.avatar}}"
+                  alt="User Photo"
+                  class="img-circle img-responsive"
+                  style="
+                    width: 150px;
+                    height: 150px;
+                    margin: 0 auto;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                    border: 3px solid #337ab7;
+                  "
+                />
+                <div style="margin: 15px 0">
+                  <button
+                    class="btn btn-primary btn-sm"
+                    style="margin-right: 10px"
+                    ng-click="toggleChangeProfileModal(true)"
+                  >
+                    <i class="glyphicon glyphicon-pencil"></i> Edit Profile
+                  </button>
+                  <button
+                    class="btn btn-danger btn-sm"
+                    ng-click="toggleChangePasswordModal(true)"
+                  >
+                    <i class="glyphicon glyphicon-lock"></i> Change Password
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="row" style="margin-top: 20px">
+              <div class="col-md-8 col-md-offset-2">
+                <div class="panel panel-info">
+                  <div class="panel-heading">
+                    <h4 class="panel-title">
+                      <i class="glyphicon glyphicon-info-sign"></i> Personal
+                      Information
+                    </h4>
+                  </div>
+                  <div class="panel-body">
+                    <div class="row">
+                      <div
+                        class="col-xs-4 text-right"
+                        style="font-weight: bold; color: #337ab7"
+                      >
+                        <i class="glyphicon glyphicon-user"></i> Name:
+                      </div>
+                      <div class="col-xs-8">{{user.username}}</div>
+                    </div>
+                    <hr style="margin: 10px 0" />
+
+                    <div class="row">
+                      <div
+                        class="col-xs-4 text-right"
+                        style="font-weight: bold; color: #337ab7"
+                      >
+                        <i class="glyphicon glyphicon-envelope"></i> Email:
+                      </div>
+                      <div class="col-xs-8">{{user.email}}</div>
+                    </div>
+                    <hr style="margin: 10px 0" />
+
+                    <div class="row">
+                      <div
+                        class="col-xs-4 text-right"
+                        style="font-weight: bold; color: #337ab7"
+                      >
+                        <i class="glyphicon glyphicon-phone"></i> Phone:
+                      </div>
+                      <div class="col-xs-8">{{user.tel}}</div>
+                    </div>
+                    <hr style="margin: 10px 0" />
+
+                    <div class="row">
+                      <div
+                        class="col-xs-4 text-right"
+                        style="font-weight: bold; color: #337ab7"
+                      >
+                        <i class="glyphicon glyphicon-credit-card"></i> Adhaar:
+                      </div>
+                      <div class="col-xs-8">{{user.adhaar}}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bookings Section -->
+      <div ng-if="currentTab==='bookings'">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <i class="glyphicon glyphicon-calendar"></i> Bookings
+            </h3>
+          </div>
+          <div class="panel-body">
+            <div class="row" style="margin-bottom: 20px">
+              <div class="col-md-4">
+                <label for="sortFilterBooking">
+                  <i class="glyphicon glyphicon-sort"></i> Sort by:
+                </label>
+                <select
+                  id="sortFilterBooking"
+                  class="form-control"
+                  ng-model="bookingFilter.sortBy"
+                  ng-change="setBookings()"
+                >
+                  <option value="date">Date Created</option>
+                  <option value="amount">Amount</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="sortOrderBooking">
+                  <i class="glyphicon glyphicon-sort-by-attributes"></i> Order:
+                </label>
+                <select
+                  id="sortOrderBooking"
+                  class="form-control"
+                  ng-model="bookingFilter.sortOrder"
+                  ng-change="setBookings()"
+                >
+                  <option value="asc">Ascending</option>
+                  <option value="desc">Descending</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover">
+                <thead>
+                  <tr class="info">
+                    <th><i class="glyphicon glyphicon-road"></i> Car Name</th>
+                    <th><i class="glyphicon glyphicon-user"></i> Owner</th>
+                    <th>
+                      <i class="glyphicon glyphicon-tag"></i> Plate Number
+                    </th>
+                    <th>
+                      <i class="glyphicon glyphicon-calendar"></i> Start Date
+                    </th>
+                    <th>
+                      <i class="glyphicon glyphicon-calendar"></i> End Date
+                    </th>
+                    <th><i class="glyphicon glyphicon-usd"></i> Amount</th>
+                    <th><i class="glyphicon glyphicon-file"></i> Invoice</th>
+                    <th>
+                      <i class="glyphicon glyphicon-time"></i> Confirmed At
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    ng-repeat="booking in bookings"
+                    ng-if="bookings.length > 0"
+                  >
+                    <td>{{booking.vehicle.name}}</td>
+                    <td>{{booking.vehicle.owner.username}}</td>
+                    <td>{{booking.vehicle.plateNumber}}</td>
+                    <td>{{booking.startDate | date}}</td>
+                    <td>{{booking.endDate | date}}</td>
+                    <td>{{booking.amount | currency:"Rs."}}</td>
+                    <td>
+                      <a
+                        ng-href="{{booking.invoice?booking.invoice:''}}"
+                        target="_blank"
+                      >
+                        <button
+                          ng-show="booking.invoice"
+                          class="btn btn-success btn-sm"
+                        >
+                          Download Invoice
+                        </button>
+                        <span ng-show="!booking.invoice">Not Completed</span>
+                      </a>
+                    </td>
+                    <td>{{booking.createdAt | date}}</td>
+                  </tr>
+                  <tr ng-if="bookings.length === 0">
+                    <td colspan="8" class="text-center">No bookings found</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Custom Pagination -->
+            <div
+              class="row"
+              ng-if="!isLoading && bookings.length > 0 && totalPage > 1"
+            >
+              <div class="col-xs-12 text-center">
+                <ul class="pagination">
+                  <li ng-class="{disabled: currentPage === 1}">
+                    <a
+                      href
+                      ng-click="currentPage > 1 && prevPage('bookings')"
+                      aria-label="Previous"
+                    >
+                      <span aria-hidden="true"
+                        ><i class="glyphicon glyphicon-backward"></i
+                      ></span>
+                    </a>
+                  </li>
+
+                  <li
+                    ng-class="{active: currentPage === page}"
+                    ng-repeat="page in getPageArray()"
+                  >
+                    <a href ng-click="goToPage(page)">{{page}}</a>
+                  </li>
+
+                  <li ng-class="{disabled: currentPage === totalPage}">
+                    <a
+                      href
+                      ng-click="currentPage < totalPage && nextPage('bookings')"
+                      aria-label="Next"
+                    >
+                      <span aria-hidden="true"
+                        ><i class="glyphicon glyphicon-forward"></i
+                      ></span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Biddings Section -->
+      <div ng-if="currentTab==='biddings'">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <i class="glyphicon glyphicon-usd"></i> Biddings
+            </h3>
+          </div>
+          <div class="panel-body">
+            <div class="row" style="margin-bottom: 20px">
+              <div class="col-md-4">
+                <label for="statusFilter">
+                  <i class="glyphicon glyphicon-filter"></i> Filter by Status:
+                </label>
+                <select
+                  id="statusFilter"
+                  class="form-control"
+                  ng-model="bidFilter.filterBy"
+                  ng-change="setBiddings()"
+                >
+                  <option value="all">All</option>
+                  <option value="pending">Pending</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="sortFilterBidding">
+                  <i class="glyphicon glyphicon-sort"></i> Sort by:
+                </label>
+                <select
+                  id="sortFilterBidding"
+                  class="form-control"
+                  ng-model="bidFilter.sortBy"
+                  ng-change="setBiddings()"
+                >
+                  <option value="date">Date Created</option>
+                  <option value="amount">Amount</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="sortOrderBidding">
+                  <i class="glyphicon glyphicon-sort-by-attributes"></i> Order:
+                </label>
+                <select
+                  id="sortOrderBidding"
+                  class="form-control"
+                  ng-model="bidFilter.sortOrder"
+                  ng-change="setBiddings()"
+                >
+                  <option value="asc">Ascending</option>
+                  <option value="desc">Descending</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover">
+                <thead>
+                  <tr class="info">
+                    <th><i class="glyphicon glyphicon-road"></i> Car Name</th>
+                    <th><i class="glyphicon glyphicon-user"></i> Owner</th>
+                    <th>
+                      <i class="glyphicon glyphicon-tag"></i> Plate Number
+                    </th>
+                    <th>
+                      <i class="glyphicon glyphicon-calendar"></i> Start Date
+                    </th>
+                    <th>
+                      <i class="glyphicon glyphicon-calendar"></i> End Date
+                    </th>
+                    <th><i class="glyphicon glyphicon-usd"></i> Amount</th>
+                    <th>
+                      <i class="glyphicon glyphicon-info-sign"></i> Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="bid in bids" ng-if="bids.length > 0">
+                    <td>{{bid.vehicle.name}}</td>
+                    <td>{{bid.vehicle.owner.username}}</td>
+                    <td>{{bid.vehicle.plateNumber}}</td>
+                    <td>{{bid.startDate | date}}</td>
+                    <td>{{bid.endDate | date}}</td>
+                    <td>{{bid.amount | currency:"Rs."}}</td>
+                    <td>
+                      <span
+                        class="label"
+                        ng-class="{
+                          'label-warning': bid.status === 'pending',
+                          'label-danger': bid.status === 'rejected',
+                          'label-success': bid.status === 'approved'
+                        }"
+                      >
+                        {{bid.status}}
+                      </span>
+                    </td>
+                  </tr>
+                  <tr ng-if="bids.length === 0">
+                    <td colspan="7" class="text-center">No biddings found</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Custom Pagination -->
+            <div
+              class="row"
+              ng-if="!isLoading && bids.length > 0 && totalPage > 1"
+            >
+              <div class="col-xs-12 text-center">
+                <ul class="pagination">
+                  <li ng-class="{disabled: currentPage === 1}">
+                    <a
+                      href
+                      ng-click="currentPage > 1 && prevPage('biddings')"
+                      aria-label="Previous"
+                    >
+                      <span aria-hidden="true"
+                        ><i class="glyphicon glyphicon-backward"></i
+                      ></span>
+                    </a>
+                  </li>
+
+                  <li
+                    ng-class="{active: currentPage === page}"
+                    ng-repeat="page in getPageArray()"
+                  >
+                    <a href ng-click="goToPage(page)">{{page}}</a>
+                  </li>
+
+                  <li ng-class="{disabled: currentPage === totalPage}">
+                    <a
+                      href
+                      ng-click="currentPage < totalPage && nextPage('biddings')"
+                      aria-label="Next"
+                    >
+                      <span aria-hidden="true"
+                        ><i class="glyphicon glyphicon-forward"></i
+                      ></span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Approval Section -->
+      <div ng-if="currentTab==='approval'">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <i class="glyphicon glyphicon-check"></i> Approval Status
+            </h3>
+          </div>
+          <div
+            class="panel-body text-center"
+            style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 30px"
+          >
+            <i
+              class="glyphicon glyphicon-info-sign fa-3x text-primary"
+              style="margin-bottom: 15px"
+            ></i>
+            <p class="lead" style="font-size: 20px; margin-bottom: 20px">
+              {{approvalMessage}}
+            </p>
+            <button
+              class="btn btn-lg"
+              ng-disabled="approvalBtnDisabled"
+              ng-class="{'btn-warning': !approvalBtnDisabled, 'btn-default': approvalBtnDisabled}"
+              ng-click="seekApproval()"
+              style="padding: 10px 30px"
+            >
+              <i
+                class="glyphicon"
+                ng-class="{'glyphicon-exclamation-sign': !approvalBtnDisabled, 'glyphicon-ok-circle': approvalBtnDisabled}"
+              ></i>
+              {{approvalBtnText}}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-  <main class="dashboard-main">
-    <div class="loader-overlay" ng-show="isLoading">
-      <div class="loader"></div>
-    </div>
-    <!-- // profile home section -->
-    <section
-      id="profileHome"
-      class="hidden-section profile-home"
-      ng-show="currentTab==='home'"
-    >
-      <div class="profile-card">
-        <div class="profile-image">
-          <img ng-src="{{user.avatar}}" alt="User Photo" id="userAvatar" />
-          <button ng-click="toggleChangeProfileModal(true)" class="edit-btn">
-            ✏️
-          </button>
-        </div>
-        <div class="profile-details">
-          <h2>Your Details</h2>
-          <hr />
-          <ul>
-            <li>
-              <span class="icon">👤</span> <span class="label">Name:</span>
-              <span id="name">{{user.username}}</span>
-            </li>
-            <li>
-              <span class="icon">📧</span>
-              <span class="label">Email:</span>
-              <span id="email">{{user.email}}</span>
-            </li>
-            <li>
-              <span class="icon">📞</span>
-              <span class="label">Phone:</span>
-              <span id="phone">{{user.tel}}</span>
-            </li>
-            <li>
-              <span class="icon">🆔</span>
-              <span class="label">Adhaar:</span>
-              <span id="adhaar">{{user.adhaar}}</span>
-            </li>
-          </ul>
-          <button
-            class="change-password-btn"
-            ng-click="toggleChangePasswordModal(true)"
-          >
-            🔒 Change Password
-          </button>
-        </div>
-      </div>
-    </section>
-    <!-- // profile bookings section -->
-    <section
-      id="profileBookings"
-      class="tableSection"
-      ng-if="currentTab==='bookings'"
-    >
-      <div class="chartHeader">
-        <h2>Bookings</h2>
-        <div class="analytics">
-          <div>
-            <label for="sortFilterBooking">Sort by:</label>
-            <select
-              id="sortFilterBooking"
-              ng-model="bookingFilter.sortBy"
-              ng-change="setBookings()"
-            >
-              <option value="date" selected>Date Created</option>
-              <option value="amount">Amount</option>
-            </select>
-          </div>
-          <div>
-            <label for="sortOrderBooking">Order:</label>
-            <select
-              id="sortOrderBooking"
-              ng-model="bookingFilter.sortOrder"
-              ng-change="setBookings()"
-            >
-              <option value="asc" selected>Ascending &#9650;</option>
-              <option value="desc">Descending &#9660;</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <table id="bookingTable">
-        <thead>
-          <tr>
-            <th scope="col">Car Name</th>
-            <th scope="col">Owner</th>
-            <th scope="col">Plate Number</th>
-            <th scope="col">Start Date</th>
-            <th scope="col">End Date</th>
-            <th scope="col">Amount</th>
-            <th scope="col">Invoice</th>
-            <th scope="col">Confirmed At</th>
-          </tr>
-        </thead>
-        <tbody id="bookingContainer">
-          <tr ng-repeat="booking in bookings" ng-if="bookings.length > 0">
-            <td data-label="Car Name">{{booking.vehicle.name}}</td>
-            <td data-label="Owner">{{booking.vehicle.owner.username}}</td>
-            <td data-label="Plate Number">{{booking.vehicle.plateNumber}}</td>
-            <td data-label="Start Date">{{booking.startDate | date}}</td>
-            <td data-label="End Date">{{booking.endDate | date}}</td>
-            <td data-label="Amount">{{booking.amount | currency:"Rs."}}</td>
-            <td data-label="Invoice">
-              <a
-                ng-href="{{booking.invoice?booking.invoice:''}}"
-                target="_blank"
-              >
-                <button
-                  ng-show="booking.invoice"
-                  style="
-                    border-radius: 1rem;
-                    background-color: rgb(39, 230, 39);
-                    cursor: pointer;
-                    padding: 0.3rem;
-                  "
-                >
-                  Download Invoice
-                </button>
-                <p ng-show="!booking.invoice">Not Completed</p>
-              </a>
-            </td>
-            <td data-label="Confirmed At">{{booking.createdAt | date}}</td>
-          </tr>
-          <tr ng-if="bookings.length === 0">
-            <td colspan="8" class="no-data">There is no data</td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="pagination">
-        <button
-          class="pagination-button"
-          ng-disabled="currentPage === 1"
-          ng-click="prevPage('bookings')"
-        >
-          Prev
-        </button>
-        <span>Page {{currentPage}} of {{totalPage===0?1:totalPage}}</span>
-        <button
-          class="pagination-button"
-          ng-disabled="currentPage === totalPage"
-          ng-click="nextPage('bookings')"
-        >
-          Next
-        </button>
-      </div>
-    </section>
-    <!-- // profile biddings section -->
-    <section
-      id="profileBiddings"
-      class="tableSection"
-      ng-if="currentTab==='biddings'"
-    >
-      <div class="chartHeader">
-        <h2>Biddings</h2>
-        <div class="analytics">
-          <div>
-            <label for="statusFilter">Filter by Status:</label>
-            <select
-              id="statusFilter"
-              ng-model="bidFilter.filterBy"
-              ng-change="setBiddings()"
-            >
-              <option value="all" selected>All</option>
-              <option value="pending">Pending</option>
-              <option value="rejected">Rejected</option>
-            </select>
-          </div>
-          <div>
-            <label for="sortFilterBidding">Sort by:</label>
-            <select
-              id="sortFilterBidding"
-              ng-model="bidFilter.sortBy"
-              ng-change="setBiddings()"
-            >
-              <option value="date" selected>Date Created</option>
-              <option value="amount">Amount</option>
-            </select>
-          </div>
-          <div>
-            <label for="sortOrderBidding">Order:</label>
-            <select
-              id="sortOrderBidding"
-              ng-model="bidFilter.sortOrder"
-              ng-change="setBiddings()"
-            >
-              <option value="asc" selected>Ascending &#9650;</option>
-              <option value="desc">Descending &#9660;</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <table id="biddingTable">
-        <thead>
-          <tr>
-            <th scope="col">Car Name</th>
-            <th scope="col">Owner</th>
-            <th scope="col">Plate Number</th>
-            <th scope="col">Start Date</th>
-            <th scope="col">End Date</th>
-            <th scope="col">Amount</th>
-            <th scope="col">Status</th>
-          </tr>
-        </thead>
-        <tbody id="biddingContainer">
-          <tr ng-repeat="bid in bids" ng-if="bids.length > 0">
-            <td data-label="Car Name">{{bid.vehicle.name}}</td>
-            <td data-label="Owner">{{bid.vehicle.owner.username}}</td>
-            <td data-label="Plate Number">{{bid.vehicle.plateNumber}}</td>
-            <td data-label="Start Date">{{bid.startDate | date}}</td>
-            <td data-label="End Date">{{bid.endDate| date}}</td>
-            <td data-label="Amount">{{bid.amount | currency:"Rs."}}</td>
-            <td data-label="Status">{{bid.status}}</td>
-          </tr>
-          <tr ng-if="bids.length === 0">
-            <td colspan="7" class="no-data">There is no data</td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="pagination">
-        <button
-          class="pagination-button"
-          ng-disabled="currentPage === 1"
-          ng-click="prevPage('bids')"
-        >
-          Prev
-        </button>
-        <span>Page {{currentPage}} of {{totalPage===0?1:totalPage}}</span>
-        <button
-          class="pagination-button"
-          ng-disabled="currentPage === totalPage"
-          ng-click="nextPage('bids')"
-        >
-          Next
-        </button>
-      </div>
-    </section>
-    <!-- // approval section -->
-    <section
-      id="approvalSection"
-      class="approval-section"
-      ng-if="currentTab==='approval'"
-    >
-      <div class="approval-card">
-        <p id="approvalMessage" class="approval-message">{{approvalMessage}}</p>
-        <button
-          id="seekApprovalBtn"
-          class="approval-btn"
-          ng-disabled="approvalBtnDisabled"
-          ng-style="{'background-color':  approvalBtnDisabled? 'grey' : ' #f1c40f'}"
-          ng-click="seekApproval()"
-        >
-          {{approvalBtnText}}
-        </button>
-      </div>
-    </section>
-  </main>
-</div>
-<!-- //profile modal -->
-<div class="custom-modal" ng-show="changeProfileModal===true">
-  <div class="custom-modal-inner">
-    <div class="custom-modal-header">
-      <button
-        class="custom-modal-close"
-        ng-click="toggleChangeProfileModal(false)"
-      >
-        <img src="../../asset/images/exit.svg" alt="Close" />
+
+  <!-- Profile Edit Modal -->
+  <script type="text/ng-template" id="profileEditModal.html">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="cancel()">
+        <i class="glyphicon glyphicon-remove" aria-hidden="true"></i>
       </button>
+      <h4 class="modal-title">
+        <i class="glyphicon glyphicon-pencil"></i> Update Profile
+      </h4>
     </div>
-    <div class="custom-modal-body">
-      <p class="custom-modal-title">Update Profile</p>
-      <form
-        id="editProfileForm"
-        name="editProfileForm"
-        class="custom-form"
-        style="height: auto"
-        novalidate
-        ng-submit="changeProfile()"
-        enctype="multipart/form-data"
-      >
-        <div class="form-group">
-          <label for="username">Name <span class="required">*</span></label>
-          <input
-            type="text"
-            name="username"
-            id="username"
-            placeholder="Enter your full name"
-            title="Name must contain only letters and be 3-50 characters long."
-            ng-required="true"
-            ng-model="profileFormData.username"
-            autocomplete="username"
-          />
-          <!-- Display an error message if email is invalid -->
-          <span
-            style="color: red"
-            ng-show="editProfileForm.username.$touched && editProfileForm.username.$error.required"
-          >
+    <div class="modal-body">
+      <form id="editProfileForm" name="editProfileForm" class="form" novalidate>
+        <div class="form-group" ng-class="{'has-error': editProfileForm.username.$touched && editProfileForm.username.$invalid}">
+          <label for="username">Name <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" name="username" id="username"
+            placeholder="Enter your full name" ng-required="true"
+            ng-model="profileFormData.username" autocomplete="username" />
+          <span class="help-block" ng-show="editProfileForm.username.$touched && editProfileForm.username.$error.required">
             Name is required.
           </span>
         </div>
-        <div class="form-group">
-          <label for="profilePhone"
-            >Phone Number <span class="required">*</span></label
-          >
-          <input
-            type="tel"
-            name="phone"
-            id="profilePhone"
-            placeholder="Enter your phone number"
-            title="Phone number must be 10 digits long"
-            autocomplete="tel"
-            ng-required="true"
-            ng-model="profileFormData.tel"
-            valid-Phone
-          />
-          <span
-            style="color: red"
-            ng-show="editProfileForm.phone.$touched && editProfileForm.phone.$error.required"
-          >
+
+        <div class="form-group" ng-class="{'has-error': editProfileForm.phone.$touched && editProfileForm.phone.$invalid}">
+          <label for="profilePhone">Phone Number <span class="text-danger">*</span></label>
+          <input type="tel" class="form-control" name="phone" id="profilePhone"
+            placeholder="Enter your phone number" ng-required="true"
+            ng-model="profileFormData.tel" autocomplete="tel" valid-Phone />
+          <span class="help-block" ng-show="editProfileForm.phone.$touched && editProfileForm.phone.$error.required">
             Phone number is required.
           </span>
-          <span
-            style="color: red"
-            ng-show="editProfileForm.phone.$touched && editProfileForm.phone.$error.validPhone"
-          >
+          <span class="help-block" ng-show="editProfileForm.phone.$touched && editProfileForm.phone.$error.validPhone">
             Phone number is invalid.
           </span>
         </div>
-        <div class="form-group">
+
+        <div class="form-group" ng-class="{'has-error': editProfileForm.avatar.$touched && editProfileForm.avatar.$invalid}">
           <label for="profileAvatar">Avatar</label>
-          <input
-            type="file"
-            name="avatar"
-            id="profileAvatar"
-            accept="image/jpg, image/jpeg, image/png"
-            title="Upload a new image to change the existing one (size less than 500kb)"
-            ng-model="profileFormData.avatar"
-            valid-Avatar
-          />
-          <span
-            style="color: red"
-            ng-show="editProfileForm.avatar.$touched && editProfileForm.avatar.$error.validAvatar"
-          >
+          <input type="file" class="form-control" name="avatar" id="profileAvatar"
+            accept="image/jpg, image/jpeg, image/png" ng-model="profileFormData.avatar" valid-Avatar />
+          <span class="help-block" ng-show="editProfileForm.avatar.$touched && editProfileForm.avatar.$error.validAvatar">
             Upload a new image to change the existing one (size less than 500kb)
           </span>
         </div>
-        <div class="form-group full-width">
-          <input type="submit" name="submit" value="Change" />
-        </div>
       </form>
     </div>
-  </div>
-</div>
-<!-- //change password modal -->
-<div class="custom-modal" ng-show="changePasswordModal==true">
-  <div class="custom-modal-inner">
-    <div class="custom-modal-header">
-      <button
-        class="custom-modal-close"
-        ng-click="toggleChangePasswordModal(false)"
-      >
-        <img src="../../asset/images/exit.svg" alt="Close" />
+    <div class="modal-footer">
+      <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+      <button class="btn btn-primary" ng-click="ok()" ng-disabled="editProfileForm.$invalid">
+        <i class="glyphicon glyphicon-ok"></i> Save
       </button>
     </div>
-    <div class="custom-modal-body">
-      <p class="custom-modal-title">Update Profile</p>
-      <form
-        id="changePasswordForm"
-        name="changePasswordForm"
-        class="custom-form"
-        style="height: auto"
-        ng-submit="changePassword()"
-      >
-        <div class="form-group">
-          <label for="oldPassword"
-            >Old Password<span class="required">*</span></label
-          >
-          <input
-            type="password"
-            name="oldPassword"
-            id="oldPassword"
-            placeholder="Enter your old password"
-            ng-model="passwordFormData.oldPassword"
-            autocomplete="on"
-            ng-required="true"
-          />
-          <span
-            style="color: red"
-            ng-show="changePasswordForm.oldPassword.$touched && changePasswordForm.oldPassword.$error.required"
-          >
+  </script>
+
+  <!-- Change Password Modal -->
+  <script type="text/ng-template" id="changePasswordModal.html">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="cancel()">
+        <i class="glyphicon glyphicon-remove" aria-hidden="true"></i>
+      </button>
+      <h4 class="modal-title">
+        <i class="glyphicon glyphicon-lock"></i> Change Password
+      </h4>
+    </div>
+    <div class="modal-body">
+      <form id="changePasswordForm" name="changePasswordForm" class="form" novalidate>
+        <div class="form-group" ng-class="{'has-error': changePasswordForm.oldPassword.$touched && changePasswordForm.oldPassword.$invalid}">
+          <label for="oldPassword">Old Password <span class="text-danger">*</span></label>
+          <input type="password" class="form-control" name="oldPassword" id="oldPassword"
+            placeholder="Enter your old password" ng-model="passwordFormData.oldPassword"
+            autocomplete="current-password" ng-required="true" />
+          <span class="help-block" ng-show="changePasswordForm.oldPassword.$touched && changePasswordForm.oldPassword.$error.required">
             Old password is required.
           </span>
         </div>
-        <div class="form-group">
-          <label for="newPassword"
-            >New Password<span class="required">*</span></label
-          >
-          <input
-            type="password"
-            name="newPassword"
-            id="newPassword"
-            placeholder="Enter your new password"
-            minlength="8"
-            title="Password must be at least 8 characters long."
-            ng-required="true"
-            ng-model="passwordFormData.newPassword"
-            autocomplete="on"
-            strong-Password
-          />
-          <span
-            style="color: red"
-            ng-show="changePasswordForm.newPassword.$touched && changePasswordForm.newPassword.$error.required"
-          >
+
+        <div class="form-group" ng-class="{'has-error': changePasswordForm.newPassword.$touched && changePasswordForm.newPassword.$invalid}">
+          <label for="newPassword">New Password <span class="text-danger">*</span></label>
+          <input type="password" class="form-control" name="newPassword" id="newPassword"
+            placeholder="Enter your new password" ng-required="true"
+            ng-model="passwordFormData.newPassword" autocomplete="new-password" strong-Password />
+          <span class="help-block" ng-show="changePasswordForm.newPassword.$touched && changePasswordForm.newPassword.$error.required">
             New password is required.
           </span>
-          <span
-            style="color: red"
-            ng-show="changePasswordForm.newPassword.$touched && changePasswordForm.newPassword.$error.strongPassword"
-          >
+          <span class="help-block" ng-show="changePasswordForm.newPassword.$touched && changePasswordForm.newPassword.$error.strongPassword">
             Password must be at least 8 characters long.
           </span>
         </div>
-        <div class="form-group">
-          <label for="confirmPassword"
-            >Confirm Password<span class="required">*</span></label
-          >
-          <input
-            type="password"
-            name="confirmPassword"
-            id="confirmPassword"
-            placeholder="Enter your new password"
-            minlength="8"
-            autocomplete="on"
-            title="Password must be at least 8 characters long."
-            ng-model="passwordFormData.confirmPassword"
-            ng-required="true"
-            password-Match="passwordFormData.newPassword"
-          />
-          <span
-            style="color: red"
-            ng-show="changePasswordForm.confirmPassword.$touched && changePasswordForm.confirmPassword.$error.required"
-          >
+
+        <div class="form-group" ng-class="{'has-error': changePasswordForm.confirmPassword.$touched && changePasswordForm.confirmPassword.$invalid}">
+          <label for="confirmPassword">Confirm Password <span class="text-danger">*</span></label>
+          <input type="password" class="form-control" name="confirmPassword" id="confirmPassword"
+            placeholder="Confirm your new password" ng-required="true"
+            ng-model="passwordFormData.confirmPassword" autocomplete="new-password"
+            password-Match="passwordFormData.newPassword" />
+          <span class="help-block" ng-show="changePasswordForm.confirmPassword.$touched && changePasswordForm.confirmPassword.$error.required">
             Confirm password is required.
           </span>
-          <span
-            style="color: red"
-            ng-show="changePasswordForm.confirmPassword.$touched && changePasswordForm.confirmPassword.$error.passwordMatch"
-          >
+          <span class="help-block" ng-show="changePasswordForm.confirmPassword.$touched && changePasswordForm.confirmPassword.$error.passwordMatch">
             Passwords do not match.
           </span>
         </div>
-        <div class="form-group full-width">
-          <input
-            type="submit"
-            name="submit"
-            value="Change"
-            ng-disabled="changePasswordForm.$invalid"
-          />
-        </div>
       </form>
     </div>
-  </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+      <button class="btn btn-primary" ng-click="ok()" ng-disabled="changePasswordForm.$invalid">
+        <i class="glyphicon glyphicon-ok"></i> Save
+      </button>
+    </div>
+  </script>
 </div>

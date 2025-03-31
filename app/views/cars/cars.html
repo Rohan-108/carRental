@@ -1,139 +1,738 @@
-<main class="cars-page" ng-init="init()">
-  <aside class="cars-sidebar">
-    <div class="search-section">
-      <label for="search">Search</label>
-      <input
-        type="text"
-        id="search"
-        name="search"
-        placeholder="Search by car name"
-        ng-model="query"
-        ng-change="search()"
-        ng-model-options="{ debounce: 500 }"
-      />
-    </div>
-    <div class="filter-panel" id="filterPanel">
-      <div class="filter-group">
-        <label for="location">City</label>
-        <select id="location" name="location" ng-model="filter.location">
-          <option ng-repeat="city in cities" value="{{city}}">{{city}}</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label for="fuelType">Fuel Type</label>
-        <select name="fuelType" id="fuelType" ng-model="filter.fuelType">
-          <option ng-repeat="fuel in fuelTypes" value="{{fuel}}">
-            {{fuel}}
-          </option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label for="vehicleType">Car Type</label>
-        <select id="vehicleType" name="carType" ng-model="filter.vehicleType">
-          <option ng-repeat="type in vehicleTypes" value="{{type}}">
-            {{type}}
-          </option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label for="transmission">Transmission</label>
-        <select
-          name="transmission"
-          id="transmission"
-          ng-model="filter.transmission"
-        >
-          <option
-            ng-repeat="transmission in transmissionType"
-            value="{{transmission}}"
+<div
+  class="container-fluid"
+  ng-init="init()"
+  style="position: relative; padding: 0"
+>
+  <div class="row" style="margin: 0; height: 91vh">
+    <!-- Main Content Area -->
+    <div
+      class="col-md-9 col-sm-8 col-xs-12 pull-right"
+      ng-class="{'col-md-12 col-sm-12': isSidebarCollapsed}"
+      style="
+        padding: 1.5rem;
+        background-color: #fff;
+        height: 100%;
+        overflow-y: auto;
+        position: relative;
+      "
+    >
+      <!-- Header with filter button in mobile -->
+      <div class="row">
+        <div class="col-xs-12">
+          <div
+            class="clearfix"
+            style="
+              margin-bottom: 30px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: space-between;
+            "
           >
-            {{transmission}}
-          </option>
-        </select>
-      </div>
-      <div class="range">
-        <label for="price" style="font-size: 1rem">Price</label>
-        <div class="range-slider">
-          <span class="range-selected"></span>
-        </div>
-        <div class="range-input">
-          <input
-            type="range"
-            class="min"
-            min="0"
-            max="10000"
-            value="0"
-            step="500"
-            ng-model="filter.minPrice"
-          />
-          <input
-            type="range"
-            class="max"
-            min="0"
-            max="10000"
-            value="10000"
-            step="500"
-            ng-model="filter.maxPrice"
-          />
-        </div>
-        <div class="range-price">
-          <label for="min">Min</label>
-          <input type="number" name="min" ng-value="filter.minPrice" disabled />
-          <label for="max">Max</label>
-          <input type="number" name="max" ng-value="filter.maxPrice" disabled />
-        </div>
-      </div>
-      <button id="applyFilters" class="btn apply-btn" ng-click="setCars()">
-        Apply Filters
-      </button>
-      <button id="clearFilters" class="btn clear-btn" ng-click="clearFilters()">
-        Clear Filters
-      </button>
-    </div>
-  </aside>
-  <section class="cars-main" style="display: relative">
-    <h2>Our Cars</h2>
-    <div class="loader-overlay" ng-show="isLoading">
-      <div class="loader"></div>
-    </div>
-    <div class="carContainer" id="carContainer">
-      <div class="carCard" ng-repeat="car in cars" ng-show="isLoading===false">
-        <div class="details">
-          <div class="thumb-gallery">
-            <img class="first" ng-src="{{car.images[0]}}" alt="{{car.name}}" />
-          </div>
-          <div class="info">
-            <h3>{{car.name}}</h3>
-            <p class="car-type">{{car.vehicleType}}</p>
-            <p class="car-type">Location: {{car.location}}</p>
-            <div class="price">
-              <span>Base Price</span>
-              <h4>Rs {{car.rentalPrice}}/day</h4>
+            <div style="align-self: flex-start">
+              <button
+                class="btn btn-primary visible-xs pull-left"
+                ng-click="toggleSidebar()"
+                style="margin-right: 10px; margin-top: 5px; border-radius: 4px"
+              >
+                <i class="glyphicon glyphicon-filter"></i> Filters
+              </button>
             </div>
-            <div class="ctas">
-              <button class="btn" ng-click="changeState(car._id)">
-                More Details
+
+            <h2 class="page-header" style="margin-top: 10px">
+              <i class="glyphicon glyphicon-calendar"></i> Available Cars
+            </h2>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bootstrap Loader with Angular UI -->
+      <div
+        class="text-center"
+        ng-show="isLoading"
+        style="
+          position: absolute;
+          inset: 0;
+          background-color: rgba(255, 255, 255, 0.7);
+          z-index: 1000;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        "
+      >
+        <uib-progress
+          style="width: 30%; height: 10px; background-color: #f5f5f5"
+        >
+          <uib-bar value="100" type="info" style="width: 100%">
+            <span class="sr-only">Loading...</span>
+          </uib-bar>
+        </uib-progress>
+        <i
+          class="glyphicon glyphicon-refresh"
+          style="
+            position: absolute;
+            animation: spin 1s infinite linear;
+            font-size: 24px;
+            color: #337ab7;
+          "
+        ></i>
+      </div>
+
+      <!-- No Cars Found Message -->
+      <div class="row" ng-if="!isLoading && (!cars || cars.length === 0)">
+        <div
+          class="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1 col-xs-12"
+        >
+          <div class="text-center empty-state">
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/2849/2849295.png"
+              alt="No cars found"
+              style="
+                width: 80px;
+                height: 80px;
+                margin-bottom: 1rem;
+                opacity: 0.7;
+              "
+            />
+            <h3>No Cars Available</h3>
+            <p class="text-muted">
+              We couldn't find any cars matching your search criteria.
+            </p>
+            <button class="btn btn-primary" ng-click="clearFilters()">
+              <i class="glyphicon glyphicon-refresh"></i> Reset Filters
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Car Cards -->
+      <div class="row" ng-if="!isLoading && cars.length > 0">
+        <div
+          class="col-lg-4 col-md-6 col-sm-6 col-xs-12"
+          ng-repeat="car in cars"
+          style="padding: 0.75rem"
+        >
+          <div
+            class="panel panel-default car-panel"
+            style="
+              border-radius: 8px;
+              box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+              transition: all 0.3s ease;
+              overflow: hidden;
+              border: none;
+              position: relative;
+            "
+          >
+            <!-- Car Image with Larger Height -->
+            <div style="height: 200px; overflow: hidden; position: relative">
+              <img
+                ng-src="{{car.images[0]}}"
+                alt="{{car.name}}"
+                style="
+                  width: 100%;
+                  height: 100%;
+                  object-fit: cover;
+                  transition: transform 0.5s;
+                "
+              />
+              <div
+                class="car-type-badge"
+                style="
+                  position: absolute;
+                  top: 10px;
+                  right: 10px;
+                  background-color: rgba(0, 122, 243, 0.8);
+                  color: white;
+                  padding: 5px 10px;
+                  border-radius: 20px;
+                  font-size: 12px;
+                  font-weight: bold;
+                "
+              >
+                {{car.vehicleType}}
+              </div>
+            </div>
+
+            <div
+              class="panel-body"
+              style="
+                padding: 1rem;
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                background: white;
+              "
+            >
+              <h3
+                style="
+                  font-size: 1.25rem;
+                  margin: 0;
+                  color: #333;
+                  font-weight: 600;
+                "
+              >
+                {{car.name}}
+                <small ng-if="car.rating" style="color: #f39c12">
+                  <i class="glyphicon glyphicon-star"></i> {{car.rating}}
+                </small>
+              </h3>
+
+              <!-- Car Details with Icons -->
+              <div
+                style="
+                  display: flex;
+                  flex-wrap: wrap;
+                  gap: 10px;
+                  margin-top: 8px;
+                "
+              >
+                <span
+                  style="
+                    display: flex;
+                    align-items: center;
+                    font-size: 0.85rem;
+                    color: #555;
+                  "
+                >
+                  <i
+                    class="glyphicon glyphicon-map-marker"
+                    style="margin-right: 4px; color: #e74c3c"
+                  ></i>
+                  {{car.location}}
+                </span>
+                <span
+                  style="
+                    display: flex;
+                    align-items: center;
+                    font-size: 0.85rem;
+                    color: #555;
+                  "
+                >
+                  <i
+                    class="glyphicon glyphicon-tint"
+                    style="margin-right: 4px; color: #3498db"
+                  ></i>
+                  {{car.fuelType}}
+                </span>
+                <span
+                  style="
+                    display: flex;
+                    align-items: center;
+                    font-size: 0.85rem;
+                    color: #555;
+                  "
+                >
+                  <i
+                    class="glyphicon glyphicon-cog"
+                    style="margin-right: 4px; color: #95a5a6"
+                  ></i>
+                  {{car.transmission}}
+                </span>
+              </div>
+
+              <!-- Price Section with Improved Design -->
+              <div
+                style="
+                  margin-top: 12px;
+                  padding-top: 12px;
+                  border-top: 1px solid #f0f0f0;
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                "
+              >
+                <div>
+                  <span style="font-size: 0.9rem; color: #555; display: block"
+                    >Daily Rate</span
+                  >
+                  <h4
+                    style="
+                      font-size: 1.3rem;
+                      margin: 0;
+                      color: #007af3;
+                      font-weight: 700;
+                    "
+                  >
+                    ₹{{car.rentalPrice}}<span
+                      style="font-size: 0.8rem; font-weight: normal"
+                      >/day</span
+                    >
+                  </h4>
+                </div>
+                <button
+                  class="btn btn-primary"
+                  ng-click="changeState(car._id)"
+                  style="
+                    background-color: #007af3;
+                    color: #fff;
+                    padding: 8px 16px;
+                    border: none;
+                    border-radius: 4px;
+                    transition: all 0.3s ease;
+                    font-weight: 600;
+                    box-shadow: 0 2px 5px rgba(0, 122, 243, 0.3);
+                  "
+                >
+                  <i class="glyphicon glyphicon-info-sign"></i> Details
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Pagination -->
+      <div class="row" ng-if="!isLoading && cars.length > 0 && totalPage > 1">
+        <div class="col-xs-12 text-center">
+          <ul class="pagination">
+            <li ng-class="{disabled: currentPage === 1}">
+              <a
+                href
+                ng-click="currentPage > 1 && prevPage()"
+                aria-label="Previous"
+              >
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+
+            <li
+              ng-class="{active: currentPage === page}"
+              ng-repeat="page in getPageArray()"
+            >
+              <a href ng-click="goToPage(page)">{{page}}</a>
+            </li>
+
+            <li ng-class="{disabled: currentPage === totalPage}">
+              <a
+                href
+                ng-click="currentPage < totalPage && nextPage()"
+                aria-label="Next"
+              >
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar --- Collapsible on Mobile -->
+    <div
+      class="col-md-3 col-sm-4 col-xs-12 sidebar-container pull-left"
+      ng-class="{'hidden-xs': isSidebarCollapsed}"
+      style="
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        padding: 1.5rem;
+        height: 100%;
+        overflow-y: auto;
+        z-index: 1000;
+        transition: all 0.3s ease;
+      "
+    >
+      <!-- Sidebar Header with Close Button -->
+      <div class="visible-xs clearfix" style="margin-bottom: 15px">
+        <h4 style="color: #fff; display: inline-block; margin-top: 5px">
+          Filter Options
+        </h4>
+        <button
+          class="btn btn-sm btn-danger pull-right"
+          ng-click="toggleSidebar()"
+        >
+          <i class="glyphicon glyphicon-remove"></i>
+        </button>
+      </div>
+
+      <!-- Search Section -->
+      <div style="margin-bottom: 1.5rem">
+        <label
+          for="search"
+          class="control-label"
+          style="color: #fff; font-size: 1.5rem"
+        >
+          <i class="glyphicon glyphicon-search" style="margin-right: 5px"></i>
+          Search
+        </label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="search"
+            class="form-control"
+            placeholder="Search by car name"
+            ng-model="query"
+            ng-change="search()"
+            ng-model-options="{ debounce: 500 }"
+            style="border-radius: 0.5rem"
+          />
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="row">
+        <!-- City Filter -->
+        <div class="col-xs-12">
+          <div class="form-group">
+            <label
+              for="location"
+              class="control-label"
+              style="font-size: 1.5rem; color: #fff"
+            >
+              <i
+                class="glyphicon glyphicon-map-marker"
+                style="margin-right: 5px"
+              ></i>
+              City
+            </label>
+            <select
+              id="location"
+              class="form-control"
+              ng-model="filter.location"
+              style="
+                border-radius: 0.5rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+                outline: none;
+                transition: border-color 0.3s;
+              "
+            >
+              <option ng-repeat="city in cities" value="{{city}}">
+                {{city}}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Fuel Type Filter -->
+        <div class="col-xs-12">
+          <div class="form-group">
+            <label
+              for="fuelType"
+              class="control-label"
+              style="font-size: 1.5rem; color: #fff"
+            >
+              <i class="glyphicon glyphicon-tint" style="margin-right: 5px"></i>
+              Fuel Type
+            </label>
+            <select
+              id="fuelType"
+              class="form-control"
+              ng-model="filter.fuelType"
+              style="
+                border-radius: 0.5rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+                outline: none;
+                transition: border-color 0.3s;
+              "
+            >
+              <option ng-repeat="fuel in fuelTypes" value="{{fuel}}">
+                {{fuel}}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Car Type Filter -->
+        <div class="col-xs-12">
+          <div class="form-group">
+            <label
+              for="vehicleType"
+              class="control-label"
+              style="font-size: 1.5rem; color: #fff"
+            >
+              <i class="glyphicon glyphicon-road" style="margin-right: 5px"></i>
+              Car Type
+            </label>
+            <select
+              id="vehicleType"
+              class="form-control"
+              ng-model="filter.vehicleType"
+              style="
+                border-radius: 0.5rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+                outline: none;
+                transition: border-color 0.3s;
+              "
+            >
+              <option ng-repeat="type in vehicleTypes" value="{{type}}">
+                {{type}}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Transmission Filter -->
+        <div class="col-xs-12">
+          <div class="form-group">
+            <label
+              for="transmission"
+              class="control-label"
+              style="font-size: 1.5rem; color: #fff"
+            >
+              <i class="glyphicon glyphicon-cog" style="margin-right: 5px"></i>
+              Transmission
+            </label>
+            <select
+              id="transmission"
+              class="form-control"
+              ng-model="filter.transmission"
+              style="
+                border-radius: 0.5rem;
+                padding: 0.5rem 1rem;
+                font-size: 1.2rem;
+                outline: none;
+                transition: border-color 0.3s;
+              "
+            >
+              <option
+                ng-repeat="transmission in transmissionType"
+                value="{{transmission}}"
+              >
+                {{transmission}}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Price Range Filter -->
+        <div class="col-xs-12">
+          <div class="form-group">
+            <label style="font-size: 1.5rem; color: #fff">
+              <i class="glyphicon glyphicon-usd" style="margin-right: 5px"></i>
+              Price Range
+            </label>
+            <div style="margin: 35px 10px 30px 10px; position: relative">
+              <div
+                style="
+                  height: 10px;
+                  background: #e1e9f6;
+                  border-radius: 5px;
+                  position: relative;
+                "
+              >
+                <!-- Range highlight -->
+                <div
+                  style="
+                    position: absolute;
+                    height: 100%;
+                    background-color: #1b53c0;
+                  "
+                  ng-style="{ left: getSliderStyles().range.left, right: getSliderStyles().range.right }"
+                ></div>
+
+                <!-- Min handle -->
+                <button
+                  type="button"
+                  style="
+                    position: absolute;
+                    top: -9px;
+                    transform: translateX(-50%);
+                    width: 18px;
+                    height: 18px;
+                    border-radius: 50%;
+                    background: #ffffff;
+                    border: 2px solid #1b53c0;
+                    cursor: pointer;
+                    padding: 0;
+                  "
+                  ng-style="{ left: getSliderStyles().minHandle.left }"
+                  ng-mousedown="startDragMin($event)"
+                ></button>
+
+                <!-- Max handle -->
+                <button
+                  type="button"
+                  style="
+                    position: absolute;
+                    top: -9px;
+                    transform: translateX(-50%);
+                    width: 18px;
+                    height: 18px;
+                    border-radius: 50%;
+                    background: #ffffff;
+                    border: 2px solid #1b53c0;
+                    cursor: pointer;
+                    padding: 0;
+                  "
+                  ng-style="{ left: getSliderStyles().maxHandle.left }"
+                  ng-mousedown="startDragMax($event)"
+                ></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-xs-6">
+              <div class="form-group">
+                <label class="text-white" style="font-size: 1.5rem">Min</label>
+                <div class="input-group">
+                  <span
+                    class="input-group-addon"
+                    style="background: #007af3; color: white; border: none"
+                    >₹</span
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    ng-value="filter.minPrice"
+                    readonly
+                    style="
+                      background-color: rgba(255, 255, 255, 0.3);
+                      color: #fff;
+                      cursor: not-allowed;
+                    "
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="col-xs-6">
+              <div class="form-group">
+                <label class="text-white" style="font-size: 1.5rem">Max</label>
+                <div class="input-group">
+                  <span
+                    class="input-group-addon"
+                    style="background: #007af3; color: white; border: none"
+                    >₹</span
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    ng-value="filter.maxPrice"
+                    readonly
+                    style="
+                      background-color: rgba(255, 255, 255, 0.3);
+                      color: #fff;
+                      cursor: not-allowed;
+                    "
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="col-xs-12">
+          <div class="row">
+            <div class="col-xs-6">
+              <button class="btn btn-primary btn-block" ng-click="setCars()">
+                <i class="glyphicon glyphicon-filter"></i> Apply
+              </button>
+            </div>
+            <div class="col-xs-6">
+              <button
+                class="btn btn-danger btn-block"
+                ng-click="clearFilters()"
+              >
+                <i class="glyphicon glyphicon-trash"></i> Clear
               </button>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="pagination" id="pagination">
-      <button
-        class="pagination-button"
-        ng-disabled="currentPage === 1"
-        ng-click="prevPage()"
-      >
-        Prev
-      </button>
-      <span>Page {{currentPage}} of {{totalPage}}</span>
-      <button
-        class="pagination-button"
-        ng-disabled="currentPage === totalPage"
-        ng-click="nextPage()"
-      >
-        Next
-      </button>
-    </div>
-  </section>
-</main>
+  </div>
+</div>
+
+<style>
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  .page-header {
+    font-size: 1.75rem;
+    color: #333;
+    margin-bottom: 1.5rem;
+    padding-top: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-top: 0;
+    overflow: hidden;
+  }
+
+  .text-white {
+    color: #fff;
+    font-size: 1rem;
+  }
+
+  .empty-state {
+    padding: 3rem 1rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    margin: 2rem auto;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  }
+
+  .car-panel:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .car-panel:hover img {
+    transform: scale(1.05);
+  }
+  @media (max-width: 767px) {
+    .container-fluid,
+    .row {
+      height: auto !important;
+    }
+
+    .sidebar-container.hidden-xs {
+      display: none !important;
+    }
+
+    .sidebar-container {
+      position: fixed;
+      top: 9%;
+      left: 0;
+      width: 85%;
+      height: 100vh;
+      z-index: 1050 !important;
+      overflow-y: auto;
+    }
+
+    .sidebar-hidden {
+      transform: translateX(-100%) !important;
+    }
+
+    .sidebar-hidden button,
+    .sidebar-hidden input,
+    .sidebar-hidden select,
+    .sidebar-hidden a {
+      visibility: hidden !important;
+    }
+
+    .full-width {
+      width: 100%;
+    }
+  }
+
+  /* Pagination Styles */
+  .pagination > li > a,
+  .pagination > li > span {
+    color: #337ab7;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    cursor: pointer;
+  }
+
+  .pagination > .active > a,
+  .pagination > .active > span {
+    background-color: #337ab7;
+    border-color: #337ab7;
+    color: white;
+  }
+
+  .pagination > .disabled > a,
+  .pagination > .disabled > span {
+    color: #777;
+    cursor: not-allowed;
+    background-color: #fff;
+    border-color: #ddd;
+  }
+</style>

@@ -15,12 +15,30 @@ angular.module("rentIT").controller("carsController", [
   "utilService",
   "toaster",
   "$q",
-  function ($scope, $state, carService, utilService, toaster, $q) {
+  "$window",
+  "$timeout",
+  "$document",
+  function (
+    $scope,
+    $state,
+    carService,
+    utilService,
+    toaster,
+    $q,
+    $window,
+    $timeout,
+    $document
+  ) {
     // Initialize variables
     $scope.cars = []; // List of cars
     $scope.pageSize = 2; // Number of cars per page
     $scope.currentPage = 1; // Current page
     $scope.totalPage = null; // Total number of pages
+
+    // Mobile sidebar control variables - set initially but don't track resize
+    $scope.isSidebarCollapsed = true; // Default to collapsed on mobile
+    $scope.isMobile = true; // Bootstrap classes will handle responsive behavior
+
     // Default filter
     const defaultFilter = {
       location: "All",
@@ -45,17 +63,128 @@ angular.module("rentIT").controller("carsController", [
     $scope.query = ""; // Search query
 
     /**
+     * @description Toggle sidebar visibility (for mobile)
+     */
+    $scope.toggleSidebar = function () {
+      $scope.isSidebarCollapsed = !$scope.isSidebarCollapsed;
+    };
+
+    /**
+     * @description Slider functionality: Start dragging minimum handle
+     */
+    $scope.startDragMin = function (event) {
+      event.preventDefault();
+
+      const sliderWidth = document.querySelector(
+        '[style*="background: #e1e9f6"]'
+      ).offsetWidth;
+      const startX = event.pageX;
+      const startValue = $scope.filter.minPrice;
+
+      function onMouseMove(event) {
+        const dx = event.pageX - startX;
+        const percent = (dx / sliderWidth) * 100;
+        let newValue = startValue + percent * 100;
+
+        // Constrain to valid range
+        newValue = Math.max(
+          0,
+          Math.min(newValue, $scope.filter.maxPrice - 500)
+        );
+
+        // Round to nearest step (500)
+        newValue = Math.round(newValue / 500) * 500;
+
+        // Use $timeout instead of $apply to avoid digest cycle issues
+        $timeout(function () {
+          $scope.filter.minPrice = newValue;
+        }, 0);
+      }
+
+      function onMouseUp() {
+        $document.off("mousemove", onMouseMove);
+        $document.off("mouseup", onMouseUp);
+      }
+
+      $document.on("mousemove", onMouseMove);
+      $document.on("mouseup", onMouseUp);
+    };
+
+    /**
+     * @description Slider functionality: Start dragging maximum handle
+     */
+    $scope.startDragMax = function (event) {
+      event.preventDefault();
+
+      const sliderWidth = document.querySelector(
+        '[style*="background: #e1e9f6"]'
+      ).offsetWidth;
+      const startX = event.pageX;
+      const startValue = $scope.filter.maxPrice;
+
+      function onMouseMove(event) {
+        const dx = event.pageX - startX;
+        const percent = (dx / sliderWidth) * 100;
+        let newValue = startValue + percent * 100;
+
+        // Constrain to valid range
+        newValue = Math.max(
+          $scope.filter.minPrice + 500,
+          Math.min(newValue, 10000)
+        );
+
+        // Round to nearest step (500)
+        newValue = Math.round(newValue / 500) * 500;
+
+        // Use $timeout instead of $apply
+        $timeout(function () {
+          $scope.filter.maxPrice = newValue;
+        }, 0);
+      }
+
+      function onMouseUp() {
+        $document.off("mousemove", onMouseMove);
+        $document.off("mouseup", onMouseUp);
+      }
+
+      $document.on("mousemove", onMouseMove);
+      $document.on("mouseup", onMouseUp);
+    };
+
+    /**
+     * @description Calculate the style properties for the price range slider
+     * This moves the inline expressions from the template to the controller
+     */
+    $scope.getSliderStyles = function () {
+      return {
+        range: {
+          left: $scope.filter.minPrice / 100 + "%",
+          right: (10000 - $scope.filter.maxPrice) / 100 + "%",
+        },
+        minHandle: {
+          left: $scope.filter.minPrice / 100 + "%",
+        },
+        maxHandle: {
+          left: $scope.filter.maxPrice / 100 + "%",
+        },
+      };
+    };
+
+    /**
      * @description Initialize the controller
      */
     $scope.init = function () {
+      // Set totalItems for pagination
+      $scope.totalItems = 0;
+      $scope.itemsPerPage = $scope.pageSize;
+
       $scope.setCars();
     };
+
     /**
      * @description Set the list of cars based on the filter
      */
     $scope.setCars = function () {
-      // Filter function for the paged cars
-      // Set loading state to true
       $scope.isLoading = true;
 
       carService
@@ -66,16 +195,24 @@ angular.module("rentIT").controller("carsController", [
           $scope.query
         )
         .then((response) => {
-          $scope.cars = response.data.vehicles;
-          $scope.totalPage = response.data.pages;
+          $scope.cars = response.data.vehicles || [];
+          $scope.totalPage = response.data.pages || 0;
+          $scope.totalItems =
+            response.data.count || $scope.totalPage * $scope.pageSize || 0;
         })
         .catch((error) => {
-          toaster.error("error", "error", error.description);
+          $scope.cars = [];
+          toaster.error(
+            "error",
+            "Error",
+            error.description || "Could not load cars"
+          );
         })
         .finally(() => {
           $scope.isLoading = false;
         });
     };
+
     /**
      * @description Apply the filter and set the list of cars
      * @returns {Promise} - A promise that resolves to the list of cars
@@ -92,6 +229,7 @@ angular.module("rentIT").controller("carsController", [
       $scope.currentPage = 1;
       $scope.setCars();
     };
+
     /**
      * @description Load the previous page
      * @returns {Promise} - A promise that resolves to the list of cars
@@ -102,6 +240,7 @@ angular.module("rentIT").controller("carsController", [
         $scope.setCars();
       }
     };
+
     /**
      * @description Next page
      * @returns {Promise} - A promise that resolves to the list of cars
@@ -119,10 +258,56 @@ angular.module("rentIT").controller("carsController", [
     };
 
     /**
+     * @description Page change handler for pagination
+     */
+    $scope.pageChanged = function () {
+      $scope.setCars();
+    };
+
+    /**
      * @description Change the state to the car details page
      * */
     $scope.changeState = function (state) {
       $state.go("car", { carId: state });
+    };
+
+    /**
+     * @description Generate an array of page numbers for pagination
+     * @returns {Array} Array of page numbers
+     */
+    $scope.getPageArray = function () {
+      const pages = [];
+      let startPage, endPage;
+      if ($scope.totalPage <= 5) {
+        startPage = 1;
+        endPage = $scope.totalPage;
+      } else {
+        if ($scope.currentPage <= 3) {
+          startPage = 1;
+          endPage = 5;
+        } else if ($scope.currentPage + 1 >= $scope.totalPage) {
+          startPage = $scope.totalPage - 4;
+          endPage = $scope.totalPage;
+        } else {
+          startPage = $scope.currentPage - 2;
+          endPage = $scope.currentPage + 2;
+        }
+      }
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+      return pages;
+    };
+
+    /**
+     * @description Go to a specific page
+     * @param {number} page - The page number to go to
+     */
+    $scope.goToPage = function (page) {
+      if (page !== $scope.currentPage) {
+        $scope.currentPage = page;
+        $scope.setCars();
+      }
     };
   },
 ]);

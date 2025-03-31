@@ -22,6 +22,7 @@ angular.module("rentIT").controller("carDetailController", [
   "toaster",
   "$q",
   "$timeout",
+  "$uibModal", // Added $uibModal dependency
   function (
     $scope,
     $rootScope,
@@ -31,12 +32,12 @@ angular.module("rentIT").controller("carDetailController", [
     chatService,
     toaster,
     $q,
-    $timeout
+    $timeout,
+    $uibModal // Add to function parameters
   ) {
     // Initialize variables
     $scope.car = car; // set car details that came through resolve
     $scope.currentImage = car.images[0]; // set current image to first image
-    $scope.imageModal = false; // set image modal to false
     $scope.image = null; // set image to null
     // set rental object with amount and isOutStation
     $scope.rental = {
@@ -47,16 +48,17 @@ angular.module("rentIT").controller("carDetailController", [
     $scope.messages = []; // set messages to empty array
     $scope.message = ""; // set message to empty string
     $scope.convId = null; // set conversation id to null
+    $scope.modalInstance = null; // Add modalInstance variable
 
     /**
      * @description Initialize function
      */
     $scope.init = function () {
-      $q.all[
-        ($scope.setUpDatePicker(),
+      $q.all([
+        $scope.setUpDatePicker(),
         $scope.loadUserChat(),
-        $scope.listenForChat())
-      ];
+        $scope.listenForChat(),
+      ]);
     };
 
     $scope.listenForChat = function () {
@@ -66,6 +68,7 @@ angular.module("rentIT").controller("carDetailController", [
         });
       });
     };
+
     /**
      * @description Change image function
      * @param {*} image - image url to change
@@ -85,7 +88,7 @@ angular.module("rentIT").controller("carDetailController", [
           );
           // create date picker
           const datePicker = new easepick.create({
-            element: document.getElementById("datepicker"),
+            element: document.querySelector(".easepicker"),
             css: [
               "https://cdn.jsdelivr.net/npm/@easepick/bundle@1.2.1/dist/index.css",
             ],
@@ -100,7 +103,6 @@ angular.module("rentIT").controller("carDetailController", [
                 other: "days",
               },
             },
-            // set min date to current date and block the booked dates
             LockPlugin: {
               minDate: new Date(),
               minDays: $scope.car.minRentalPeriod,
@@ -131,6 +133,7 @@ angular.module("rentIT").controller("carDetailController", [
         ? Number($scope.car.rentalPriceOutStation)
         : Number($scope.car.rentalPrice);
     };
+
     /**
      * @description Bid now function to place a bid
      */
@@ -181,6 +184,7 @@ angular.module("rentIT").controller("carDetailController", [
         .getConversationByCarAndMember($scope.car._id, $scope.user._id)
         .then((response) => {
           $scope.convId = response.data._id;
+          console.log("Conversation ID: ", $scope.convId);
           chatService.joinConversation($scope.convId);
           chatService
             .getAllChats($scope.convId)
@@ -248,40 +252,81 @@ angular.module("rentIT").controller("carDetailController", [
     };
 
     /**
-     * @description Toggle modal function for image upload
-     * @param {*} state - state to toggle modal
+     * @description Toggle modal function for image upload - Updated to use $uibModal
+     * @param {boolean} state - open modal if true, close if false
      */
     $scope.toggleModal = function (state) {
-      $scope.imageModal = state;
-      $scope.image = null;
-    };
+      if (state) {
+        // Open modal
+        const convId = $scope.convId;
+        $scope.modalInstance = $uibModal.open({
+          templateUrl: "imageModalContent.html",
+          backdrop: "static",
+          keyboard: false,
+          ariaLabelledBy: "modal-title",
+          ariaDescribedBy: "modal-body",
+          controller: function ($scope, $uibModalInstance) {
+            $scope.image = null;
 
-    /**
-     * @description upload the image to the selected conversation
-     */
-    $scope.uploadImage = function () {
-      if ($scope.image === null) {
-        toaster.pop("error", "Error", "Please select an image");
-        return;
-      }
-      const key = $scope.image.name + "-" + Date.now();
-      const contentType = $scope.image.type;
-      chatService
-        .uploadAttachment($scope.image, key, contentType, $scope.convId)
-        .then((response) => {
-          toaster.pop("success", "Success", "Image uploaded successfully");
-          $scope.toggleModal(false);
-          $scope.image = null;
-        })
-        .catch((error) => {
-          toaster.pop(
-            "error",
-            "Error",
-            error?.message || "Error while uploading image"
-          );
+            // Close modal
+            $scope.cancel = function () {
+              $uibModalInstance.dismiss("cancel");
+            };
+
+            // Upload image and close modal
+            $scope.uploadImage = function () {
+              if ($scope.$parent.image === null) {
+                toaster.pop("error", "Error", "Please select an image");
+                return;
+              }
+              if (!convId) {
+                toaster.pop(
+                  "error",
+                  "Error",
+                  "Please create a conversation first"
+                );
+                return;
+              }
+              const key = $scope.$parent.image.name + "-" + Date.now();
+              const contentType = $scope.$parent.image.type;
+              chatService
+                .uploadAttachment(
+                  $scope.$parent.image,
+                  key,
+                  contentType,
+                  convId
+                )
+                .then((response) => {
+                  toaster.pop(
+                    "success",
+                    "Success",
+                    "Image uploaded successfully"
+                  );
+                  $uibModalInstance.close();
+                  $scope.$parent.image = null;
+                })
+                .catch((error) => {
+                  toaster.pop(
+                    "error",
+                    "Error",
+                    error?.message || "Error while uploading image"
+                  );
+                });
+            };
+          },
         });
+        $scope.modalInstance.result.then(
+          function () {
+            $scope.image = null;
+          },
+          function () {
+            $scope.image = null;
+          }
+        );
+      } else if ($scope.modalInstance) {
+        $scope.modalInstance.dismiss("cancel");
+      }
     };
-
     /**
      * @description Get dates in range function
      * @param {*} startDate - start date
@@ -298,6 +343,7 @@ angular.module("rentIT").controller("carDetailController", [
       }
       return dates;
     }
+
     /**
      * @description Get booked dates function
      * @returns {Promise<Array>} - booked dates

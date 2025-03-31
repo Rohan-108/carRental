@@ -1,15 +1,71 @@
 <main class="container">
-  <div class="hero">
-    <div class="text_container">
-      <h1>RENT <span>IT</span></h1>
-      <p>
-        Rent a car from our extensive fleet of vehicles. We have every type of
-        vehicle to meet your needs.
-      </p>
-      <button class="btn" ng-click="changeState('cars')">Rent Now</button>
+  <div class="row" style="margin-top: 2rem; margin-bottom: 2rem">
+    <div class="col-md-6 col-xs-12">
+      <div style="background-color: transparent; padding: 2rem">
+        <h1
+          class="hidden-xs"
+          style="font-size: 3.5rem; font-weight: 300; line-height: 1.1"
+        >
+          RENT <span style="color: #5469d4 !important">IT</span>
+        </h1>
+        <h1
+          class="visible-xs"
+          style="font-size: 2.5rem; font-weight: 300; line-height: 1.2"
+        >
+          RENT <span style="color: #5469d4 !important">IT</span>
+        </h1>
+        <p class="hidden-xs" style="font-size: 1.5rem; font-weight: 300">
+          Rent a car from our extensive fleet of vehicles. We have every type of
+          vehicle to meet your needs.
+        </p>
+        <p class="visible-xs" style="font-size: 1.25rem; font-weight: 300">
+          Rent a car from our extensive fleet of vehicles. We have every type of
+          vehicle to meet your needs.
+        </p>
+        <hr
+          style="
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            border: 0;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+          "
+        />
+        <button
+          class="btn-lg hidden-xs btn-primary"
+          uib-tooltip="Find your perfect car"
+          ng-click="changeState('cars')"
+          style="
+            color: #fff;
+            background-color: #5469d4;
+            border-color: #5469d4;
+            transition: all 0.3s ease;
+            cursor: pointer;
+          "
+          onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)';"
+          onmouseout="this.style.transform=''; this.style.boxShadow='';"
+        >
+          <i class="glyphicon glyphicon-road"></i> Rent Now
+        </button>
+        <button
+          class="btn visible-xs btn-primary"
+          uib-tooltip="Find your perfect car"
+          ng-click="changeState('cars')"
+          style="
+            color: #fff;
+            background-color: #5469d4;
+            border-color: #5469d4;
+            transition: all 0.3s ease;
+            cursor: pointer;
+          "
+          onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)';"
+          onmouseout="this.style.transform=''; this.style.boxShadow='';"
+        >
+          <i class="glyphicon glyphicon-road"></i> Rent Now
+        </button>
+      </div>
     </div>
-    <div class="hero_image_container">
-      <img src="../../asset/images/hero.svg" alt="Car" />
+    <div class="col-md-6 col-xs-12 text-center">
+      <img src="../../asset/images/hero.svg" alt="Car" class="img-responsive" />
     </div>
   </div>
 </main>

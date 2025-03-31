@@ -1,487 +1,763 @@
-<div class="dashboard" ng-init="init()">
-  <div class="dashboard-sidebar">
-    <p>Dashboard</p>
-    <div class="dashboardPage">
-      <div
-        class="dashboard-page"
-        data-id="home"
-        ng-click="changeTab('home')"
-        ng-class="{ active: currentTab === 'home' }"
+<div
+  class="container-fluid"
+  ng-init="init()"
+  style="min-height: 91vh; overflow-x: hidden"
+>
+  <div class="row">
+    <!-- Sidebar -->
+    <div
+      class="col-sm-3 col-md-2 hidden-xs"
+      style="
+        background-color: #f5f9ff;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        position: fixed;
+        top: 60px;
+        bottom: 0;
+        left: 0;
+        z-index: 1000;
+        border-right: 1px solid #e1e8f0;
+        overflow-y: auto;
+      "
+    >
+      <h3 class="text-primary" style="margin-left: 15px; margin-bottom: 20px">
+        Admin Dashboard
+      </h3>
+      <ul class="nav nav-pills nav-stacked">
+        <li ng-class="{ active: currentTab === 'home' }">
+          <a href ng-click="changeTab('home')"
+            ><i class="glyphicon glyphicon-home"></i> Home</a
+          >
+        </li>
+        <li ng-class="{ active: currentTab === 'analytics' }">
+          <a href ng-click="changeTab('analytics')"
+            ><i class="glyphicon glyphicon-stats"></i> Revenue Analytics</a
+          >
+        </li>
+        <li ng-class="{ active: currentTab === 'carBookAnalytics' }">
+          <a href ng-click="changeTab('carBookAnalytics')"
+            ><i class="glyphicon glyphicon-dashboard"></i> Booking & Car
+            Analytics</a
+          >
+        </li>
+        <li ng-class="{ active: currentTab === 'approvals' }">
+          <a href ng-click="changeTab('approvals')"
+            ><i class="glyphicon glyphicon-check"></i> Approvals</a
+          >
+        </li>
+      </ul>
+    </div>
+
+    <!-- Collapsible Sidebar for Small Screens -->
+    <div class="visible-xs" style="margin-bottom: 15px">
+      <button
+        class="btn btn-primary"
+        style="margin: 10px"
+        ng-click="isSidebarVisible = !isSidebarVisible"
       >
-        Home
-      </div>
+        <i class="glyphicon glyphicon-menu-hamburger"></i> Menu
+      </button>
       <div
-        class="dashboard-page"
-        data-id="analytics"
-        ng-click="changeTab('analytics')"
-        ng-class="{ active: currentTab === 'analytics' }"
+        ng-show="isSidebarVisible"
+        class="panel panel-default"
+        style="
+          margin-top: 10px;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          background-color: #f5f9ff;
+          border-color: #e1e8f0;
+        "
       >
-        Revenue Analytics
-      </div>
-      <div
-        class="dashboard-page"
-        data-id="stat"
-        ng-click="changeTab('carBookAnalytics')"
-        ng-class="{ active: currentTab === 'carBookAnalytics' }"
-      >
-        Booking & Car Analytics
-      </div>
-      <div
-        class="dashboard-page"
-        data-id="approvals"
-        ng-click="changeTab('approvals')"
-        ng-class="{ active: currentTab === 'approvals' }"
-      >
-        Approvals
+        <ul class="nav nav-pills nav-stacked">
+          <li ng-class="{ active: currentTab === 'home' }">
+            <a href ng-click="changeTab('home')"
+              ><i class="glyphicon glyphicon-home"></i> Home</a
+            >
+          </li>
+          <li ng-class="{ active: currentTab === 'analytics' }">
+            <a href ng-click="changeTab('analytics')"
+              ><i class="glyphicon glyphicon-stats"></i> Revenue Analytics</a
+            >
+          </li>
+          <li ng-class="{ active: currentTab === 'carBookAnalytics' }">
+            <a href ng-click="changeTab('carBookAnalytics')"
+              ><i class="glyphicon glyphicon-dashboard"></i> Booking & Car
+              Analytics</a
+            >
+          </li>
+          <li ng-class="{ active: currentTab === 'approvals' }">
+            <a href ng-click="changeTab('approvals')"
+              ><i class="glyphicon glyphicon-check"></i> Approvals</a
+            >
+          </li>
+        </ul>
       </div>
     </div>
-  </div>
-  <main class="dashboard-main">
-    <div class="loader-overlay" ng-show="isLoading">
-      <div class="loader"></div>
-    </div>
-    <!------Home section -------------------------------------------------------------->
-    <section id="home" class="stat" ng-if="currentTab==='home'">
-      <div>
-        <h2 style="padding: 0.5rem">Admin Dashboard</h2>
-        <div class="summary-cards">
-          <div class="card">
-            <h3>Pending Bid</h3>
-            <p id="biddingCount">{{stat.bids}}</p>
+
+    <!-- Main Content Area -->
+    <div
+      class="col-sm-9 col-md-10 col-sm-offset-3 col-md-offset-2"
+      style="padding-bottom: 30px"
+    >
+      <!-- Loading Overlay -->
+      <div
+        ng-show="isLoading"
+        style="
+          position: absolute;
+          inset: 0;
+          background-color: rgba(255, 255, 255, 0.7);
+          z-index: 1050;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          backdrop-filter: blur(5px);
+        "
+      >
+        <div class="text-center">
+          <div
+            class="spinner"
+            style="
+              width: 60px;
+              height: 60px;
+              border-radius: 50%;
+              border: 5px solid #f3f3f3;
+              border-top: 5px solid #337ab7;
+              animation: spin 1s linear infinite;
+            "
+          ></div>
+          <p
+            class="lead"
+            style="margin-top: 15px; font-weight: bold; color: #337ab7"
+          >
+            Loading...
+          </p>
+        </div>
+      </div>
+
+      <style>
+        @keyframes spin {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+      </style>
+
+      <!-- Home Section -->
+      <div ng-show="currentTab === 'home'">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <i class="glyphicon glyphicon-dashboard"></i> Admin Dashboard
+            </h3>
           </div>
-          <div class="card">
-            <h3>Total Booking</h3>
-            <p id="bookingCount">{{stat.bookings}}</p>
+          <div class="panel-body">
+            <h4>Key Metrics</h4>
+            <div class="row">
+              <!-- Example Metric Card -->
+              <div class="col-md-3 col-sm-6">
+                <div class="panel panel-info">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">
+                      <i class="glyphicon glyphicon-time"></i> Pending Bids
+                    </h3>
+                  </div>
+                  <div class="panel-body text-center">
+                    <h3 id="biddingCount">{{stat.bids}}</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <div class="panel panel-info">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">
+                      <i class="glyphicon glyphicon-book"></i> Total Booking
+                    </h3>
+                  </div>
+                  <div class="panel-body text-center">
+                    <h3 id="bookingCount">{{stat.bookings}}</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <div class="panel panel-info">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">
+                      <i class="glyphicon glyphicon-user"></i> Users
+                    </h3>
+                  </div>
+                  <div class="panel-body text-center">
+                    <h3 id="noOfAdmin">{{stat.users}}</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <div class="panel panel-info">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">
+                      <i class="glyphicon glyphicon-road"></i> Cars
+                    </h3>
+                  </div>
+                  <div class="panel-body text-center">
+                    <h3 id="noOfCars">{{stat.cars}}</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <div class="panel panel-info">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">
+                      <i class="glyphicon glyphicon-usd"></i> Total Revenue
+                    </h3>
+                  </div>
+                  <div class="panel-body text-center">
+                    <h3 id="revenue">{{stat.revenue | currency:"Rs."}}</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <div class="panel panel-info">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">
+                      <i class="glyphicon glyphicon-time"></i> Average Rental
+                      Period
+                    </h3>
+                  </div>
+                  <div class="panel-body text-center">
+                    <h3 id="averageRentDay">
+                      {{stat.avgRentalDay}} {{stat.avgRentalDay>1?"days":"day"}}
+                    </h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <div class="panel panel-info">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">
+                      <i class="glyphicon glyphicon-remove"></i> Rejected Bids
+                    </h3>
+                  </div>
+                  <div class="panel-body text-center">
+                    <h3 id="rejectedBids">{{stat.rejectedBids}}</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <div class="panel panel-info">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">
+                      <i class="glyphicon glyphicon-stats"></i> Conversion Ratio
+                    </h3>
+                  </div>
+                  <div class="panel-body text-center">
+                    <h3 id="conversionRatio">{{stat.conversionRatio}} %</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="card">
-            <h3>Users</h3>
-            <p id="noOfAdmin">{{stat.users}}</p>
+        </div>
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <i class="glyphicon glyphicon-thumbs-up"></i> Popular Things/Types
+            </h3>
           </div>
-          <div class="card">
-            <h3>Cars</h3>
-            <p id="noOfCars">{{stat.cars}}</p>
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-md-3 col-sm-6">
+                <div class="panel panel-info">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">
+                      <i class="glyphicon glyphicon-road"></i> Most Popular
+                      vehicleType
+                    </h3>
+                  </div>
+                  <div class="panel-body text-center">
+                    <h3>
+                      {{popularVehicleDetails.popularVehicleType[0].name}}
+                    </h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <div class="panel panel-info">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">
+                      <i class="glyphicon glyphicon-cog"></i> Most Popular
+                      Transmission
+                    </h3>
+                  </div>
+                  <div class="panel-body text-center">
+                    <h3>
+                      {{popularVehicleDetails.popularTransmissionType[0].name}}
+                    </h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <div class="panel panel-info">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">
+                      <i class="glyphicon glyphicon-tint"></i> Most Popular Fuel
+                      Type
+                    </h3>
+                  </div>
+                  <div class="panel-body text-center">
+                    <h3>{{popularVehicleDetails.popularFuelType[0].name}}</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <div class="panel panel-info">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">
+                      <i class="glyphicon glyphicon-tag"></i> Most Popular Model
+                    </h3>
+                  </div>
+                  <div class="panel-body text-center">
+                    <h3>{{popularVehicleDetails.popularModel[0].name}}</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <div class="panel panel-info">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">
+                      <i class="glyphicon glyphicon-map-marker"></i> Most
+                      Popular Location
+                    </h3>
+                  </div>
+                  <div class="panel-body text-center">
+                    <h3>{{popularVehicleDetails.popularLocation[0].name}}</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="card">
-            <h3>Total Revenue</h3>
-            <p id="revenue">{{stat.revenue | currency:"Rs."}}</p>
+        </div>
+      </div>
+
+      <!-- Revenue Analytics Section -->
+      <div ng-show="currentTab === 'analytics'">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <i class="glyphicon glyphicon-stats"></i> Revenue Analytics
+            </h3>
           </div>
-          <div class="card">
-            <h3>Average Rental Period</h3>
-            <p id="averageRentDay">
-              {{stat.avgRentalDay}} {{stat.avgRentalDay>1?"days":"day"}}
+          <div class="panel-body text-center">
+            <div class="row">
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label for="days">No Of Days:</label>
+                  <select
+                    name="days"
+                    id="days"
+                    class="form-control"
+                    ng-model="revenueChartFilter.days"
+                    ng-change="revenueChart()"
+                  >
+                    <option value="7" selected>Last 7 Days</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="90">Last 90 Days</option>
+                    <option value="180">Last 180 Days</option>
+                    <option value="365">Last 365 Days</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label for="revenueFilter">Filter:</label>
+                  <select
+                    name="revenueFilter"
+                    id="revenueFilter"
+                    class="form-control"
+                    ng-model="revenueChartFilter.field"
+                    ng-change="revenueChart()"
+                  >
+                    <option value="vehicle.vehicleType">By Car Type</option>
+                    <option value="vehicle.fuelType">By FuelType</option>
+                    <option value="vehicle.transmission">
+                      By Transmission Type
+                    </option>
+                    <option value="vehicle.location" selected>
+                      By Location
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label for="revenueChartType">Chart:</label>
+                  <select
+                    name="revenueChartType"
+                    id="revenueChartType"
+                    class="form-control"
+                    ng-model="revenueChartFilter.typeOfChart"
+                    ng-change="revenueChart()"
+                  >
+                    <option value="bar" selected>Bar</option>
+                    <option value="pie">Pie</option>
+                    <option value="doughnut">DoughNut</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="revenueChart"></canvas>
+            </div>
+            <p style="text-align: center; font-size: 0.8rem">
+              *revenue is calculated for confirmed bookings only.
             </p>
           </div>
-          <div class="card">
-            <h3>Rejected Bids</h3>
-            <p id="rejectedBids">{{stat.rejectedBids}}</p>
+        </div>
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <i class="glyphicon glyphicon-user"></i> Top Earnings Owners
+            </h3>
           </div>
-          <div class="card">
-            <h3>Conversion Ratio</h3>
-            <p id="conversionRatio">{{stat.conversionRatio}} %</p>
+          <div class="panel-body text-center">
+            <div class="row">
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label for="days">No Of Days:</label>
+                  <select
+                    name="days"
+                    id="days"
+                    class="form-control"
+                    ng-model="topEarningOwnersChartFilter.days"
+                    ng-change="topEarningOwnersChart()"
+                  >
+                    <option value="7" selected>Last 7 Days</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="90">Last 90 Days</option>
+                    <option value="180">Last 180 Days</option>
+                    <option value="365">Last 365 Days</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label for="topEarningOwnersChartType">Chart:</label>
+                  <select
+                    name="topEarningOwnersChartType"
+                    id="topEarningOwnersChartType"
+                    class="form-control"
+                    ng-model="topEarningOwnersChartFilter.typeOfChart"
+                    ng-change="topEarningOwnersChart()"
+                  >
+                    <option value="bar" selected>Bar</option>
+                    <option value="pie">Pie</option>
+                    <option value="doughnut">DoughNut</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="topEarningOwnersChart"></canvas>
+            </div>
+            <p style="text-align: center; font-size: 0.8rem">
+              *revenue is calculated for confirmed bookings only.
+            </p>
           </div>
         </div>
       </div>
-      <div>
-        <h2 style="padding: 0.5rem">Popular Things/Types:</h2>
-        <div class="summary-cards">
-          <div class="card">
-            <h3>Most Popular vehicleType</h3>
-            <p>{{popularVehicleDetails.popularVehicleType[0].name}}</p>
+
+      <!-- Booking & Car Analytics Section -->
+      <div ng-show="currentTab === 'carBookAnalytics'">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <i class="glyphicon glyphicon-calendar"></i> Number of Bookings
+            </h3>
           </div>
-          <div class="card">
-            <h3>Most Popular Transmission</h3>
-            <p>{{popularVehicleDetails.popularTransmissionType[0].name}}</p>
+          <div class="panel-body text-center">
+            <div class="row">
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label for="days">No Of Days:</label>
+                  <select
+                    name="days"
+                    id="days"
+                    class="form-control"
+                    ng-model="bookChartFilter.days"
+                    ng-change="bookChart()"
+                  >
+                    <option value="7" selected>Last 7 Days</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="90">Last 90 Days</option>
+                    <option value="180">Last 180 Days</option>
+                    <option value="365">Last 365 Days</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label for="bookingFilter">Filter:</label>
+                  <select
+                    name="bookingFilter"
+                    id="bookingFilter"
+                    class="form-control"
+                    ng-model="bookChartFilter.field"
+                    ng-change="bookChart()"
+                  >
+                    <option value="vehicle.vehicleType">By Car Type</option>
+                    <option value="vehicle.fuelType">By FuelType</option>
+                    <option value="vehicle.transmission">
+                      By Transmission Type
+                    </option>
+                    <option value="vehicle.location">By Location</option>
+                    <option value="vehicle.plateNumber">By CarID</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label for="bookChartType">Chart:</label>
+                  <select
+                    name="bookChartType"
+                    id="bookChartType"
+                    class="form-control"
+                    ng-model="bookChartFilter.typeOfChart"
+                    ng-change="bookChart()"
+                  >
+                    <option value="bar" selected>Bar</option>
+                    <option value="pie">Pie</option>
+                    <option value="doughnut">DoughNut</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="bookChart"></canvas>
+            </div>
           </div>
-          <div class="card">
-            <h3>Most Popular Fuel Type</h3>
-            <p>{{popularVehicleDetails.popularFuelType[0].name}}</p>
+        </div>
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <i class="glyphicon glyphicon-road"></i> Number of Cars
+            </h3>
           </div>
-          <div class="card">
-            <h3>Most Popular Model</h3>
-            <p>{{popularVehicleDetails.popularModel[0].name}}</p>
-          </div>
-          <div class="card">
-            <h3>Most Popular Location</h3>
-            <p>{{popularVehicleDetails.popularLocation[0].name}}</p>
+          <div class="panel-body text-center">
+            <div class="row">
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label for="carfilter">Filter:</label>
+                  <select
+                    name="carfilter"
+                    id="carfilter"
+                    class="form-control"
+                    ng-model="carChartFilter.field"
+                    ng-change="carChart()"
+                  >
+                    <option value="vehicleType" selected>By Car Type</option>
+                    <option value="seats">By Seats</option>
+                    <option value="fuelType">By FuelType</option>
+                    <option value="transmission">By Transmission Type</option>
+                    <option value="location">By Location</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label for="chartType">Chart:</label>
+                  <select
+                    name="chartType"
+                    id="chartType"
+                    class="form-control"
+                    ng-model="carChartFilter.typeOfChart"
+                    ng-change="carChart()"
+                  >
+                    <option value="bar" selected>Bar</option>
+                    <option value="pie">Pie</option>
+                    <option value="doughnut">DoughNut</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="carChart"></canvas>
+            </div>
           </div>
         </div>
       </div>
-    </section>
-    <!-----Revenue Chart Section-------------------------------------------------------->
-    <section class="chart" ng-if="currentTab==='analytics'">
-      <div class="chartHeader">
-        <h2>Revenue Analytics</h2>
-        <div class="analytics">
-          <div class="fields">
-            <label for="days">No Of Days:</label>
-            <select
-              name="days"
-              id="days"
-              ng-model="revenueChartFilter.days"
-              ng-change="revenueChart()"
-            >
-              <option value="7" selected>Last 7 Days</option>
-              <option value="30">Last 30 Days</option>
-              <option value="90">Last 90 Days</option>
-              <option value="180">Last 180 Days</option>
-              <option value="365">Last 365 Days</option>
-            </select>
+
+      <!-- Approvals Section -->
+      <div ng-show="currentTab === 'approvals'">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <i class="glyphicon glyphicon-check"></i> Approvals
+            </h3>
           </div>
-          <div class="field">
-            <label for="revenueFilter">Filter:</label>
-            <select
-              name="revenueFilter"
-              id="revenueFilter"
-              ng-model="revenueChartFilter.field"
-              ng-change="revenueChart()"
-            >
-              <option value="vehicle.vehicleType">By Car Type</option>
-              <option value="vehicle.fuelType">By FuelType</option>
-              <option value="vehicle.transmission">By Transmission Type</option>
-              <option value="vehicle.location" selected>By Location</option>
-              <!-- <option value="vehicle.plateNumber">By Per Car</option>
-              <option value="user.email">By Car Owner</option> -->
-            </select>
-          </div>
-          <div class="field">
-            <label for="revenueChartType">Chart:</label>
-            <select
-              name="revenueChartType"
-              id="revenueChartType"
-              ng-model="revenueChartFilter.typeOfChart"
-              ng-change="revenueChart()"
-            >
-              <option value="bar" selected>Bar</option>
-              <option value="pie">Pie</option>
-              <option value="doughnut">DoughNut</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="chart-container">
-        <canvas id="revenueChart"></canvas>
-      </div>
-      <div>
-        <p style="text-align: center; font-size: 0.8rem">
-          *revenue is calculated for confirmed bookings only.
-        </p>
-      </div>
-    </section>
-    <!-----Revenue Chart Section-------------------------------------------------------->
-    <section class="chart" ng-if="currentTab==='analytics'">
-      <div class="chartHeader">
-        <h2>Top Earnings Owners</h2>
-        <div class="analytics">
-          <div class="fields">
-            <label for="days">No Of Days:</label>
-            <select
-              name="days"
-              id="days"
-              ng-model="topEarningOwnersChartFilter.days"
-              ng-change="topEarningOwnersChart()"
-            >
-              <option value="7" selected>Last 7 Days</option>
-              <option value="30">Last 30 Days</option>
-              <option value="90">Last 90 Days</option>
-              <option value="180">Last 180 Days</option>
-              <option value="365">Last 365 Days</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="topEarningOwnersChartType">Chart:</label>
-            <select
-              name="topEarningOwnersChartType"
-              id="topEarningOwnersChartType"
-              ng-model="topEarningOwnersChartFilter.typeOfChart"
-              ng-change="topEarningOwnersChart()"
-            >
-              <option value="bar" selected>Bar</option>
-              <option value="pie">Pie</option>
-              <option value="doughnut">DoughNut</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="chart-container">
-        <canvas id="topEarningOwnersChart"></canvas>
-      </div>
-      <div>
-        <p style="text-align: center; font-size: 0.8rem">
-          *revenue is calculated for confirmed bookings only.
-        </p>
-      </div>
-    </section>
-    <!-----Car and Booking Chart Section-------------------------------------------------------->
-    <section
-      id="bookingsChart"
-      class="chart"
-      ng-if="currentTab==='carBookAnalytics'"
-    >
-      <div class="chartHeader">
-        <h2>Number of Bookings</h2>
-        <div class="analytics">
-          <div class="fields">
-            <label for="days">No Of Days:</label>
-            <select
-              name="days"
-              id="days"
-              ng-model="bookChartFilter.days"
-              ng-change="bookChart()"
-            >
-              <option value="7" selected>Last 7 Days</option>
-              <option value="30">Last 30 Days</option>
-              <option value="90">Last 90 Days</option>
-              <option value="180">Last 180 Days</option>
-              <option value="365">Last 365 Days</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="bookingFilter">Filter:</label>
-            <select
-              name="bookingFilter"
-              id="bookingFilter"
-              ng-model="bookChartFilter.field"
-              ng-change="bookChart()"
-            >
-              <option value="vehicle.vehicleType">By Car Type</option>
-              <option value="vehicle.fuelType">By FuelType</option>
-              <option value="vehicle.transmission">By Transmission Type</option>
-              <option value="vehicle.location">By Location</option>
-              <option value="vehicle.plateNumber">By CarID</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="bookChartType">Chart:</label>
-            <select
-              name="bookChartType"
-              id="bookChartType"
-              ng-model="bookChartFilter.typeOfChart"
-              ng-change="bookChart()"
-            >
-              <option value="bar" selected>Bar</option>
-              <option value="pie">Pie</option>
-              <option value="doughnut">DoughNut</option>
-            </select>
+          <div class="panel-body">
+            <div class="row" style="margin-bottom: 20px">
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label for="approvalFilter">Filter by Status:</label>
+                  <select
+                    id="approvalFilter"
+                    class="form-control"
+                    ng-model="approvalFilter.status"
+                    ng-change="setApprovals()"
+                  >
+                    <option value="all">All</option>
+                    <option value="pending">Pending</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="approved">Approved</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label for="sortFilterApproval">Sort by:</label>
+                  <select
+                    id="sortFilterApproval"
+                    class="form-control"
+                    ng-model="approvalFilter.sortBy"
+                    ng-change="setApprovals()"
+                  >
+                    <option value="date">Date Created</option>
+                    <option value="username">Username</option>
+                    <option value="email">Email</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label for="sortOrderApproval">Order:</label>
+                  <select
+                    id="sortOrderApproval"
+                    class="form-control"
+                    ng-model="approvalFilter.orderBy"
+                    ng-change="setApprovals()"
+                  >
+                    <option value="asc">Ascending &#9650;</option>
+                    <option value="desc">Descending &#9660;</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <th>User Name</th>
+                    <th>Adhaar</th>
+                    <th>Email</th>
+                    <th>Request Date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-if="approvals.length === 0">
+                    <td colspan="5" class="text-center">There is no data</td>
+                  </tr>
+                  <tr ng-repeat="app in approvals" ng-if="approvals.length">
+                    <td>{{app.user.username}}</td>
+                    <td>{{app.user.adhaar}}</td>
+                    <td>{{app.user.email}}</td>
+                    <td>{{app.createdAt | date}}</td>
+                    <td>
+                      <div ng-if="app.status === 'pending'">
+                        <button
+                          class="btn btn-success btn-sm"
+                          ng-click="openApproveModal(app._id)"
+                        >
+                          <i class="glyphicon glyphicon-ok"></i> Approve
+                        </button>
+                        <button
+                          class="btn btn-danger btn-sm"
+                          ng-click="openCancelModal(app._id)"
+                        >
+                          <i class="glyphicon glyphicon-remove"></i> Cancel
+                        </button>
+                      </div>
+                      <span
+                        class="label"
+                        ng-if="app.status !== 'pending'"
+                        ng-class="{'label-success': app.status === 'approved', 'label-danger': app.status === 'rejected'}"
+                      >
+                        {{app.status}}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- UI Bootstrap Pagination -->
+            <div class="text-center">
+              <uib-pagination
+                total-items="totalItems"
+                ng-model="currentPage"
+                max-size="5"
+                class="pagination-sm"
+                boundary-links="true"
+                force-ellipses="true"
+                items-per-page="pageSize"
+                ng-change="pageChanged()"
+                previous-text="&lsaquo;"
+                next-text="&rsaquo;"
+                first-text="&laquo;"
+                last-text="&raquo;"
+              ></uib-pagination>
+              <div class="pagination-info">
+                <span class="text-muted"
+                  >Page {{currentPage}} of {{totalPage}}</span
+                >
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="chart-container">
-        <canvas id="bookChart"></canvas>
-      </div>
-    </section>
-    <!-----Car Chart Section-------------------------------------------------------->
-    <section class="chart" ng-if="currentTab==='carBookAnalytics'">
-      <div class="chartHeader">
-        <h2>Number of Cars</h2>
-        <div class="analytics">
-          <div class="field">
-            <label for="carfilter">Filter:</label>
-            <select
-              name="carfilter"
-              id="carfilter"
-              ng-model="carChartFilter.field"
-              ng-change="carChart()"
-            >
-              <option value="vehicleType" selected>By Car Type</option>
-              <option value="seats">By Seats</option>
-              <option value="fuelType">By FuelType</option>
-              <option value="transmission">By Transmission Type</option>
-              <option value="location">By Location</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="chartType">Chart:</label>
-            <select
-              name="chartType"
-              id="chartType"
-              ng-model="carChartFilter.typeOfChart"
-              ng-change="carChart()"
-            >
-              <option value="bar" selected>Bar</option>
-              <option value="pie">Pie</option>
-              <option value="doughnut">DoughNut</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="chart-container">
-        <canvas id="carChart"></canvas>
-      </div>
-    </section>
-    <!--------------Approvals sections----------------------------------------------------->
-    <section
-      id="approvals"
-      class="hidden-section tableSection"
-      ng-if="currentTab==='approvals'"
-    >
-      <div class="chartHeader">
-        <h2>Approvals</h2>
-        <div class="analytics">
-          <div>
-            <label for="approvalFilter">Filter by Status:</label>
-            <select
-              id="approvalFilter"
-              ng-model="approvalFilter.status"
-              ng-change="setApprovals()"
-            >
-              <option value="all">All</option>
-              <option value="pending">Pending</option>
-              <option value="rejected">Rejected</option>
-              <option value="approved">Approved</option>
-            </select>
-          </div>
-          <div>
-            <label for="sortFilterApproval">Sort by:</label>
-            <select
-              id="sortFilterApproval"
-              ng-model="approvalFilter.sortBy"
-              ng-change="setApprovals()"
-            >
-              <option value="date">Date Created</option>
-            </select>
-          </div>
-          <div>
-            <label for="sortOrderApproval">Order:</label>
-            <select
-              id="sortOrderApproval"
-              ng-model="approvalFilter.orderBy"
-              ng-change="setApprovals()"
-            >
-              <option value="asc">Ascending &#9650;</option>
-              <option value="desc">Descending &#9660;</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <table id="approvalTable">
-        <thead>
-          <tr>
-            <th scope="col">User Name</th>
-            <th scope="col">Adhaar</th>
-            <th scope="col">Email</th>
-            <th scope="col">Request Date</th>
-            <th scope="col">status</th>
-          </tr>
-        </thead>
-        <tbody id="approvalsBody">
-          <tr ng-if="approvals.length===0">
-            <td colspan="5" class="no-data">There is no data</td>
-          </tr>
-          <tr ng-repeat="app in approvals" ng-if="approvals.length">
-            <td data-label="Name">{{app.user.username}}</td>
-            <td data-label="Adhaar">{{app.user.adhaar}}</td>
-            <td data-label="Email">{{app.user.email}}</td>
-            <td data-label="Request Date">{{app.createdAt |date}}</td>
-            <td ng-if="app.status==='pending'">
-              <button
-                class="btn-approve"
-                style="
-                  background-color: green;
-                  color: #fff;
-                  border-radius: 1rem;
-                  cursor: pointer;
-                "
-                ng-click="toggleApproveModal(true,app._id)"
-              >
-                Approve
-              </button>
-              <button
-                class="btn-deny"
-                style="
-                  background-color: red;
-                  color: #fff;
-                  border-radius: 1rem;
-                  cursor: pointer;
-                "
-                ng-click="toggleCancelApproveModal(true,app._id)"
-              >
-                Cancel
-              </button>
-            </td>
-            <td data-label="Status" ng-if="app.status!=='pending'">
-              {{app.status}}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="pagination">
-        <button
-          class="pagination-button"
-          ng-disabled="currentPage === 1"
-          ng-click="prevPage(bookings)"
-        >
-          Prev
-        </button>
-        <span>Page {{currentPage}} of {{totalPage}}</span>
-        <button
-          class="pagination-button"
-          ng-disabled="currentPage === totalPage"
-          ng-click="nextPage(bookings)"
-        >
-          Next
-        </button>
-      </div>
-    </section>
-  </main>
-</div>
-<!-------------------Approve approval modal-->
-<div class="custom-modal" id="approveModal" ng-if="approveModal==true">
-  <div class="custom-modal-inner">
-    <div class="custom-modal-header">
-      <button
-        class="custom-modal-close"
-        id="closeButtonApprove"
-        ng-click="toggleApproveModal(false,null)"
-      >
-        <img src="../../asset/images/exit.svg" alt="Close" />
-      </button>
-    </div>
-    <div class="custom-modal-body">
-      <p class="custom-modal-title">Approve the Bid</p>
-      <form
-        id="approveBidForm"
-        name="approveBidForm"
-        class="custom-form"
-        ng-submit="approveUserRequest()"
-        style="height: auto"
-      >
-        <div class="form-group">
-          <label for="confirmation" style="text-align: center">
-            Are you sure you want to approve this user?
-          </label>
-        </div>
-        <div class="form-group full-width">
-          <input type="submit" name="submit" value="Approve" />
-        </div>
-      </form>
     </div>
   </div>
 </div>
-<!-- cancel approval modal ------------------------------------------------------>
-<div class="custom-modal" id="cancelModal" ng-if="cancelApproveModal==true">
-  <div class="custom-modal-inner">
-    <div class="custom-modal-header">
-      <button
-        class="custom-modal-close"
-        id="closeButtonCancel"
-        ng-click="toggleCancelApproveModal(false,null)"
-      >
-        <img src="../../asset/images/exit.svg" alt="Close" />
-      </button>
-    </div>
-    <div class="custom-modal-body">
-      <p class="custom-modal-title">Cancel the Bid</p>
-      <form
-        id="cancelBidForm"
-        class="custom-form"
-        name="cancelBidForm"
-        style="height: auto"
-        ng-submit="cancelUserRequest()"
-      >
-        <div class="form-group full-width">
-          <input type="submit" name="submit" value="Cancel" />
-        </div>
-      </form>
-    </div>
+
+<!-- Replace custom modals with Angular UI Bootstrap Modal Templates -->
+<!-- Approve Modal Template -->
+<script type="text/ng-template" id="approveModal.html">
+  <div class="modal-header" style="background-color: #f8f9fa; border-bottom: 2px solid #28a745; padding: 15px 20px;">
+    <h3 class="modal-title" style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #28a745; font-weight: 600;">
+      <i class="glyphicon glyphicon-ok-circle" style="margin-right: 10px;"></i>Approve User Request
+    </h3>
+    <button type="button" class="close" ng-click="cancel()" style="font-size: 24px;">&times;</button>
   </div>
-</div>
+  <div class="modal-body" style="padding: 20px;">
+    <p class="lead text-center">Are you sure you want to approve this user?</p>
+    <p class="text-center text-muted">This action will grant the user permission to list cars for rental.</p>
+  </div>
+  <div class="modal-footer" style="background-color: #f8f9fa; border-top: 1px solid #e9ecef; padding: 15px 20px;">
+    <button class="btn btn-default" ng-click="cancel()" style="padding: 8px 16px; border-radius: 4px;">
+      <i class="glyphicon glyphicon-remove"></i> Cancel
+    </button>
+    <button class="btn btn-success" ng-click="ok()" style="font-weight: 600; padding: 8px 16px; border-radius: 4px;">
+      <i class="glyphicon glyphicon-ok"></i> Approve
+    </button>
+  </div>
+</script>
+
+<!-- Cancel Approval Modal Template -->
+<script type="text/ng-template" id="cancelModal.html">
+  <div class="modal-header" style="background-color: #f8f9fa; border-bottom: 2px solid #dc3545; padding: 15px 20px;">
+    <h3 class="modal-title" style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #dc3545; font-weight: 600;">
+      <i class="glyphicon glyphicon-ban-circle" style="margin-right: 10px;"></i>Cancel User Request
+    </h3>
+    <button type="button" class="close" ng-click="cancel()" style="font-size: 24px;">&times;</button>
+  </div>
+  <div class="modal-body" style="padding: 20px;">
+    <p class="lead text-center">Are you sure you want to reject this request?</p>
+    <p class="text-center text-muted">This action will deny the user permission to list cars for rental.</p>
+  </div>
+  <div class="modal-footer" style="background-color: #f8f9fa; border-top: 1px solid #e9ecef; padding: 15px 20px;">
+    <button class="btn btn-default" ng-click="cancel()" style="padding: 8px 16px; border-radius: 4px;">
+      <i class="glyphicon glyphicon-remove"></i> No, Keep It
+    </button>
+    <button class="btn btn-danger" ng-click="ok()" style="font-weight: 600; padding: 8px 16px; border-radius: 4px;">
+      <i class="glyphicon glyphicon-trash"></i> Yes, Reject Request
+    </button>
+  </div>
+</script>

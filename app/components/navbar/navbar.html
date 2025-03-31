@@ -1,45 +1,367 @@
-<div class="navbar">
-  <div class="container">
-    <a class="logo" ui-sref="home">RENT <span>IT</span></a>
-    <img
-      id="mobile-cta"
-      class="mobile-menu"
-      src="../../asset/images/menu.svg"
-      alt="Open navigation"
-      ng-click="openMenu()"
-    />
-    <nav ng-class="{'menu-btn':toggleMenu && toggleMenu==true}">
-      <img
-        id="mobile-exit"
-        class="mobile-menu-exit"
-        src="../../asset/images/exit.svg"
-        alt="close navigation"
-        ng-click="closeMenu()"
-      />
-      <ul class="primary-nav">
-        <li><a ui-sref="home" ui-sref-active="active">Home</a></li>
-        <li><a ui-sref="cars" ui-sref-active="active">Cars</a></li>
-        <li ng-show="user">
-          <a ui-sref="profile" ui-sref-active="active">Profile</a>
-        </li>
-        <li ng-show="user && !(user.role==='super-admin')">
-          <a ui-sref="chat" ui-sref-active="active">Chat</a>
-        </li>
-      </ul>
-      <ul class="secondary-nav">
-        <li class="go-premium-cta" ng-show="!user">
-          <a ui-sref="login">Login</a>
-        </li>
-        <li class="go-premium-cta" ng-show="user && user.role ==='admin'">
-          <a ui-sref="dashboard">Dashboard</a>
-        </li>
-        <li class="go-premium-cta" ng-show="user && user.role==='super-admin'">
-          <a ui-sref="admin">Admin-Dashboard</a>
-        </li>
-        <li class="go-premium-cta" ng-show="user">
-          <a ng-click="logout()" href="#">Logout</a>
-        </li>
-      </ul>
-    </nav>
+<div
+  class="navbar-fixed-top"
+  style="
+    background: white;
+    padding: 1em;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border: none;
+  "
+>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Logo -->
+      <div class="col-xs-8 col-md-2">
+        <a
+          ui-sref="home"
+          style="
+            text-decoration: none;
+            font-weight: bold;
+            color: black;
+            font-size: 1.2em;
+          "
+        >
+          RENT <span style="color: #007af3">IT</span>
+        </a>
+      </div>
+
+      <!-- Desktop Navigation - Hidden on mobile -->
+      <div
+        class="col-md-10 hidden-xs hidden-sm"
+        style="display: flex; justify-content: space-between"
+      >
+        <!-- Primary nav -->
+        <ul style="list-style: none; margin: 0; padding: 0; display: flex">
+          <li style="margin: 0; padding: 0">
+            <a
+              ui-sref="home"
+              ui-sref-active="active"
+              style="
+                color: black;
+                text-decoration: none;
+                display: block;
+                padding: 0.1em 1em;
+              "
+              onmouseover="this.style.fontWeight='bold'"
+              onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
+              >Home</a
+            >
+          </li>
+          <li style="margin: 0; padding: 0">
+            <a
+              ui-sref="cars"
+              ui-sref-active="active"
+              style="
+                color: black;
+                text-decoration: none;
+                display: block;
+                padding: 0.1em 1em;
+              "
+              onmouseover="this.style.fontWeight='bold'"
+              onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
+              >Cars</a
+            >
+          </li>
+          <li style="margin: 0; padding: 0" ng-show="user">
+            <a
+              ui-sref="profile"
+              ui-sref-active="active"
+              style="
+                color: black;
+                text-decoration: none;
+                display: block;
+                padding: 0.1em 1em;
+              "
+              onmouseover="this.style.fontWeight='bold'"
+              onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
+              >Profile</a
+            >
+          </li>
+          <li
+            style="margin: 0; padding: 0"
+            ng-show="user && !(user.role==='super-admin')"
+          >
+            <a
+              ui-sref="chat"
+              ui-sref-active="active"
+              style="
+                color: black;
+                text-decoration: none;
+                display: block;
+                padding: 0.1em 1em;
+              "
+              onmouseover="this.style.fontWeight='bold'"
+              onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
+              >Chat</a
+            >
+          </li>
+        </ul>
+
+        <!-- Secondary nav -->
+        <ul
+          style="
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+          "
+        >
+          <li style="margin: 0 5px; padding: 0" ng-if="!user">
+            <a
+              ui-sref="login"
+              ui-sref-active="active"
+              style="
+                color: #007af3;
+                border: 3px solid #007af3;
+                font-weight: bold;
+                border-radius: 5em;
+                padding: 0.3em 1.2em;
+                display: block;
+              "
+              onmouseover="this.style.backgroundColor='#007af3'; this.style.color='white'"
+              onmouseout="this.style.backgroundColor='transparent'; this.style.color='#007af3'"
+              >Login</a
+            >
+          </li>
+          <li
+            style="margin: 0 5px; padding: 0"
+            ng-if="user && user.role==='admin'"
+          >
+            <a
+              ui-sref="dashboard"
+              style="
+                color: #007af3;
+                border: 3px solid #007af3;
+                font-weight: bold;
+                border-radius: 5em;
+                padding: 0.1em 1em;
+                margin-top: 0.2em;
+                display: block;
+              "
+              onmouseover="this.style.backgroundColor='#007af3'; this.style.color='white'"
+              onmouseout="this.style.backgroundColor='transparent'; this.style.color='#007af3'"
+              >Dashboard</a
+            >
+          </li>
+          <li
+            style="margin: 0 5px; padding: 0"
+            ng-if="user && user.role==='super-admin'"
+          >
+            <a
+              ui-sref="admin"
+              style="
+                color: #007af3;
+                border: 3px solid #007af3;
+                font-weight: bold;
+                border-radius: 5em;
+                padding: 0.1em 1em;
+                margin-top: 0.2em;
+                display: block;
+              "
+              onmouseover="this.style.backgroundColor='#007af3'; this.style.color='white'"
+              onmouseout="this.style.backgroundColor='transparent'; this.style.color='#007af3'"
+              >Admin-Dashboard</a
+            >
+          </li>
+          <li style="margin: 0 5px; padding: 0" ng-if="user">
+            <a
+              ng-click="logout()"
+              href="#"
+              style="
+                color: #007af3;
+                border: 3px solid #007af3;
+                font-weight: bold;
+                border-radius: 5em;
+                padding: 0.3em 1.2em;
+                display: block;
+              "
+              onmouseover="this.style.backgroundColor='#007af3'; this.style.color='white'"
+              onmouseout="this.style.backgroundColor='transparent'; this.style.color='#007af3'"
+              >Logout</a
+            >
+          </li>
+        </ul>
+      </div>
+
+      <!-- Single Toggle Button that changes based on state -->
+      <div class="col-xs-4 visible-xs visible-sm text-right">
+        <button
+          type="button"
+          class="btn btn-default"
+          ng-click="toggleMenu ? closeMenu() : openMenu()"
+          style="border: none; background: transparent"
+        >
+          <span
+            ng-class="{'glyphicon-menu-hamburger': !toggleMenu, 'glyphicon-remove': toggleMenu}"
+            class="glyphicon"
+            style="font-size: 1.5em"
+          ></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Accordion Menu -->
+    <div class="row visible-xs visible-sm" ng-show="toggleMenu">
+      <div class="col-xs-12">
+        <uib-accordion>
+          <!-- Main Navigation Accordion Group -->
+          <div uib-accordion-group heading="Navigation" is-open="true">
+            <ul style="list-style: none; margin: 0; padding: 0">
+              <li style="margin: 0; padding: 0">
+                <a
+                  ui-sref="home"
+                  ui-sref-active="active"
+                  style="
+                    color: #444;
+                    text-decoration: none;
+                    display: block;
+                    padding: 0.8em 0;
+                    border-bottom: 1px solid #eee;
+                  "
+                  onmouseover="this.style.fontWeight='bold'"
+                  onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
+                  >Home</a
+                >
+              </li>
+              <li style="margin: 0; padding: 0">
+                <a
+                  ui-sref="cars"
+                  ui-sref-active="active"
+                  style="
+                    color: #444;
+                    text-decoration: none;
+                    display: block;
+                    padding: 0.8em 0;
+                    border-bottom: 1px solid #eee;
+                  "
+                  onmouseover="this.style.fontWeight='bold'"
+                  onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
+                  >Cars</a
+                >
+              </li>
+              <li style="margin: 0; padding: 0" ng-show="user">
+                <a
+                  ui-sref="profile"
+                  ui-sref-active="active"
+                  style="
+                    color: #444;
+                    text-decoration: none;
+                    display: block;
+                    padding: 0.8em 0;
+                    border-bottom: 1px solid #eee;
+                  "
+                  onmouseover="this.style.fontWeight='bold'"
+                  onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
+                  >Profile</a
+                >
+              </li>
+              <li
+                style="margin: 0; padding: 0"
+                ng-show="user && !(user.role==='super-admin')"
+              >
+                <a
+                  ui-sref="chat"
+                  ui-sref-active="active"
+                  style="
+                    color: #444;
+                    text-decoration: none;
+                    display: block;
+                    padding: 0.8em 0;
+                    border-bottom: 1px solid #eee;
+                  "
+                  onmouseover="this.style.fontWeight='bold'"
+                  onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
+                  >Chat</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <!-- Account Section Accordion Group -->
+          <div uib-accordion-group heading="Account" is-open="true">
+            <ul style="list-style: none; margin: 0; padding: 0">
+              <li style="margin: 0; padding: 0" ng-if="!user">
+                <a
+                  ui-sref="login"
+                  ui-sref-active="active"
+                  style="
+                    color: #444;
+                    text-decoration: none;
+                    display: block;
+                    padding: 0.8em 0;
+                    border-bottom: 1px solid #eee;
+                    font-weight: normal;
+                  "
+                  onmouseover="this.style.fontWeight='bold'"
+                  onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
+                  >Login</a
+                >
+              </li>
+              <li
+                style="margin: 0; padding: 0"
+                ng-if="user && user.role ==='admin'"
+              >
+                <a
+                  ui-sref="dashboard"
+                  style="
+                    color: #444;
+                    text-decoration: none;
+                    display: block;
+                    padding: 0.8em 0;
+                    border-bottom: 1px solid #eee;
+                  "
+                  onmouseover="this.style.fontWeight='bold'"
+                  onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
+                  >Dashboard</a
+                >
+              </li>
+              <li
+                style="margin: 0; padding: 0"
+                ng-if="user && user.role==='super-admin'"
+              >
+                <a
+                  ui-sref="admin"
+                  style="
+                    color: #444;
+                    text-decoration: none;
+                    display: block;
+                    padding: 0.8em 0;
+                    border-bottom: 1px solid #eee;
+                  "
+                  onmouseover="this.style.fontWeight='bold'"
+                  onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
+                  >Admin-Dashboard</a
+                >
+              </li>
+              <li style="margin: 0; padding: 0" ng-if="user">
+                <a
+                  ng-click="logout()"
+                  href="#"
+                  style="
+                    color: #444;
+                    text-decoration: none;
+                    display: block;
+                    padding: 0.8em 0;
+                  "
+                  onmouseover="this.style.fontWeight='bold'"
+                  onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
+                  >Logout</a
+                >
+              </li>
+            </ul>
+          </div>
+        </uib-accordion>
+      </div>
+    </div>
   </div>
 </div>
+
+<!-- Add space to prevent content from hiding under fixed navbar -->
+<div style="height: 70px"></div>
+
+<!-- Add active class styling -->
+<style>
+  .active {
+    font-weight: bold !important;
+  }
+</style>

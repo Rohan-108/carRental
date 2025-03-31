@@ -1,80 +1,210 @@
-<!-- Login Section -->
-<div class="login-root" ng-controller="loginController">
-  <div
-    class="flex-flex flex-direction--column"
-    style="min-height: 100vh; flex-grow: 1"
-  >
-    <div
-      class="padding-top--48 padding-bottom--24 flex-flex flex-justifyContent--center"
-    >
-      <h1 class="logo">
-        <a class="logo" href="#" aria-label="Go to Rent IT homepage">
-          Welcome <span>To</span> Rent <span>IT</span>
-        </a>
-      </h1>
-    </div>
-    <div class="formbg-outer">
-      <div class="formbg">
-        <div class="formbg-inner padding-horizontal--48">
-          <p class="padding-bottom--15 spanText">Sign in to your account</p>
-          <!-- Use a named form and disable browser validation with novalidate -->
+<div
+  class="container"
+  style="
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  "
+>
+  <div class="row" style="width: 100%">
+    <div class="col-md-6 col-md-offset-3">
+      <!-- Header -->
+      <div class="text-center" style="padding-top: 48px; padding-bottom: 24px">
+        <h1>
+          <a
+            href="#"
+            style="
+              color: #333;
+              font-weight: 600;
+              letter-spacing: 0.5px;
+              text-decoration: none;
+            "
+            aria-label="Go to Rent IT homepage"
+          >
+            Welcome <span style="color: #5469d4">To</span> Rent
+            <span style="color: #5469d4">IT</span>
+          </a>
+        </h1>
+      </div>
+
+      <!-- Form Panel - Using standard Bootstrap panel -->
+      <div
+        class="panel panel-default"
+        style="
+          box-shadow: rgba(60, 66, 87, 0.12) 0px 7px 14px 0px,
+            rgba(0, 0, 0, 0.12) 0px 3px 6px 0px;
+          border-radius: 8px;
+          border: none;
+          max-width: 448px;
+          margin: 0 auto;
+        "
+      >
+        <div class="panel-body" style="padding: 48px">
+          <p
+            class="lead text-center"
+            style="
+              margin-bottom: 24px;
+              font-weight: 600;
+              color: #333;
+              font-size: 20px;
+            "
+          >
+            Sign in to your account
+          </p>
+
+          <!-- Login Form with standard Bootstrap validation -->
           <form name="loginForm" novalidate ng-submit="submitLogin()">
             <!-- Email Field -->
-            <div class="field padding-bottom--24">
-              <label for="email">Email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="Enter your email"
-                ng-required="true"
-                ng-pattern="/^[^\s@]+@[^\s@]+\.[^\s@]+$/"
-                ng-model="loginData.email"
-              />
-              <!-- Display an error message if email is invalid -->
-              <span
-                style="color: red"
+            <div class="form-group">
+              <label
+                for="email"
+                style="font-weight: 500; margin-bottom: 8px; color: #424770"
+                >Email</label
+              >
+              <div class="input-group">
+                <span
+                  class="input-group-addon"
+                  style="
+                    background-color: #f7fafc;
+                    border-color: rgba(60, 66, 87, 0.16);
+                  "
+                >
+                  <i
+                    class="glyphicon glyphicon-envelope"
+                    style="color: #5469d4"
+                  ></i>
+                </span>
+                <input
+                  type="email"
+                  class="form-control input-lg"
+                  id="email"
+                  name="email"
+                  placeholder="Enter your email"
+                  ng-required="true"
+                  ng-pattern="/^[^\s@]+@[^\s@]+\.[^\s@]+$/"
+                  ng-model="loginData.email"
+                  ng-class="{'has-error': loginForm.email.$touched && loginForm.email.$invalid}"
+                  style="
+                    height: 44px;
+                    font-size: 16px;
+                    border-color: rgba(60, 66, 87, 0.16);
+                    box-shadow: none;
+                    outline-color: rgba(84, 105, 212, 0.5);
+                  "
+                />
+              </div>
+
+              <!-- Email validation message with standard Bootstrap alert -->
+              <div
                 ng-show="loginForm.email.$touched && loginForm.email.$invalid"
               >
-                Please enter a valid email.
-              </span>
+                <div
+                  class="alert alert-danger"
+                  style="font-size: 14px; margin-top: 6px; padding: 5px"
+                >
+                  <span ng-show="loginForm.email.$error.required"
+                    >Email is required.</span
+                  >
+                  <span ng-show="loginForm.email.$error.pattern"
+                    >Please enter a valid email format.</span
+                  >
+                </div>
+              </div>
             </div>
+
             <!-- Password Field -->
-            <div class="field padding-bottom--24">
-              <label for="password">Password</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                placeholder="Enter your password"
-                ng-required="true"
-                ng-model="loginData.password"
-              />
-              <span
-                style="color: red"
+            <div class="form-group" style="margin-bottom: 24px">
+              <label
+                for="password"
+                style="font-weight: 500; margin-bottom: 8px; color: #424770"
+                >Password</label
+              >
+              <div class="input-group">
+                <span
+                  class="input-group-addon"
+                  style="
+                    background-color: #f7fafc;
+                    border-color: rgba(60, 66, 87, 0.16);
+                  "
+                >
+                  <i
+                    class="glyphicon glyphicon-lock"
+                    style="color: #5469d4"
+                  ></i>
+                </span>
+                <input
+                  type="password"
+                  class="form-control input-lg"
+                  id="password"
+                  name="password"
+                  placeholder="Enter your password"
+                  ng-required="true"
+                  ng-model="loginData.password"
+                  ng-class="{'has-error': loginForm.password.$touched && loginForm.password.$invalid}"
+                  style="
+                    height: 44px;
+                    font-size: 16px;
+                    border-color: rgba(60, 66, 87, 0.16);
+                    box-shadow: none;
+                    outline-color: rgba(84, 105, 212, 0.5);
+                  "
+                />
+              </div>
+
+              <!-- Password validation message with standard Bootstrap alert -->
+              <div
                 ng-show="loginForm.password.$touched && loginForm.password.$error.required"
               >
-                Password is required.
-              </span>
+                <div
+                  class="alert alert-danger"
+                  style="font-size: 14px; margin-top: 6px; padding: 5px"
+                >
+                  Password is required.
+                </div>
+              </div>
             </div>
-            <!-- Submit Button: disabled until the form is valid -->
-            <div class="field padding-bottom--24">
-              <input
+
+            <!-- Submit Button with standard Bootstrap button -->
+            <div style="margin-top: 32px">
+              <button
                 type="submit"
-                name="submit"
-                value="Login"
+                class="btn btn-primary btn-lg btn-block"
                 ng-disabled="loginForm.$invalid"
-              />
+                data-toggle="tooltip"
+                data-placement="top"
+                title="Please complete the form"
+                style="
+                  background-color: #5469d4;
+                  border-color: #5469d4;
+                  height: 44px;
+                  font-size: 16px;
+                  font-weight: 600;
+                  box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 1px 0px,
+                    rgb(84, 105, 212) 0px 0px 0px 1px,
+                    rgba(60, 66, 87, 0.08) 0px 2px 5px 0px;
+                  transition: all 0.2s ease;
+                "
+              >
+                Login
+              </button>
             </div>
           </form>
-          <div>
-            Don't have an account?
+
+          <!-- Register Link -->
+          <div class="text-center" style="margin-top: 32px">
+            <span style="color: #6b7c93">Don't have an account?</span>
             <a
               ui-sref="register"
-              style="color: blue"
+              class="btn btn-link"
               aria-label="Go to Register page"
-              >Register</a
+              data-toggle="tooltip"
+              data-placement="right"
+              title="Create a new account"
+              style="color: #2949e7; font-weight: 500"
             >
+              Register
+            </a>
           </div>
         </div>
       </div>

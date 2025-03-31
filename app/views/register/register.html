@@ -1,38 +1,90 @@
 <!-- Register Section -->
-<div class="login-root">
-  <div
-    class="flex-flex flex-direction--column"
-    style="min-height: 100vh; flex-grow: 1"
-  >
-    <div
-      class="padding-top--24 flex-flex flex-direction--column"
-      style="flex-grow: 1; z-index: 9"
-    >
-      <div
-        class="padding-top--48 padding-bottom--24 flex-flex flex-justifyContent--center"
-      >
-        <h1 class="logo">
-          <a class="logo" href="#" aria-label="Go to Rent IT homepage">
-            RENT <span>IT</span>
+<div
+  class="container"
+  style="
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  "
+>
+  <div class="row" style="width: 100%">
+    <div class="col-md-6 col-md-offset-3">
+      <!-- Header -->
+      <div class="text-center" style="padding-top: 48px; padding-bottom: 24px">
+        <h1>
+          <a
+            href="#"
+            style="
+              color: #333;
+              font-weight: 600;
+              letter-spacing: 0.5px;
+              text-decoration: none;
+            "
+            aria-label="Go to Rent IT homepage"
+          >
+            Welcome <span style="color: #5469d4">To</span> Rent
+            <span style="color: #5469d4">IT</span>
           </a>
         </h1>
       </div>
-      <div class="formbg-outer">
-        <div class="formbg">
-          <div class="formbg-inner padding-horizontal--48">
-            <p class="padding-bottom--15 spanText">Register your details</p>
-            <form
-              id="registerForm"
-              name="registerForm"
-              novalidate
-              enctype="multipart/form-data"
-              ng-submit="register()"
-            >
-              <!-- Name Field -->
-              <div class="field">
-                <label for="username">Name</label>
+
+      <!-- Form Panel - Using standard Bootstrap panel -->
+      <div
+        class="panel panel-default"
+        style="
+          box-shadow: rgba(60, 66, 87, 0.12) 0px 7px 14px 0px,
+            rgba(0, 0, 0, 0.12) 0px 3px 6px 0px;
+          border-radius: 8px;
+          border: none;
+          max-width: 448px;
+          margin: 0 auto;
+        "
+      >
+        <div class="panel-body" style="padding: 48px">
+          <p
+            class="lead text-center"
+            style="
+              margin-bottom: 24px;
+              font-weight: 600;
+              color: #333;
+              font-size: 20px;
+            "
+          >
+            Register your details
+          </p>
+
+          <!-- Register Form with standard Bootstrap validation -->
+          <form
+            id="registerForm"
+            name="registerForm"
+            novalidate
+            enctype="multipart/form-data"
+            ng-submit="register()"
+          >
+            <!-- Name Field -->
+            <div class="form-group">
+              <label
+                for="username"
+                style="font-weight: 500; margin-bottom: 8px; color: #424770"
+                >Name</label
+              >
+              <div class="input-group">
+                <span
+                  class="input-group-addon"
+                  style="
+                    background-color: #f7fafc;
+                    border-color: rgba(60, 66, 87, 0.16);
+                  "
+                >
+                  <i
+                    class="glyphicon glyphicon-user"
+                    style="color: #5469d4"
+                  ></i>
+                </span>
                 <input
                   type="text"
+                  class="form-control input-lg"
                   name="username"
                   id="username"
                   placeholder="Enter your full name"
@@ -40,20 +92,50 @@
                   ng-required="true"
                   autocomplete="username"
                   ng-model="user.username"
+                  style="
+                    height: 44px;
+                    font-size: 16px;
+                    border-color: rgba(60, 66, 87, 0.16);
+                    box-shadow: none;
+                    outline-color: rgba(84, 105, 212, 0.5);
+                  "
                 />
-                <span
-                  style="color: red"
-                  ng-show="registerForm.username.$touched && registerForm.username.$invalid"
+              </div>
+              <div
+                ng-show="registerForm.username.$touched && registerForm.username.$invalid"
+              >
+                <div
+                  class="alert alert-danger"
+                  style="font-size: 14px; margin-top: 6px; padding: 5px"
                 >
                   User name is not valid
-                </span>
+                </div>
               </div>
+            </div>
 
-              <!-- Email Field -->
-              <div class="field">
-                <label for="email">Email</label>
+            <!-- Email Field -->
+            <div class="form-group">
+              <label
+                for="email"
+                style="font-weight: 500; margin-bottom: 8px; color: #424770"
+                >Email</label
+              >
+              <div class="input-group">
+                <span
+                  class="input-group-addon"
+                  style="
+                    background-color: #f7fafc;
+                    border-color: rgba(60, 66, 87, 0.16);
+                  "
+                >
+                  <i
+                    class="glyphicon glyphicon-envelope"
+                    style="color: #5469d4"
+                  ></i>
+                </span>
                 <input
                   type="email"
+                  class="form-control input-lg"
                   name="email"
                   id="email"
                   placeholder="Enter your email"
@@ -61,20 +143,50 @@
                   ng-required="true"
                   ng-model="user.email"
                   valid-Email
+                  style="
+                    height: 44px;
+                    font-size: 16px;
+                    border-color: rgba(60, 66, 87, 0.16);
+                    box-shadow: none;
+                    outline-color: rgba(84, 105, 212, 0.5);
+                  "
                 />
-                <span
-                  style="color: red"
-                  ng-show="registerForm.email.$touched && registerForm.email.$invalid"
-                >
-                  email is not valid
-                </span>
               </div>
+              <div
+                ng-show="registerForm.email.$touched && registerForm.email.$invalid"
+              >
+                <div
+                  class="alert alert-danger"
+                  style="font-size: 14px; margin-top: 6px; padding: 5px"
+                >
+                  Email is not valid
+                </div>
+              </div>
+            </div>
 
-              <!-- Phone Number Field -->
-              <div class="field">
-                <label for="tel">Phone Number</label>
+            <!-- Phone Number Field -->
+            <div class="form-group">
+              <label
+                for="tel"
+                style="font-weight: 500; margin-bottom: 8px; color: #424770"
+                >Phone Number</label
+              >
+              <div class="input-group">
+                <span
+                  class="input-group-addon"
+                  style="
+                    background-color: #f7fafc;
+                    border-color: rgba(60, 66, 87, 0.16);
+                  "
+                >
+                  <i
+                    class="glyphicon glyphicon-phone"
+                    style="color: #5469d4"
+                  ></i>
+                </span>
                 <input
                   type="tel"
+                  class="form-control input-lg"
                   name="tel"
                   id="tel"
                   placeholder="Enter your phone number"
@@ -83,25 +195,55 @@
                   ng-required="true"
                   ng-model="user.tel"
                   valid-Phone
+                  style="
+                    height: 44px;
+                    font-size: 16px;
+                    border-color: rgba(60, 66, 87, 0.16);
+                    box-shadow: none;
+                    outline-color: rgba(84, 105, 212, 0.5);
+                  "
                 />
-                <span
-                  style="color: red"
-                  ng-show="registerForm.tel.$touched && registerForm.tel.$error.validPhone"
-                >
-                  Phone number is not valid
-                </span>
-                <span
-                  style="color: red"
-                  ng-show="registerForm.phone.$touched && registerForm.phone.$error.required"
-                >
-                  Phone number is required
-                </span>
               </div>
-              <!-- Adhaar Number Field -->
-              <div class="field">
-                <label for="adhaar">Adhaar Number</label>
+              <div
+                ng-show="registerForm.tel.$touched && (registerForm.tel.$error.validPhone || registerForm.phone.$error.required)"
+              >
+                <div
+                  class="alert alert-danger"
+                  style="font-size: 14px; margin-top: 6px; padding: 5px"
+                >
+                  <span ng-show="registerForm.tel.$error.validPhone"
+                    >Phone number is not valid</span
+                  >
+                  <span ng-show="registerForm.phone.$error.required"
+                    >Phone number is required</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Adhaar Number Field -->
+            <div class="form-group">
+              <label
+                for="adhaar"
+                style="font-weight: 500; margin-bottom: 8px; color: #424770"
+                >Adhaar Number</label
+              >
+              <div class="input-group">
+                <span
+                  class="input-group-addon"
+                  style="
+                    background-color: #f7fafc;
+                    border-color: rgba(60, 66, 87, 0.16);
+                  "
+                >
+                  <i
+                    class="glyphicon glyphicon-credit-card"
+                    style="color: #5469d4"
+                  ></i>
+                </span>
                 <input
                   type="text"
+                  class="form-control input-lg"
                   name="adhaar"
                   id="adhaar"
                   placeholder="Enter your Adhaar number"
@@ -110,25 +252,55 @@
                   ng-required="true"
                   ng-model="user.adhaar"
                   valid-Adhaar
+                  style="
+                    height: 44px;
+                    font-size: 16px;
+                    border-color: rgba(60, 66, 87, 0.16);
+                    box-shadow: none;
+                    outline-color: rgba(84, 105, 212, 0.5);
+                  "
                 />
-                <span
-                  style="color: red"
-                  ng-show="registerForm.adhaar.$touched && registerForm.adhaar.$error.validAdhaar"
-                >
-                  Adhaar number is not valid
-                </span>
-                <span
-                  style="color: red"
-                  ng-show="registerForm.adhaar.$touched && registerForm.adhaar.$error.required"
-                >
-                  Adhaar number is required
-                </span>
               </div>
-              <!-- Avatar Field -->
-              <div class="field">
-                <label for="avatar">Avatar</label>
+              <div
+                ng-show="registerForm.adhaar.$touched && (registerForm.adhaar.$error.validAdhaar || registerForm.adhaar.$error.required)"
+              >
+                <div
+                  class="alert alert-danger"
+                  style="font-size: 14px; margin-top: 6px; padding: 5px"
+                >
+                  <span ng-show="registerForm.adhaar.$error.validAdhaar"
+                    >Adhaar number is not valid</span
+                  >
+                  <span ng-show="registerForm.adhaar.$error.required"
+                    >Adhaar number is required</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Avatar Field -->
+            <div class="form-group">
+              <label
+                for="avatar"
+                style="font-weight: 500; margin-bottom: 8px; color: #424770"
+                >Avatar</label
+              >
+              <div class="input-group">
+                <span
+                  class="input-group-addon"
+                  style="
+                    background-color: #f7fafc;
+                    border-color: rgba(60, 66, 87, 0.16);
+                  "
+                >
+                  <i
+                    class="glyphicon glyphicon-picture"
+                    style="color: #5469d4"
+                  ></i>
+                </span>
                 <input
                   type="file"
+                  class="form-control input-lg"
                   name="avatar"
                   id="avatar"
                   accept="image/png, image/jpeg, image/jpg"
@@ -136,20 +308,51 @@
                   ng-required="true"
                   ng-model="user.avatar"
                   valid-Avatar
+                  style="
+                    height: auto;
+                    font-size: 16px;
+                    border-color: rgba(60, 66, 87, 0.16);
+                    box-shadow: none;
+                    outline-color: rgba(84, 105, 212, 0.5);
+                  "
                 />
-                <span
-                  style="color: red"
-                  ng-show="registerForm.avatar.$touched && registerForm.avatar.$error.validAvatar"
+              </div>
+              <div
+                ng-show="registerForm.avatar.$touched && registerForm.avatar.$error.validAvatar"
+              >
+                <div
+                  class="alert alert-danger"
+                  style="font-size: 14px; margin-top: 6px; padding: 5px"
                 >
                   Please upload a valid image file(png, jpeg, jpg) of size less
                   than 500Kb.
-                </span>
+                </div>
               </div>
-              <!-- Password Field -->
-              <div class="field">
-                <label for="password">Password</label>
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group">
+              <label
+                for="password"
+                style="font-weight: 500; margin-bottom: 8px; color: #424770"
+                >Password</label
+              >
+              <div class="input-group">
+                <span
+                  class="input-group-addon"
+                  style="
+                    background-color: #f7fafc;
+                    border-color: rgba(60, 66, 87, 0.16);
+                  "
+                >
+                  <i
+                    class="glyphicon glyphicon-lock"
+                    style="color: #5469d4"
+                  ></i>
+                </span>
                 <input
                   type="password"
+                  class="form-control input-lg"
                   name="password"
                   id="password"
                   placeholder="Enter your password"
@@ -158,26 +361,55 @@
                   ng-required="true"
                   ng-model="user.password"
                   strong-Password
+                  style="
+                    height: 44px;
+                    font-size: 16px;
+                    border-color: rgba(60, 66, 87, 0.16);
+                    box-shadow: none;
+                    outline-color: rgba(84, 105, 212, 0.5);
+                  "
                 />
-                <span
-                  style="color: red"
-                  ng-show="registerForm.password.$touched && registerForm.password.$error.required"
-                >
-                  Password is required.
-                </span>
-                <span
-                  style="color: red"
-                  ng-show="registerForm.password.$touched && registerForm.password.$error.strongPassword"
-                >
-                  Password isn't strong.
-                </span>
               </div>
+              <div
+                ng-show="registerForm.password.$touched && (registerForm.password.$error.required || registerForm.password.$error.strongPassword)"
+              >
+                <div
+                  class="alert alert-danger"
+                  style="font-size: 14px; margin-top: 6px; padding: 5px"
+                >
+                  <span ng-show="registerForm.password.$error.required"
+                    >Password is required.</span
+                  >
+                  <span ng-show="registerForm.password.$error.strongPassword"
+                    >Password isn't strong.</span
+                  >
+                </div>
+              </div>
+            </div>
 
-              <!-- Confirm Password Field -->
-              <div class="field">
-                <label for="ConfirmPassword">Confirm Password</label>
+            <!-- Confirm Password Field -->
+            <div class="form-group" style="margin-bottom: 24px">
+              <label
+                for="confirmPassword"
+                style="font-weight: 500; margin-bottom: 8px; color: #424770"
+                >Confirm Password</label
+              >
+              <div class="input-group">
+                <span
+                  class="input-group-addon"
+                  style="
+                    background-color: #f7fafc;
+                    border-color: rgba(60, 66, 87, 0.16);
+                  "
+                >
+                  <i
+                    class="glyphicon glyphicon-lock"
+                    style="color: #5469d4"
+                  ></i>
+                </span>
                 <input
                   type="password"
+                  class="form-control input-lg"
                   name="confirmPassword"
                   id="confirmPassword"
                   placeholder="Re-enter your password"
@@ -186,40 +418,73 @@
                   ng-required="true"
                   ng-model="user.confirmPassword"
                   password-Match="user.password"
-                />
-                <span
-                  style="color: red"
-                  ng-show="registerForm.confirmPassword.$touched && registerForm.confirmPassword.$error.required"
-                >
-                  Confirm Password is required.
-                </span>
-                <span
-                  style="color: red"
-                  ng-show="registerForm.confirmPassword.$touched && registerForm.confirmPassword.$error.passwordMatch"
-                >
-                  Passwords do not match.
-                </span>
-              </div>
-
-              <!-- Submit Button -->
-              <div class="field">
-                <input
-                  type="submit"
-                  name="submit"
-                  value="Register"
-                  ng-disabled="registerForm.$invalid"
+                  style="
+                    height: 44px;
+                    font-size: 16px;
+                    border-color: rgba(60, 66, 87, 0.16);
+                    box-shadow: none;
+                    outline-color: rgba(84, 105, 212, 0.5);
+                  "
                 />
               </div>
-            </form>
-            <div>
-              Already have an account?
-              <a
-                ui-sref="login"
-                style="color: blue"
-                aria-label="Go to Login page"
-                >Login</a
+              <div
+                ng-show="registerForm.confirmPassword.$touched && (registerForm.confirmPassword.$error.required || registerForm.confirmPassword.$error.passwordMatch)"
               >
+                <div
+                  class="alert alert-danger"
+                  style="font-size: 14px; margin-top: 6px; padding: 5px"
+                >
+                  <span ng-show="registerForm.confirmPassword.$error.required"
+                    >Confirm Password is required.</span
+                  >
+                  <span
+                    ng-show="registerForm.confirmPassword.$error.passwordMatch"
+                    >Passwords do not match.</span
+                  >
+                </div>
+              </div>
             </div>
+
+            <!-- Submit Button with standard Bootstrap button -->
+            <div style="margin-top: 32px">
+              <button
+                type="submit"
+                class="btn btn-primary btn-lg btn-block"
+                ng-disabled="registerForm.$invalid"
+                data-toggle="tooltip"
+                data-placement="top"
+                title="Please complete the form"
+                style="
+                  background-color: #5469d4;
+                  border-color: #5469d4;
+                  height: 44px;
+                  font-size: 16px;
+                  font-weight: 600;
+                  box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 1px 0px,
+                    rgb(84, 105, 212) 0px 0px 0px 1px,
+                    rgba(60, 66, 87, 0.08) 0px 2px 5px 0px;
+                  transition: all 0.2s ease;
+                "
+              >
+                Register
+              </button>
+            </div>
+          </form>
+
+          <!-- Login Link -->
+          <div class="text-center" style="margin-top: 32px">
+            <span style="color: #6b7c93">Already have an account?</span>
+            <a
+              ui-sref="login"
+              class="btn btn-link"
+              aria-label="Go to Login page"
+              data-toggle="tooltip"
+              data-placement="right"
+              title="Sign into your existing account"
+              style="color: #2949e7; font-weight: 500"
+            >
+              Login
+            </a>
           </div>
         </div>
       </div>

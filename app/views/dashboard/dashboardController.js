@@ -24,6 +24,7 @@ angular.module("rentIT").controller("dashboardController", [
   "utilService",
   "toaster",
   "$q",
+  "$uibModal", // Added UI Bootstrap modal service
   function (
     $scope,
     $rootScope,
@@ -35,7 +36,8 @@ angular.module("rentIT").controller("dashboardController", [
     chartService,
     utilService,
     toaster,
-    $q
+    $q,
+    $uibModal // Injected $uibModal
   ) {
     // Initialize variables
     $scope.isLoading = false;
@@ -186,8 +188,37 @@ angular.module("rentIT").controller("dashboardController", [
      * @description Toggle add car modal
      * @param {*} state - Modal state
      */
-    $scope.toggleAddCarModal = (state) => {
-      $scope.carModal = state;
+    $scope.toggleAddCarModal = function (state) {
+      if (state) {
+        var modalInstance = $uibModal.open({
+          templateUrl: "addCarModal.html",
+          controller: "AddCarModalController",
+          backdrop: "static",
+          size: "lg",
+          resolve: {
+            carFormData: function () {
+              return $scope.carFormData || {};
+            },
+            vehicleTypes: function () {
+              return $scope.vehicleTypes;
+            },
+            fuelTypes: function () {
+              return $scope.fuelTypes;
+            },
+            transmissionTypes: function () {
+              return $scope.transmissionTypes;
+            },
+            cities: function () {
+              return $scope.cities;
+            },
+          },
+        });
+
+        modalInstance.result.then(function (carFormData) {
+          $scope.carFormData = carFormData;
+          $scope.addCar();
+        });
+      }
     };
 
     /**
@@ -246,14 +277,14 @@ angular.module("rentIT").controller("dashboardController", [
      * @param {*} state - Modal state
      * @param {*} id - Car id
      */
-    $scope.toggleEditCarModal = (state, id) => {
-      $scope.editCarModal = state;
-      $scope.carId = id;
-      if (!id) return;
+    $scope.toggleEditCarModal = function (state, id) {
+      if (!state || !id) return;
+
       // Get car by id
       const car = $scope.cars.find((car) => car._id === id);
+
       // Set form data
-      $scope.editCarFormData = {
+      const editCarFormData = {
         rentalPrice: car.rentalPrice,
         ratePerKm: car.ratePerKm,
         fixedKilometer: car.fixedKilometer,
@@ -263,6 +294,30 @@ angular.module("rentIT").controller("dashboardController", [
         maxRentalPeriod: car.maxRentalPeriod,
         images: [],
       };
+
+      var modalInstance = $uibModal.open({
+        templateUrl: "editCarModal.html",
+        controller: "EditCarModalController",
+        backdrop: "static",
+        size: "lg",
+        resolve: {
+          editCarFormData: function () {
+            return editCarFormData;
+          },
+          cities: function () {
+            return $scope.cities;
+          },
+          carId: function () {
+            return id;
+          },
+        },
+      });
+
+      modalInstance.result.then(function (result) {
+        $scope.editCarFormData = result;
+        $scope.carId = id;
+        $scope.editCar();
+      });
     };
 
     /**
@@ -330,9 +385,20 @@ angular.module("rentIT").controller("dashboardController", [
      * @param {*} state - Modal state
      * @param {*} id - Bid id
      */
-    $scope.toggleApproveBidModal = (state, id) => {
-      $scope.approveBidModal = state;
-      $scope.bidId = id;
+    $scope.toggleApproveBidModal = function (state, id) {
+      if (!state || !id) return;
+
+      var modalInstance = $uibModal.open({
+        templateUrl: "approveBidModal.html",
+        controller: "ApproveBidModalController",
+        backdrop: "static",
+        size: "sm",
+      });
+
+      modalInstance.result.then(function () {
+        $scope.bidId = id;
+        $scope.approveBid();
+      });
     };
 
     /**
@@ -340,9 +406,20 @@ angular.module("rentIT").controller("dashboardController", [
      * @param {*} state - Modal state
      * @param {*} id - Bid id
      */
-    $scope.toggleCancelBidModal = (state, id) => {
-      $scope.cancelBidModal = state;
-      $scope.bidId = id;
+    $scope.toggleCancelBidModal = function (state, id) {
+      if (!state || !id) return;
+
+      var modalInstance = $uibModal.open({
+        templateUrl: "cancelBidModal.html",
+        controller: "CancelBidModalController",
+        backdrop: "static",
+        size: "sm",
+      });
+
+      modalInstance.result.then(function () {
+        $scope.bidId = id;
+        $scope.cancelBid();
+      });
     };
 
     /**
@@ -462,16 +539,33 @@ angular.module("rentIT").controller("dashboardController", [
      * @param {*} id - Booking id
      * @param {*} type - Type of odometer value (current or final)
      */
-    $scope.toggleOdometerModal = (state, id, type) => {
-      $scope.odometerModal = state;
-      $scope.bookingId = id;
-      $scope.type = type;
-      if (id) {
-        const currentBooking = $scope.bookings.find(
-          (booking) => booking._id === $scope.bookingId
-        );
-        $scope.startOdometer = currentBooking?.startOdometer;
-      }
+    $scope.toggleOdometerModal = function (state, id, type) {
+      if (!state || !id || !type) return;
+
+      const booking = $scope.bookings.find((booking) => booking._id === id);
+      const startOdometer = booking?.startOdometer;
+
+      const modalInstance = $uibModal.open({
+        templateUrl: "odometerModal.html",
+        controller: "OdometerModalController",
+        backdrop: "static",
+        size: "sm",
+        resolve: {
+          startOdometer: function () {
+            return startOdometer;
+          },
+          type: function () {
+            return type;
+          },
+        },
+      });
+
+      modalInstance.result.then(function (odometerValue) {
+        $scope.bookingId = id;
+        $scope.type = type;
+        $scope.odometerFormData = { odometerValue: odometerValue };
+        $scope.addOdometerValue();
+      });
     };
 
     /**
@@ -739,6 +833,114 @@ angular.module("rentIT").controller("dashboardController", [
       } else if (pagename === "cars") {
         if ($scope.currentPage > 1) $scope.currentPage--;
         $scope.setCars();
+      }
+    };
+  },
+]);
+
+// Modal Controllers
+angular.module("rentIT").controller("AddCarModalController", [
+  "$scope",
+  "$uibModalInstance",
+  "carFormData",
+  "vehicleTypes",
+  "fuelTypes",
+  "transmissionTypes",
+  "cities",
+  function (
+    $scope,
+    $uibModalInstance,
+    carFormData,
+    vehicleTypes,
+    fuelTypes,
+    transmissionTypes,
+    cities
+  ) {
+    $scope.vehicleTypes = vehicleTypes;
+    $scope.fuelTypes = fuelTypes;
+    $scope.transmissionTypes = transmissionTypes;
+    $scope.cities = cities;
+    $scope.carFormData = carFormData;
+
+    $scope.cancel = function () {
+      $uibModalInstance.dismiss("cancel");
+    };
+
+    $scope.ok = function () {
+      if ($scope.addCarForm.$valid) {
+        $uibModalInstance.close($scope.carFormData);
+      }
+    };
+  },
+]);
+
+angular.module("rentIT").controller("EditCarModalController", [
+  "$scope",
+  "$uibModalInstance",
+  "editCarFormData",
+  "cities",
+  "carId",
+  function ($scope, $uibModalInstance, editCarFormData, cities, carId) {
+    $scope.editCarFormData = editCarFormData;
+    $scope.cities = cities;
+
+    $scope.cancel = function () {
+      $uibModalInstance.dismiss("cancel");
+    };
+
+    $scope.ok = function () {
+      if ($scope.editCarForm.$valid) {
+        $uibModalInstance.close($scope.editCarFormData);
+      }
+    };
+  },
+]);
+
+angular.module("rentIT").controller("ApproveBidModalController", [
+  "$scope",
+  "$uibModalInstance",
+  function ($scope, $uibModalInstance) {
+    $scope.cancel = function () {
+      $uibModalInstance.dismiss("cancel");
+    };
+
+    $scope.ok = function () {
+      $uibModalInstance.close();
+    };
+  },
+]);
+
+angular.module("rentIT").controller("CancelBidModalController", [
+  "$scope",
+  "$uibModalInstance",
+  function ($scope, $uibModalInstance) {
+    $scope.cancel = function () {
+      $uibModalInstance.dismiss("cancel");
+    };
+
+    $scope.ok = function () {
+      $uibModalInstance.close();
+    };
+  },
+]);
+
+angular.module("rentIT").controller("OdometerModalController", [
+  "$scope",
+  "$uibModalInstance",
+  "startOdometer",
+  "type",
+  function ($scope, $uibModalInstance, startOdometer, type) {
+    $scope.startOdometer = startOdometer;
+    $scope.type = type;
+    $scope.odometerFormData = {};
+
+    $scope.cancel = function () {
+      $uibModalInstance.dismiss("cancel");
+    };
+
+    $scope.ok = function () {
+      if ($scope.odometerForm.$valid) {
+        $uibModalInstance.close($scope.odometerFormData.odometerValue);
       }
     };
   },

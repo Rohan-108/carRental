@@ -4,8 +4,14 @@
  * @requires ui.router
  * @requires ngAnimate
  * @requires toaster
+ * @requires ui.bootstrap
  */
-const app = angular.module("rentIT", ["ui.router", "ngAnimate", "toaster"]);
+const app = angular.module("rentIT", [
+  "ui.router",
+  "ngAnimate",
+  "toaster",
+  "ui.bootstrap",
+]);
 
 /**
  * @description Intilaize the application

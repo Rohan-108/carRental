@@ -176,7 +176,6 @@ angular.module("rentIT").factory("chatService", [
         .then(
           function successCallback(response) {
             const signedUrl = response.data.data.url;
-            console.log(signedUrl);
             $http
               .put(`${signedUrl}`, formdata, {
                 headers: {

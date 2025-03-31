@@ -36,5 +36,6 @@ angular.module("rentIT").controller("mainController", [
     $scope.closeMenu = function () {
       $scope.toggleMenu = false;
     };
+    $scope.isNavCollapsed = true; //to collapse the menu bar on the mobile size
   },
 ]);

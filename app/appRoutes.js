@@ -32,28 +32,12 @@ angular.module("rentIT").config([
         url: "/cars",
         templateUrl: "app/views/cars/cars.html",
         controller: "carsController",
-        resolve: {
-          loadAssets: [
-            "resourceInjector",
-            function (resourceInjector) {
-              return resourceInjector.loadCSS("./views/cars/cars.css");
-            },
-          ],
-        },
       })
       .state("car", {
         url: "/cars/{carId}",
         templateUrl: "app/views/carDetail/carDetail.html",
         controller: "carDetailController",
         resolve: {
-          loadAssets: [
-            "resourceInjector",
-            function (resourceInjector) {
-              return resourceInjector.loadCSS(
-                "./views/carDetail/carDetail.css"
-              );
-            },
-          ],
           car: [
             "carService",
             "$stateParams",
@@ -72,12 +56,6 @@ angular.module("rentIT").config([
         templateUrl: "app/views/profile/profile.html",
         controller: "profileController",
         resolve: {
-          loadAssets: [
-            "resourceInjector",
-            function (resourceInjector) {
-              return resourceInjector.loadCSS("./views/profile/profile.css");
-            },
-          ],
           loggedIn: [
             "authService",
             function (authService) {
@@ -118,14 +96,6 @@ angular.module("rentIT").config([
         templateUrl: "app/views/dashboard/dashboard.html",
         controller: "dashboardController",
         resolve: {
-          loadAssets: [
-            "resourceInjector",
-            function (resourceInjector) {
-              return resourceInjector.loadCSS(
-                "./views/dashboard/dashboard.css"
-              );
-            },
-          ],
           isAdmin: [
             "authService",
             function (authService) {
@@ -146,12 +116,6 @@ angular.module("rentIT").config([
         templateUrl: "app/views/admin/admin.html",
         controller: "adminController",
         resolve: {
-          loadAssets: [
-            "resourceInjector",
-            function (resourceInjector) {
-              return resourceInjector.loadCSS("./views/admin/admin.css");
-            },
-          ],
           isSuperAdmin: [
             "authService",
             function (authService) {
