@@ -6,8 +6,10 @@ angular.module("rentIT").factory("chartService", [
   "$http",
   "$q",
   "$rootScope",
-  function ($http, $q, $rootScope) {
-    const BACKEND_URL = "http://localhost:5000/api/v1/charts";
+  "BASE_URL",
+  function ($http, $q, $rootScope, BASE_URL) {
+    const BACKEND_URL = `${BASE_URL}/charts`;
+
     /**
      * @description Get the chart data for the dashboard.
      * @returns {Promise} A promise that resolves to the chart data.
@@ -19,6 +21,7 @@ angular.module("rentIT").factory("chartService", [
           headers: {
             Authorization: `Bearer ${$rootScope.user.accessToken}`,
           },
+          cache: true,
         })
         .then(
           function successCallback(response) {
@@ -41,6 +44,7 @@ angular.module("rentIT").factory("chartService", [
           headers: {
             Authorization: `Bearer ${$rootScope.user.accessToken}`,
           },
+          cache: true,
         })
         .then(
           function successCallback(response) {
@@ -63,6 +67,7 @@ angular.module("rentIT").factory("chartService", [
           headers: {
             Authorization: `Bearer ${$rootScope.user.accessToken}`,
           },
+          cache: true,
         })
         .then(
           function successCallback(response) {
@@ -85,6 +90,7 @@ angular.module("rentIT").factory("chartService", [
           headers: {
             Authorization: `Bearer ${$rootScope.user.accessToken}`,
           },
+          cache: true,
         })
         .then(
           function successCallback(response) {
@@ -107,6 +113,7 @@ angular.module("rentIT").factory("chartService", [
           headers: {
             Authorization: `Bearer ${$rootScope.user.accessToken}`,
           },
+          cache: true,
         })
         .then(
           function successCallback(response) {
@@ -214,6 +221,7 @@ angular.module("rentIT").factory("chartService", [
           headers: {
             Authorization: `Bearer ${$rootScope.user.accessToken}`,
           },
+          cache: true,
         })
         .then(
           function successCallback(response) {
@@ -236,6 +244,7 @@ angular.module("rentIT").factory("chartService", [
           headers: {
             Authorization: `Bearer ${$rootScope.user.accessToken}`,
           },
+          cache: true,
         })
         .then(
           function successCallback(response) {
@@ -279,6 +288,7 @@ angular.module("rentIT").factory("chartService", [
           headers: {
             Authorization: `Bearer ${$rootScope.user.accessToken}`,
           },
+          cache: true,
         })
         .then(
           function successCallback(response) {

@@ -41,7 +41,7 @@ angular.module("rentIT").controller("dashboardController", [
   ) {
     // Initialize variables
     $scope.isLoading = false;
-    $scope.pageSize = 2; // Number of items per page
+    $scope.pageSize = 5; // Number of items per page
     $scope.currentPage = 1; // Current page number
     $scope.totalPage = null; // Total number of pages
     $scope.currentTab = "home"; // Current tab
@@ -709,7 +709,10 @@ angular.module("rentIT").controller("dashboardController", [
           $scope.isLoading = false;
         });
     };
-
+    /**
+     * @description To Load Chart data for comparision of owner revenue with all owners average
+     * @param {*} days - Number of days to compare
+     */
     $scope.comparisionChart = function () {
       $scope.isLoading = true;
       const days = $scope.comparisionChartFilter.days;
@@ -823,6 +826,10 @@ angular.module("rentIT").controller("dashboardController", [
       }
     };
 
+    /**
+     * @description Function to change the page
+     * @param {*} pagename
+     */
     $scope.prevPage = function (pagename) {
       if (pagename === "bookings") {
         if ($scope.currentPage > 1) $scope.currentPage--;
@@ -838,7 +845,7 @@ angular.module("rentIT").controller("dashboardController", [
   },
 ]);
 
-// Modal Controllers
+// Modal Controllers for Add Car
 angular.module("rentIT").controller("AddCarModalController", [
   "$scope",
   "$uibModalInstance",
@@ -873,7 +880,7 @@ angular.module("rentIT").controller("AddCarModalController", [
     };
   },
 ]);
-
+// Modal Controllers for Edit Car
 angular.module("rentIT").controller("EditCarModalController", [
   "$scope",
   "$uibModalInstance",
@@ -896,6 +903,7 @@ angular.module("rentIT").controller("EditCarModalController", [
   },
 ]);
 
+// Modal Controllers for Approve and Cancel Bid
 angular.module("rentIT").controller("ApproveBidModalController", [
   "$scope",
   "$uibModalInstance",
@@ -909,7 +917,7 @@ angular.module("rentIT").controller("ApproveBidModalController", [
     };
   },
 ]);
-
+// Modal Controllers for Approve and Cancel Bid
 angular.module("rentIT").controller("CancelBidModalController", [
   "$scope",
   "$uibModalInstance",

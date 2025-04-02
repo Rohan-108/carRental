@@ -2,7 +2,6 @@
  * @description Controller for car detail page
  * @name carDetailController
  * @requires $scope
- * @requires $rootScope
  * @requires car
  * @requires userService
  * @requires carService
@@ -14,7 +13,6 @@
  */
 angular.module("rentIT").controller("carDetailController", [
   "$scope",
-  "$rootScope",
   "car",
   "bidBookService",
   "bidFactory",
@@ -25,7 +23,6 @@ angular.module("rentIT").controller("carDetailController", [
   "$uibModal", // Added $uibModal dependency
   function (
     $scope,
-    $rootScope,
     car,
     bidBookService,
     bidFactory,
@@ -36,6 +33,7 @@ angular.module("rentIT").controller("carDetailController", [
     $uibModal // Add to function parameters
   ) {
     // Initialize variables
+    $scope.isLoading = true; // set loading to true
     $scope.car = car; // set car details that came through resolve
     $scope.currentImage = car.images[0]; // set current image to first image
     $scope.image = null; // set image to null
@@ -54,11 +52,15 @@ angular.module("rentIT").controller("carDetailController", [
      * @description Initialize function
      */
     $scope.init = function () {
+      // set loading to false
+      $scope.isLoading = false; // set loading to false
       $q.all([
         $scope.setUpDatePicker(),
         $scope.loadUserChat(),
         $scope.listenForChat(),
-      ]);
+      ]).finally(() => {
+        $scope.isLoading = false; // set loading to false
+      });
     };
 
     $scope.listenForChat = function () {
@@ -138,6 +140,10 @@ angular.module("rentIT").controller("carDetailController", [
      * @description Bid now function to place a bid
      */
     $scope.bidNow = function () {
+      if (!$scope.user) {
+        toaster.pop("error", "Error", "Please login to place a bid");
+        return;
+      }
       if ($scope.user._id === $scope.car.owner._id) {
         toaster.pop("error", "Error", "You cannot bid on your own car");
         return;
@@ -152,6 +158,8 @@ angular.module("rentIT").controller("carDetailController", [
       const endDate = $scope.picker.getEndDate()
         ? $scope.picker.getEndDate().format("YYYY-MM-DD")
         : null;
+
+      $scope.isLoading = true; // set loading to true
       // create bid object
       const bid = bidFactory.createBid({
         startDate,
@@ -159,6 +167,7 @@ angular.module("rentIT").controller("carDetailController", [
         amount: $scope.rental.amount,
         isOutStation: $scope.rental.isOutStation,
       });
+      //add the bid to the car
       bid
         .addBid($scope.car)
         .then(() => {
@@ -171,6 +180,9 @@ angular.module("rentIT").controller("carDetailController", [
             "Error",
             error?.description || "Error while placing bid"
           );
+        })
+        .finally(() => {
+          $scope.isLoading = false; // set loading to false
         });
     };
 
@@ -178,14 +190,16 @@ angular.module("rentIT").controller("carDetailController", [
      * @description Load user chat function
      */
     $scope.loadUserChat = function () {
+      if (!$scope.user) return;
       if ($scope.user.role === "super-admin") return;
       if ($scope.car.owner._id === $scope.user._id) return;
+      //get the conversation by car and member
       chatService
         .getConversationByCarAndMember($scope.car._id, $scope.user._id)
         .then((response) => {
           $scope.convId = response.data._id;
-          console.log("Conversation ID: ", $scope.convId);
-          chatService.joinConversation($scope.convId);
+          chatService.joinConversation($scope.convId); // join the conversation
+          //get all the chats by conversation id
           chatService
             .getAllChats($scope.convId)
             .then((response) => {
@@ -204,11 +218,11 @@ angular.module("rentIT").controller("carDetailController", [
      * @description Send chat function to send message
      */
     $scope.sendChat = function () {
-      if ($rootScope.user.role === "super-admin") {
+      if ($scope.user.role === "super-admin") {
         toaster.pop("error", "Error", "Super admin cannot send message");
         return;
       }
-      if ($scope.car.owner._id === $rootScope.user._id) {
+      if ($scope.car.owner._id === $scope.user._id) {
         toaster.pop("error", "Error", "You cannot send message to yourself");
         return;
       }
@@ -216,14 +230,17 @@ angular.module("rentIT").controller("carDetailController", [
         toaster.pop("error", "Error", "Message cannot be empty");
         return;
       }
+      // Check if the conversation ID is null, if so create a new conversation
       if ($scope.convId === null) {
         chatService
           .addConversation($scope.car._id, [
             $scope.car.owner._id,
-            $rootScope.user._id,
+            $scope.user._id,
           ])
           .then((response) => {
             $scope.convId = response.data.conversationId;
+            chatService.joinConversation($scope.convId); // join the conversation
+            // Send the message after creating the conversation
             chatService
               .sendMessage($scope.message, $scope.convId)
               .then(() => {
@@ -289,6 +306,7 @@ angular.module("rentIT").controller("carDetailController", [
               }
               const key = $scope.$parent.image.name + "-" + Date.now();
               const contentType = $scope.$parent.image.type;
+              $scope.$parent.isLoading = true; // set loading to true
               chatService
                 .uploadAttachment(
                   $scope.$parent.image,
@@ -311,6 +329,9 @@ angular.module("rentIT").controller("carDetailController", [
                     "Error",
                     error?.message || "Error while uploading image"
                   );
+                })
+                .finally(() => {
+                  $scope.$parent.isLoading = false; // set loading to false
                 });
             };
           },

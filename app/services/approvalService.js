@@ -8,8 +8,9 @@ angular.module("rentIT").factory("approvalService", [
   "$q",
   "$http",
   "$rootScope",
-  function ($q, $http, $rootScope) {
-    const BACKEND_URL = "http://localhost:5000/api/v1/approvals";
+  "BASE_URL",
+  function ($q, $http, $rootScope, BASE_URL) {
+    const BACKEND_URL = `${BASE_URL}/approvals`;
 
     /**
      * @description Add an approval request to the database.
@@ -44,6 +45,7 @@ angular.module("rentIT").factory("approvalService", [
       $http
         .get(`${BACKEND_URL}/user`, {
           headers: { Authorization: `Bearer ${$rootScope.user.accessToken}` },
+          cache: true,
         })
         .then(
           function successCallback(response) {
@@ -71,6 +73,7 @@ angular.module("rentIT").factory("approvalService", [
           `${BACKEND_URL}?pageNumber=${pageNumber}&pageSize=${pageSize}&filter=${filter}&sort=${sort}`,
           {
             headers: { Authorization: `Bearer ${$rootScope.user.accessToken}` },
+            cache: true,
           }
         )
         .then(

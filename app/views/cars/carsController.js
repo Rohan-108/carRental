@@ -14,8 +14,6 @@ angular.module("rentIT").controller("carsController", [
   "carService",
   "utilService",
   "toaster",
-  "$q",
-  "$window",
   "$timeout",
   "$document",
   function (
@@ -24,8 +22,6 @@ angular.module("rentIT").controller("carsController", [
     carService,
     utilService,
     toaster,
-    $q,
-    $window,
     $timeout,
     $document
   ) {
@@ -226,6 +222,7 @@ angular.module("rentIT").controller("carsController", [
         minPrice: 0,
         maxPrice: 10000,
       };
+      $scope.query = ""; // Reset search query
       $scope.currentPage = 1;
       $scope.setCars();
     };

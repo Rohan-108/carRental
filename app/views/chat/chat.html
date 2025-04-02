@@ -3,25 +3,6 @@
   style="height: 91vh; padding: 0; background-color: #f5f5f5"
   ng-init="init()"
 >
-  <style>
-    /* Keep minimal styles for hover states and complex selectors */
-    .conversation:hover {
-      background-color: #f8f8f8;
-    }
-    .message-outgoing .message-bubble {
-      background-color: #dcf8c6;
-      border-bottom-right-radius: 5px;
-    }
-    .message-incoming .message-bubble {
-      background-color: #fff;
-      border-bottom-left-radius: 5px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-    .chat-input:focus {
-      height: 60px;
-    }
-  </style>
-
   <div
     style="display: flex; height: calc(100vh - 56px); background-color: #e5ddd5"
   >
@@ -87,9 +68,44 @@
         </div>
       </div>
     </div>
-
-    <div style="flex: 1; display: flex; flex-direction: column">
-      <!-- Chat box showing message -->
+    <!-- Chat box showing message -->
+    <div
+      style="flex: 1; display: flex; flex-direction: column"
+      style="position: relative"
+    >
+      <div
+        ng-show="isLoading"
+        style="
+          position: absolute;
+          inset: 0;
+          background-color: transparent;
+          z-index: 1050;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          backdrop-filter: blur(5px);
+        "
+      >
+        <div class="text-center">
+          <div
+            class="spinner"
+            style="
+              width: 60px;
+              height: 60px;
+              border-radius: 50%;
+              border: 5px solid #f3f3f3;
+              border-top: 5px solid #337ab7;
+              animation: spin 1s linear infinite;
+            "
+          ></div>
+          <p
+            class="lead"
+            style="margin-top: 15px; font-weight: bold; color: #337ab7"
+          >
+            Loading...
+          </p>
+        </div>
+      </div>
       <div
         id="messageBox"
         style="
@@ -318,3 +334,30 @@
     </div>
   </script>
 </div>
+
+<style>
+  /* Keep minimal styles for hover states and complex selectors */
+  .conversation:hover {
+    background-color: #f8f8f8;
+  }
+  .message-outgoing .message-bubble {
+    background-color: #dcf8c6;
+    border-bottom-right-radius: 5px;
+  }
+  .message-incoming .message-bubble {
+    background-color: #fff;
+    border-bottom-left-radius: 5px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  .chat-input:focus {
+    height: 60px;
+  }
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+</style>

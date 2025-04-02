@@ -11,6 +11,7 @@ angular.module("rentIT").controller("loginController", [
   "toaster",
   "userFactory",
   function ($scope, $state, toaster, userFactory) {
+    $scope.isLoading = false; //to show the loading spinner
     //to hold the login form data
     $scope.loginData = {
       email: "",
@@ -25,6 +26,7 @@ angular.module("rentIT").controller("loginController", [
         return;
       }
       // Check if the user exists and the password is correct
+      $scope.isLoading = true; // Show loading spinner
       const user = userFactory.createUser($scope.loginData);
       user
         .login()
@@ -39,6 +41,9 @@ angular.module("rentIT").controller("loginController", [
             "Error",
             error?.description || "An error occurred."
           );
+        })
+        .finally(() => {
+          $scope.isLoading = false; // Hide loading spinner
         });
     };
   },

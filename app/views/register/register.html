@@ -9,6 +9,40 @@
   "
 >
   <div class="row" style="width: 100%">
+    <!--Loading Spinner -->
+    <div
+      ng-show="isLoading"
+      style="
+        position: absolute;
+        inset: 0;
+        background-color: rgba(255, 255, 255, 0.7);
+        z-index: 1050;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(5px);
+      "
+    >
+      <div class="text-center">
+        <div
+          class="spinner"
+          style="
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #337ab7;
+            animation: spin 1s linear infinite;
+          "
+        ></div>
+        <p
+          class="lead"
+          style="margin-top: 15px; font-weight: bold; color: #337ab7"
+        >
+          Loading...
+        </p>
+      </div>
+    </div>
     <div class="col-md-6 col-md-offset-3">
       <!-- Header -->
       <div class="text-center" style="padding-top: 48px; padding-bottom: 24px">
@@ -491,3 +525,14 @@
     </div>
   </div>
 </div>
+
+<style>
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+</style>

@@ -1050,7 +1050,7 @@
     <button type="button" class="close" ng-click="cancel()" style="font-size: 24px;">&times;</button>
   </div>
   <div class="modal-body" style="padding: 20px; background-color: #fdfdfd;">
-    <form id="addCarForm" name="addCarForm" class="form" novalidate>
+    <form id="addCarForm" name="addCarForm" class="form" novalidate enctype="multipart/form-data"  >
       <div class="panel panel-default" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px;">
         <div class="panel-heading" style="background-color: #f1f8ff; border-bottom: 1px solid #dae5f2; padding: 12px 15px; border-radius: 8px 8px 0 0;">
           <h4 style="margin: 0; color: #3a5a7a; font-size: 16px; font-weight: 600;">
@@ -1122,11 +1122,12 @@
                   id="plateNumber"
                   class="form-control"
                   placeholder="Enter plate number"
-                  pattern="^[A-Z0-9\s\-]{5,10}$"
                   title="Plate number must be 5-10 characters long and can include uppercase letters, numbers, spaces, and hyphens."
                   ng-model="carFormData.plateNumber"
                   ng-required="true"
                   autocomplete="off"
+                  placeholder="XX-XX-XX-XXXX"
+                  valid-Plate
                   style="border-radius: 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
                 />
                 <span
@@ -1154,11 +1155,9 @@
                   ng-model="carFormData.fuelType"
                   style="border-radius: 4px; border: 1px solid #ced4da; padding: 9px 12px; height: 42px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
                 >
-                  <option value="Petrol">Petrol</option>
-                  <option value="Diesel">Diesel</option>
-                  <option value="Electric">Electric</option>
-                  <option value="Hybrid">Hybrid</option>
-                  <option value="CNG">CNG</option>
+                <option ng-repeat="type in fuelTypes" value="{{type}}">
+                  {{type}}
+                </option>
                 </select>
                 <span
                   class="text-danger"
@@ -1182,8 +1181,9 @@
                   ng-model="carFormData.transmission"
                   style="border-radius: 4px; border: 1px solid #ced4da; padding: 9px 12px; height: 42px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
                 >
-                  <option value="Manual">Manual</option>
-                  <option value="Automatic">Automatic</option>
+                <option ng-repeat="type in transmissionTypes" value="{{type}}">
+                  {{type}}
+                </option>
                 </select>
                 <span
                   class="text-danger"
@@ -1209,6 +1209,7 @@
                   max="10"
                   ng-model="carFormData.seats"
                   ng-required="true"
+                  valid-Number
                   style="border-radius: 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
                 />
                 <span
@@ -1248,6 +1249,7 @@
                     min="100"
                     max="100000"
                     ng-model="carFormData.rentalPrice"
+                    valid-Number
                     ng-required="true"
                     style="border-radius: 0 4px 4px 0; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
                   />
@@ -1263,20 +1265,51 @@
             </div>
             <div class="col-md-6">
               <div class="form-group">
+                <label for="rentalPriceOutStation" style="font-weight: 600; color: #495057;">
+                  <i class="glyphicon glyphicon-tag" style="margin-right: 8px; color: #28a745;"></i>Rental Price OutStation (Rs/day)
+                </label>
+                <div class="input-group">
+                  <span class="input-group-addon" style="background-color: #f8f9fa; border-color: #ced4da;">Rs.</span>
+                  <input
+                    type="number"
+                    name="rentalPriceOutStation"
+                    id="rentalPriceOutStation"
+                    class="form-control"
+                    placeholder="Enter rental price per day"
+                    min="100"
+                    max="100000"
+                    ng-model="carFormData.rentalPriceOutStation"
+                    valid-Number
+                    ng-required="true"
+                    style="border-radius: 0 4px 4px 0; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                  />
+                </div>
+                <span
+                  class="text-danger"
+                  ng-if="addCarForm.rentalPriceOutStation.$touched && addCarForm.rentalPriceOutStation.$invalid"
+                  style="font-size: 12px; display: block; margin-top: 5px;"
+                >
+                  <i class="glyphicon glyphicon-exclamation-sign"></i> Rental price OutStation must be between Rs. 100 and Rs. 100,000
+                </span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
                 <label for="location" style="font-weight: 600; color: #495057;">
                   <i class="glyphicon glyphicon-map-marker" style="margin-right: 8px; color: #e74c3c;"></i>Location
                 </label>
-                <input
-                  type="text"
+                <select
                   name="location"
                   id="location"
                   class="form-control"
-                  placeholder="Enter car location"
-                  ng-model="carFormData.location"
                   ng-required="true"
-                  autocomplete="off"
-                  style="border-radius: 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
-                />
+                  ng-model="carFormData.location"
+                  style="border-radius: 4px; border: 1px solid #ced4da; padding: 9px 12px; height: 42px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                >
+                  <option ng-repeat="location in cities" value="{{location}}">
+                    {{location}}
+                  </option>
+                </select>
                 <span
                   class="text-danger"
                   ng-if="addCarForm.location.$touched && addCarForm.location.$invalid"
@@ -1305,6 +1338,7 @@
                     max="30"
                     ng-model="carFormData.minRentalPeriod"
                     ng-required="true"
+                    valid-Number
                     style="border-radius: 4px 0 0 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
                   />
                   <span class="input-group-addon" style="background-color: #f8f9fa; border-color: #ced4da;">days</span>
@@ -1334,6 +1368,7 @@
                     max="365"
                     ng-model="carFormData.maxRentalPeriod"
                     ng-required="true"
+                    valid-Number
                     style="border-radius: 4px 0 0 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
                   />
                   <span class="input-group-addon" style="background-color: #f8f9fa; border-color: #ced4da;">days</span>
@@ -1344,6 +1379,68 @@
                   style="font-size: 12px; display: block; margin-top: 5px;"
                 >
                   <i class="glyphicon glyphicon-exclamation-sign"></i> Maximum rental period must be between 1 and 365 days
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="ratePerKm" style="font-weight: 600; color: #495057;">
+                  <i class="glyphicon glyphicon-time" style="margin-right: 8px; color: #9b59b6;"></i>Extra Charges (Rs./Km)
+                </label>
+                <div class="input-group">
+                  <span class="input-group-addon" style="background-color: #f8f9fa; border-color: #ced4da;">Rs.</span>
+                  <input
+                    type="number"
+                    name="ratePerKm"
+                    id="ratePerKm"
+                    class="form-control"
+                    placeholder="Minimum days"
+                    min="0"
+                    max="5"
+                    ng-model="carFormData.ratePerKm"
+                    ng-required="true"
+                    valid-Number
+                    style="border-radius: 4px 0 0 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                  />
+                </div>
+                <span
+                  class="text-danger"
+                  ng-if="addCarForm.ratePerKm.$touched && addCarForm.ratePerKm.$invalid"
+                  style="font-size: 12px; display: block; margin-top: 5px;"
+                >
+                  <i class="glyphicon glyphicon-exclamation-sign"></i> Minimum rental period must be between 1 and 30 days
+                </span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="freeKilometer" style="font-weight: 600; color: #495057;">
+                  <i class="glyphicon glyphicon-time" style="margin-right: 8px; color: #9b59b6;"></i>Free Kilometer (Km/day)
+                </label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    name="freeKilometer"
+                    id="freeKilometer"
+                    class="form-control"
+                    placeholder="Minimum Free Kilometer"
+                    min="100"
+                    max="1000"
+                    ng-model="carFormData.fixedKilometer"
+                    ng-required="true"
+                    valid-Number
+                    style="border-radius: 4px 0 0 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                  />
+                  <span class="input-group-addon" style="background-color: #f8f9fa; border-color: #ced4da;">Kms</span>
+                </div>
+                <span
+                  class="text-danger"
+                  ng-if="addCarForm.freeKilometer.$touched && addCarForm.freeKilometer.$invalid"
+                  style="font-size: 12px; display: block; margin-top: 5px;"
+                >
+                  <i class="glyphicon glyphicon-exclamation-sign"></i> Free Kilometer must be between 100 and 1000 km
                 </span>
               </div>
             </div>
@@ -1373,6 +1470,7 @@
                 multiple
                 ng-model="carFormData.images"
                 ng-required="true"
+                valid-Images
                 style="border-radius: 0 4px 4px 0; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
               />
             </div>
@@ -1381,10 +1479,10 @@
               ng-if="addCarForm.carImages.$touched && addCarForm.carImages.$invalid"
               style="font-size: 12px; display: block; margin-top: 5px;"
             >
-              <i class="glyphicon glyphicon-exclamation-sign"></i> Please select at least one image
+              <i class="glyphicon glyphicon-exclamation-sign"></i> Please select at least one image of size less than 500kb
             </span>
             <p class="help-block" style="margin-top: 10px; color: #6c757d; font-style: italic;">
-              <i class="glyphicon glyphicon-info-sign"></i> Upload clear images of your car (max 5 images)
+              <i class="glyphicon glyphicon-info-sign"></i> Upload clear images of your car (max 3 images)
             </p>
           </div>
         </div>
@@ -1415,7 +1513,7 @@
     <button type="button" class="close" ng-click="cancel()" style="font-size: 24px;">&times;</button>
   </div>
   <div class="modal-body" style="padding: 20px; background-color: #fdfdfd;">
-    <form id="editCarForm" name="editCarForm" class="form" novalidate>
+    <form id="editCarForm" name="editCarForm" class="form" novalidate enctype="multipart/form-data" >
       <div class="panel panel-default" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px;">
         <div class="panel-heading" style="background-color: #fff8f1; border-bottom: 1px solid #f2e5da; padding: 12px 15px; border-radius: 8px 8px 0 0;">
           <h4 style="margin: 0; color: #3a5a7a; font-size: 16px; font-weight: 600;">
@@ -1424,28 +1522,27 @@
         </div>
         <div class="panel-body" style="padding: 15px 20px;">
           <div class="form-group">
-            <label for="editCarName" style="font-weight: 600; color: #495057;">
-              <i class="glyphicon glyphicon-tag" style="margin-right: 8px; color: #5c6bc0;"></i>Car Name
+            <label for="editLocation" style="font-weight: 600; color: #495057;">
+              <i class="glyphicon glyphicon-map-marker" style="margin-right: 8px; color: #e74c3c;"></i>Location
             </label>
-            <input
-              type="text"
-              name="editCarName"
-              id="editCarName"
+            <select
+              name="editLocation"
+              id="editLocation"
               class="form-control"
-              placeholder="Enter car name"
-              pattern="^[A-Za-z0-9\s\-]{3,20}$"
-              title="Car name must be 3-20 characters long and can include letters, numbers, and hyphens."
-              ng-model="editCarFormData.name"
               ng-required="true"
-              autocomplete="off"
-              style="border-radius: 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
-            />
+              ng-model="editCarFormData.location"
+              style="border-radius: 4px; border: 1px solid #ced4da; padding: 9px 12px; height: 42px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+            >
+              <option ng-repeat="location in cities" value="{{location}}">
+                {{location}}
+              </option>
+            </select>
             <span
               class="text-danger"
-              ng-if="editCarForm.editCarName.$touched && editCarForm.editCarName.$invalid"
+              ng-if="editCarForm.editLocation.$touched && editCarForm.editLocation.$invalid"
               style="font-size: 12px; display: block; margin-top: 5px;"
             >
-              <i class="glyphicon glyphicon-exclamation-sign"></i> Car name is not valid
+              <i class="glyphicon glyphicon-exclamation-sign"></i> Location is required
             </span>
           </div>
         </div>
@@ -1476,6 +1573,7 @@
                     max="100000"
                     ng-model="editCarFormData.rentalPrice"
                     ng-required="true"
+                    valid-Number
                     style="border-radius: 0 4px 4px 0; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
                   />
                 </div>
@@ -1490,26 +1588,31 @@
             </div>
             <div class="col-md-6">
               <div class="form-group">
-                <label for="editLocation" style="font-weight: 600; color: #495057;">
-                  <i class="glyphicon glyphicon-map-marker" style="margin-right: 8px; color: #e74c3c;"></i>Location
+                <label for="editRentalPriceOutStation" style="font-weight: 600; color: #495057;">
+                  <i class="glyphicon glyphicon-tag" style="margin-right: 8px; color: #28a745;"></i>Rental Price OutStation (Rs/day)
                 </label>
-                <input
-                  type="text"
-                  name="editLocation"
-                  id="editLocation"
-                  class="form-control"
-                  placeholder="Enter car location"
-                  ng-model="editCarFormData.location"
-                  ng-required="true"
-                  autocomplete="off"
-                  style="border-radius: 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
-                />
+                <div class="input-group">
+                  <span class="input-group-addon" style="background-color: #f8f9fa; border-color: #ced4da;">Rs.</span>
+                  <input
+                    type="number"
+                    name="editRentalPriceOutStation"
+                    id="editRentalPriceOutStation"
+                    class="form-control"
+                    placeholder="Enter rental price per day"
+                    min="100"
+                    max="100000"
+                    ng-model="editCarFormData.rentalPriceOutStation"
+                    valid-Number
+                    ng-required="true"
+                    style="border-radius: 0 4px 4px 0; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                  />
+                </div>
                 <span
                   class="text-danger"
-                  ng-if="editCarForm.editLocation.$touched && editCarForm.editLocation.$invalid"
+                  ng-if="editCarForm.editRentalPriceOutStation.$touched && editCarForm.editRentalPriceOutStation.$invalid"
                   style="font-size: 12px; display: block; margin-top: 5px;"
                 >
-                  <i class="glyphicon glyphicon-exclamation-sign"></i> Location is required
+                  <i class="glyphicon glyphicon-exclamation-sign"></i> Rental price OutStation must be between Rs. 100 and Rs. 100,000
                 </span>
               </div>
             </div>
@@ -1532,6 +1635,7 @@
                     max="30"
                     ng-model="editCarFormData.minRentalPeriod"
                     ng-required="true"
+                    valid-Number
                     style="border-radius: 4px 0 0 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
                   />
                   <span class="input-group-addon" style="background-color: #f8f9fa; border-color: #ced4da;">days</span>
@@ -1561,6 +1665,7 @@
                     max="365"
                     ng-model="editCarFormData.maxRentalPeriod"
                     ng-required="true"
+                    valid-Number
                     style="border-radius: 4px 0 0 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
                   />
                   <span class="input-group-addon" style="background-color: #f8f9fa; border-color: #ced4da;">days</span>
@@ -1571,6 +1676,69 @@
                   style="font-size: 12px; display: block; margin-top: 5px;"
                 >
                   <i class="glyphicon glyphicon-exclamation-sign"></i> Maximum rental period must be between 1 and 365 days
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="editRatePerKm" style="font-weight: 600; color: #495057;">
+                  <i class="glyphicon glyphicon-time" style="margin-right: 8px; color: #9b59b6;"></i>Extra Charges (Rs./Km)
+                </label>
+                <div class="input-group">
+                  <span class="input-group-addon" style="background-color: #f8f9fa; border-color: #ced4da;">Rs.</span>
+                  <input
+                    type="number"
+                    name="editRatePerKm"
+                    id="editRatePerKm"
+                    class="form-control"
+                    placeholder="Extra charges per km"
+                    min="0"
+                    max="5"
+                    ng-model="editCarFormData.ratePerKm"
+                    ng-required="true"
+                    valid-Number
+                    style="border-radius: 0 4px 4px 0; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                  />
+                </div>
+                <span
+                  class="text-danger"
+                  ng-if="editCarForm.editRatePerKm.$touched && editCarForm.editRatePerKm.$invalid"
+                  style="font-size: 12px; display: block; margin-top: 5px;"
+                >
+                  <i class="glyphicon glyphicon-exclamation-sign"></i> Extra charges must be between 0 and 5 Rs./km
+                </span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="editFixedKilometer" style="font-weight: 600; color: #495057;">
+                  <i class="glyphicon glyphicon-time" style="margin-right: 8px; color: #9b59b6;"></i>Free Kilometer (Km/day)
+                </label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    name="editFixedKilometer"
+                    id="editFixedKilometer"
+                    class="form-control"
+                    placeholder="Free kilometers per day"
+                    min="100"
+                    max="1000"
+                    ng-model="editCarFormData.fixedKilometer"
+                    ng-required="true"
+                    valid-Number
+                    style="border-radius: 4px 0 0 4px; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                  />
+                  <span class="input-group-addon" style="background-color: #f8f9fa; border-color: #ced4da;">Kms</span>
+                </div>
+                <span
+                  class="text-danger"
+                  ng-if="editCarForm.editFixedKilometer.$touched && editCarForm.editFixedKilometer.$invalid"
+                  style="font-size: 12px; display: block; margin-top: 5px;"
+                >
+                  <i class="glyphicon glyphicon-exclamation-sign"></i> Free Kilometer must be between 100 and 1000 km
                 </span>
               </div>
             </div>
@@ -1586,26 +1754,6 @@
         </div>
         <div class="panel-body" style="padding: 15px 20px;">
           <div class="form-group">
-            <label style="font-weight: 600; color: #495057;">
-              <i class="glyphicon glyphicon-th-large" style="margin-right: 8px; color: #6c757d;"></i>Current Images
-            </label>
-            <div class="row" style="margin-bottom: 15px;">
-              <div class="col-xs-4 col-sm-3" ng-repeat="image in editCarFormData.images">
-                <div style="position: relative; margin-bottom: 15px; box-shadow: 0 3px 8px rgba(0,0,0,0.15); border-radius: 4px; overflow: hidden;">
-                  <img
-                    ng-src="{{image}}"
-                    class="img-responsive"
-                    style="height: 100px; width: 100%; object-fit: cover;"
-                  >
-                  <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; text-align: center; padding: 3px; font-size: 12px;">
-                    Image {{$index + 1}}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group">
             <label for="editCarImages" style="font-weight: 600; color: #495057;">
               <i class="glyphicon glyphicon-upload" style="margin-right: 8px; color: #fd7e14;"></i>Update Car Images
             </label>
@@ -1620,11 +1768,13 @@
                 class="form-control"
                 accept="image/*"
                 multiple
+                ng-model="editCarFormData.images"
                 style="border-radius: 0 4px 4px 0; border: 1px solid #ced4da; padding: 10px 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                valid-Images
               />
             </div>
             <p class="help-block" style="margin-top: 10px; color: #6c757d; font-style: italic;">
-              <i class="glyphicon glyphicon-info-sign"></i> Upload new images or leave empty to keep current ones (max 5 images)
+              <i class="glyphicon glyphicon-info-sign"></i> Upload new images or leave empty to keep current ones (max 3 images)
             </p>
           </div>
         </div>

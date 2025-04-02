@@ -11,6 +11,7 @@ angular.module("rentIT").controller("registerController", [
   "toaster",
   "userFactory",
   function ($scope, $state, toaster, userFactory) {
+    $scope.isLoading = false; // to show the loading spinner
     $scope.user = {}; // to hold the user form data
 
     /**
@@ -21,6 +22,7 @@ angular.module("rentIT").controller("registerController", [
         toaster.pop("error", "Error", "Invalid form data.");
         return;
       }
+      $scope.isLoading = true; // Show loading spinner
       const user = userFactory.createUser($scope.user);
       user
         .register()
@@ -35,6 +37,9 @@ angular.module("rentIT").controller("registerController", [
             "Error",
             error?.description || "Error While Registering."
           );
+        })
+        .finally(() => {
+          $scope.isLoading = false; // Hide loading spinner
         });
     };
   },

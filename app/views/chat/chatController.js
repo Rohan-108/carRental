@@ -7,7 +7,6 @@
  * @requires utilService
  * @requires chatService
  * @requires toaster
- * @requires $q
  * @requires $uibModal
  */
 angular.module("rentIT").controller("chatController", [
@@ -15,11 +14,11 @@ angular.module("rentIT").controller("chatController", [
   "$rootScope",
   "chatService",
   "toaster",
-  "$q",
   "$timeout",
   "$uibModal",
-  function ($scope, $rootScope, chatService, toaster, $q, $timeout, $uibModal) {
+  function ($scope, $rootScope, chatService, toaster, $timeout, $uibModal) {
     // Initialize variables
+    $scope.isLoading = false; // to show loading spinner
     $scope.messages = []; // to hold the messages
     $scope.message = ""; // to hold the message
     $scope.convId = null; // current conversation id
@@ -64,6 +63,7 @@ angular.module("rentIT").controller("chatController", [
      * @description load the sidebar with all the conversations
      */
     $scope.loadSidebar = function () {
+      $scope.isLoading = true;
       chatService
         .getAllConversation($rootScope.user._id)
         .then((response) => {
@@ -77,6 +77,9 @@ angular.module("rentIT").controller("chatController", [
         })
         .catch((error) => {
           toaster.pop("error", "Error", "Error while fetching conversations");
+        })
+        .finally(() => {
+          $scope.isLoading = false;
         });
     };
 
@@ -99,6 +102,7 @@ angular.module("rentIT").controller("chatController", [
         toaster.pop("error", "Error", "Please select a conversation");
         return;
       }
+      $scope.isLoading = true;
       chatService
         .getAllChats($scope.convId)
         .then((response) => {
@@ -108,6 +112,9 @@ angular.module("rentIT").controller("chatController", [
         })
         .catch((error) => {
           toaster.pop("error", "Error", "Error while fetching chats");
+        })
+        .finally(() => {
+          $scope.isLoading = false;
         });
     };
 
@@ -161,6 +168,7 @@ angular.module("rentIT").controller("chatController", [
             }
             const key = $scope.$parent.image.name + "-" + Date.now();
             const contentType = $scope.$parent.image.type;
+            $scope.$parent.isLoading = true;
             chatService
               .uploadAttachment($scope.$parent.image, key, contentType, convId)
               .then((response) => {
@@ -178,6 +186,9 @@ angular.module("rentIT").controller("chatController", [
                   "Error",
                   error?.message || "Error while uploading image"
                 );
+              })
+              .finally(() => {
+                $scope.$parent.isLoading = false;
               });
           };
         },

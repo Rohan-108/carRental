@@ -45,37 +45,39 @@
           </div>
         </div>
       </div>
-
-      <!-- Bootstrap Loader with Angular UI -->
+      <!--- Loading Spinner -------------------------------------->
       <div
-        class="text-center"
         ng-show="isLoading"
         style="
           position: absolute;
           inset: 0;
           background-color: rgba(255, 255, 255, 0.7);
-          z-index: 1000;
+          z-index: 1050;
           display: flex;
           justify-content: center;
           align-items: center;
+          backdrop-filter: blur(5px);
         "
       >
-        <uib-progress
-          style="width: 30%; height: 10px; background-color: #f5f5f5"
-        >
-          <uib-bar value="100" type="info" style="width: 100%">
-            <span class="sr-only">Loading...</span>
-          </uib-bar>
-        </uib-progress>
-        <i
-          class="glyphicon glyphicon-refresh"
-          style="
-            position: absolute;
-            animation: spin 1s infinite linear;
-            font-size: 24px;
-            color: #337ab7;
-          "
-        ></i>
+        <div class="text-center">
+          <div
+            class="spinner"
+            style="
+              width: 60px;
+              height: 60px;
+              border-radius: 50%;
+              border: 5px solid #f3f3f3;
+              border-top: 5px solid #337ab7;
+              animation: spin 1s linear infinite;
+            "
+          ></div>
+          <p
+            class="lead"
+            style="margin-top: 15px; font-weight: bold; color: #337ab7"
+          >
+            Loading...
+          </p>
+        </div>
       </div>
 
       <!-- No Cars Found Message -->
@@ -230,7 +232,7 @@
                 </span>
               </div>
 
-              <!-- Price Section with Improved Design -->
+              <!-- Price Section -->
               <div
                 style="
                   margin-top: 12px;
@@ -526,7 +528,7 @@
                   type="button"
                   style="
                     position: absolute;
-                    top: -9px;
+                    top: -3px;
                     transform: translateX(-50%);
                     width: 18px;
                     height: 18px;
@@ -545,7 +547,7 @@
                   type="button"
                   style="
                     position: absolute;
-                    top: -9px;
+                    top: -3px;
                     transform: translateX(-50%);
                     width: 18px;
                     height: 18px;

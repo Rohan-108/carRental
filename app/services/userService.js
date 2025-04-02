@@ -8,8 +8,9 @@ angular.module("rentIT").factory("userService", [
   "$q",
   "$http",
   "$rootScope",
-  function ($q, $http, $rootScope) {
-    const BACKEND_URL = "http://localhost:5000/api/v1/users";
+  "BASE_URL",
+  function ($q, $http, $rootScope, BASE_URL) {
+    const BACKEND_URL = `${BASE_URL}/users`;
     /**
      * @description Get a user by email.
      * @param {string} email The email of the user.

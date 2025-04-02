@@ -6,16 +6,16 @@ angular.module("rentIT").factory("chatService", [
   "$http",
   "$q",
   "$rootScope",
-  function ($http, $q, $rootScope) {
-    const BACKEND_URL = "http://localhost:5000/api/v1";
-    const socket = io.connect("http://localhost:5000");
-    //{
-    //   ackTimeout: 10000,
-    //   retries: 3,
-    //   auth: {
-    //     serverOffset: 0,
-    //   },
-    // }
+  "BASE_URL",
+  function ($http, $q, $rootScope, BASE_URL) {
+    const BACKEND_URL = `${BASE_URL}`;
+    const SOCKET_URL = BASE_URL.replace("/api/v1", "");
+    const socket = io(SOCKET_URL, {
+      transports: ["websocket"],
+    });
+    socket.on("connect_error", function (error) {
+      console.error("Connection error:", error);
+    });
     /**
      * @description fetch all chats for a conversation
      * @param {string} conversationId
@@ -50,6 +50,7 @@ angular.module("rentIT").factory("chatService", [
           headers: {
             Authorization: `Bearer ${$rootScope.user.accessToken}`,
           },
+          cache: true,
         })
         .then(
           function successCallback(response) {
@@ -78,6 +79,10 @@ angular.module("rentIT").factory("chatService", [
           avatar: $rootScope.user.avatar,
         },
       };
+      if (!socket.connected) {
+        deffered.reject("Socket not connected");
+        return deffered.promise;
+      }
       socket.emit("sendMessage", data);
       deffered.resolve();
       return deffered.promise;
@@ -112,6 +117,7 @@ angular.module("rentIT").factory("chatService", [
             headers: {
               Authorization: `Bearer ${$rootScope.user.accessToken}`,
             },
+            cache: true,
           }
         )
         .then(

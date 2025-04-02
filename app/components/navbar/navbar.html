@@ -41,8 +41,6 @@
                 display: block;
                 padding: 0.1em 1em;
               "
-              onmouseover="this.style.fontWeight='bold'"
-              onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
               >Home</a
             >
           </li>
@@ -56,8 +54,6 @@
                 display: block;
                 padding: 0.1em 1em;
               "
-              onmouseover="this.style.fontWeight='bold'"
-              onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
               >Cars</a
             >
           </li>
@@ -71,8 +67,6 @@
                 display: block;
                 padding: 0.1em 1em;
               "
-              onmouseover="this.style.fontWeight='bold'"
-              onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
               >Profile</a
             >
           </li>
@@ -89,8 +83,6 @@
                 display: block;
                 padding: 0.1em 1em;
               "
-              onmouseover="this.style.fontWeight='bold'"
-              onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
               >Chat</a
             >
           </li>
@@ -118,8 +110,6 @@
                 padding: 0.3em 1.2em;
                 display: block;
               "
-              onmouseover="this.style.backgroundColor='#007af3'; this.style.color='white'"
-              onmouseout="this.style.backgroundColor='transparent'; this.style.color='#007af3'"
               >Login</a
             >
           </li>
@@ -138,8 +128,6 @@
                 margin-top: 0.2em;
                 display: block;
               "
-              onmouseover="this.style.backgroundColor='#007af3'; this.style.color='white'"
-              onmouseout="this.style.backgroundColor='transparent'; this.style.color='#007af3'"
               >Dashboard</a
             >
           </li>
@@ -158,8 +146,6 @@
                 margin-top: 0.2em;
                 display: block;
               "
-              onmouseover="this.style.backgroundColor='#007af3'; this.style.color='white'"
-              onmouseout="this.style.backgroundColor='transparent'; this.style.color='#007af3'"
               >Admin-Dashboard</a
             >
           </li>
@@ -175,8 +161,6 @@
                 padding: 0.3em 1.2em;
                 display: block;
               "
-              onmouseover="this.style.backgroundColor='#007af3'; this.style.color='white'"
-              onmouseout="this.style.backgroundColor='transparent'; this.style.color='#007af3'"
               >Logout</a
             >
           </li>
@@ -218,8 +202,6 @@
                     padding: 0.8em 0;
                     border-bottom: 1px solid #eee;
                   "
-                  onmouseover="this.style.fontWeight='bold'"
-                  onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
                   >Home</a
                 >
               </li>
@@ -234,8 +216,6 @@
                     padding: 0.8em 0;
                     border-bottom: 1px solid #eee;
                   "
-                  onmouseover="this.style.fontWeight='bold'"
-                  onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
                   >Cars</a
                 >
               </li>
@@ -250,8 +230,6 @@
                     padding: 0.8em 0;
                     border-bottom: 1px solid #eee;
                   "
-                  onmouseover="this.style.fontWeight='bold'"
-                  onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
                   >Profile</a
                 >
               </li>
@@ -269,8 +247,6 @@
                     padding: 0.8em 0;
                     border-bottom: 1px solid #eee;
                   "
-                  onmouseover="this.style.fontWeight='bold'"
-                  onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
                   >Chat</a
                 >
               </li>
@@ -292,8 +268,6 @@
                     border-bottom: 1px solid #eee;
                     font-weight: normal;
                   "
-                  onmouseover="this.style.fontWeight='bold'"
-                  onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
                   >Login</a
                 >
               </li>
@@ -310,8 +284,6 @@
                     padding: 0.8em 0;
                     border-bottom: 1px solid #eee;
                   "
-                  onmouseover="this.style.fontWeight='bold'"
-                  onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
                   >Dashboard</a
                 >
               </li>
@@ -328,8 +300,6 @@
                     padding: 0.8em 0;
                     border-bottom: 1px solid #eee;
                   "
-                  onmouseover="this.style.fontWeight='bold'"
-                  onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
                   >Admin-Dashboard</a
                 >
               </li>
@@ -343,8 +313,6 @@
                     display: block;
                     padding: 0.8em 0;
                   "
-                  onmouseover="this.style.fontWeight='bold'"
-                  onmouseout="this.style.fontWeight=this.classList.contains('active') ? 'bold' : 'normal'"
                   >Logout</a
                 >
               </li>
@@ -356,12 +324,18 @@
   </div>
 </div>
 
-<!-- Add space to prevent content from hiding under fixed navbar -->
+<!-- Spacer to prevent content from being hidden behind the navbar -->
 <div style="height: 70px"></div>
 
 <!-- Add active class styling -->
 <style>
   .active {
+    font-weight: bold !important;
+  }
+  a {
+    text-decoration: none;
+  }
+  a:hover {
     font-weight: bold !important;
   }
 </style>

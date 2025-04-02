@@ -10,8 +10,9 @@ angular.module("rentIT").service("bidBookService", [
   "$http",
   "$rootScope",
   "$q",
-  function ($http, $rootScope, $q) {
-    const BACKEND_URL = "http://localhost:5000/api/v1/bids";
+  "BASE_URL",
+  function ($http, $rootScope, $q, BASE_URL) {
+    const BACKEND_URL = `${BASE_URL}/bids`;
     /**
      * @description Add Bid to the database
      * @param {*} bid - The bid object to be added
@@ -70,6 +71,7 @@ angular.module("rentIT").service("bidBookService", [
             headers: {
               Authorization: `Bearer ${$rootScope.user.accessToken}`,
             },
+            cache: true,
           }
         )
         .then(
@@ -178,6 +180,7 @@ angular.module("rentIT").service("bidBookService", [
           headers: {
             Authorization: `Bearer ${$rootScope.user.accessToken}`,
           },
+          cache: true,
         })
         .then(
           function (response) {

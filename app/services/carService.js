@@ -8,8 +8,9 @@ angular.module("rentIT").factory("carService", [
   "$http",
   "$q",
   "$rootScope",
-  function ($http, $q, $rootScope) {
-    const BACKEND_URL = "http://localhost:5000/api/v1/vehicles";
+  "BASE_URL",
+  function ($http, $q, $rootScope, BASE_URL) {
+    const BACKEND_URL = `${BASE_URL}/vehicles`;
 
     /**
      * @description This function is responsible for fetching the cars from the backend.
@@ -30,7 +31,10 @@ angular.module("rentIT").factory("carService", [
       const sortString = JSON.stringify(sort);
       $http
         .get(
-          `${BACKEND_URL}?pageNumber=${pageNumber}&pageSize=${pageSize}&filter=${filterString}&sort=${sortString}&searchText=${searchText}`
+          `${BACKEND_URL}?pageNumber=${pageNumber}&pageSize=${pageSize}&filter=${filterString}&sort=${sortString}&searchText=${searchText}`,
+          {
+            cache: true,
+          }
         )
         .then(
           function successCallback(response) {
@@ -89,14 +93,18 @@ angular.module("rentIT").factory("carService", [
     }
     function getCarById(carId) {
       const deferred = $q.defer();
-      $http.get(`${BACKEND_URL}/${carId}`).then(
-        function successCallback(response) {
-          deferred.resolve(response.data);
-        },
-        function errorCallback(error) {
-          deferred.reject(error);
-        }
-      );
+      $http
+        .get(`${BACKEND_URL}/${carId}`, {
+          cache: true,
+        })
+        .then(
+          function successCallback(response) {
+            deferred.resolve(response.data);
+          },
+          function errorCallback(error) {
+            deferred.reject(error);
+          }
+        );
       return deferred.promise;
     }
     return {

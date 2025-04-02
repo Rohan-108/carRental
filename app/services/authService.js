@@ -2,8 +2,9 @@ angular.module("rentIT").factory("authService", [
   "$http",
   "$q",
   "$rootScope",
-  function ($http, $q, $rootScope) {
-    const BACKEND_URL = "http://localhost:5000/api/v1/users";
+  "BASE_URL",
+  function ($http, $q, $rootScope, BASE_URL) {
+    const BACKEND_URL = `${BASE_URL}/users`;
     function isLoggedIn() {
       const deferred = $q.defer();
       if ($rootScope.user) {
