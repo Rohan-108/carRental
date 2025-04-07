@@ -144,15 +144,13 @@ angular.module("rentIT").factory("chartService", [
           {
             label: "Bookings",
             data: bookingsData,
-            backgroundColor: "rgba(75, 192, 192, 0.4)",
-            borderColor: "rgba(75, 192, 192, 1)",
+            backgroundColor: "rgb(224, 48, 45)",
             borderWidth: 1,
           },
           {
             label: "Bids",
             data: bidsData,
-            backgroundColor: "rgba(153, 102, 255, 0.4)",
-            borderColor: "rgba(153, 102, 255, 1)",
+            backgroundColor: "rgba(234, 245, 19, 1)",
             borderWidth: 1,
           },
         ],
@@ -177,15 +175,17 @@ angular.module("rentIT").factory("chartService", [
           {
             label: "Outstation",
             data: outstationData,
-            backgroundColor: "rgba(75, 192, 192, 0.4)",
-            borderColor: "rgba(75, 192, 192, 1)",
+            backgroundColor: "rgba(52, 152, 219,0.5)",
+            fill: true,
+            tension: 0.4,
             borderWidth: 1,
           },
           {
             label: "Local",
             data: localData,
-            backgroundColor: "rgba(153, 102, 255, 0.4)",
-            borderColor: "rgba(153, 102, 255, 1)",
+            backgroundColor: "rgba(231, 76, 60,0.5)",
+            fill: true,
+            tension: 0.4,
             borderWidth: 1,
           },
         ],
@@ -195,17 +195,28 @@ angular.module("rentIT").factory("chartService", [
      * @description Build the chart data for the car data for the super admin.
      * @param {*} data
      */
+    function generateRandomColor() {
+      const r = Math.floor(Math.random() * 256);
+      const g = Math.floor(Math.random() * 256);
+      const b = Math.floor(Math.random() * 256);
+      return `rgba(${r}, ${g}, ${b}, 0.8)`;
+    }
+    /**
+     * @description Build the chart data for the car data for the super admin.
+     * @param {*} data
+     * @returns {Object} The chart data for the car data.
+     * */
     function buildChartDataForCar(data) {
       const labels = Object.keys(data);
       const carData = labels.map((label) => data[label]);
+      const backgroundColors = labels.map(() => generateRandomColor());
       return {
         labels: labels,
         datasets: [
           {
             label: "Cars",
             data: carData,
-            backgroundColor: "rgba(75, 192, 192, 0.4)",
-            borderColor: "rgba(75, 192, 192, 1)",
+            backgroundColor: backgroundColors,
             borderWidth: 1,
           },
         ],
@@ -264,14 +275,15 @@ angular.module("rentIT").factory("chartService", [
     function buildChartDataForTopOwners(data) {
       const labels = Object.keys(data);
       const revenueData = labels.map((label) => data[label].totalRevenue);
+      const backgroundColors = labels.map(() => generateRandomColor());
       return {
         labels: labels,
         datasets: [
           {
             label: "Revenue",
             data: revenueData,
-            backgroundColor: "rgba(75, 192, 192, 0.4)",
-            borderColor: "rgba(75, 192, 192, 1)",
+            backgroundColor: backgroundColors,
+            fill: true,
             borderWidth: 1,
           },
         ],
@@ -320,6 +332,33 @@ angular.module("rentIT").factory("chartService", [
         ],
       };
     }
+
+    /**
+     * @description Get the car growth for the owner.
+     * @param {*} carId - The ID of the car.
+     * @param {*} days - The number of days for which the data is to be fetched.
+     * @returns {Promise} A promise that resolves to the car growth data.
+     */
+    function getOwnerCarGrowth(carId, days) {
+      const deferred = $q.defer();
+      $http
+        .get(`${BACKEND_URL}/owner/growth/${carId}?days=${days}`, {
+          headers: {
+            Authorization: `Bearer ${$rootScope.user.accessToken}`,
+          },
+          cache: true,
+        })
+        .then(
+          function successCallback(response) {
+            return deferred.resolve(response.data);
+          },
+          function errorCallback(error) {
+            return deferred.reject(error.data);
+          }
+        );
+      return deferred.promise;
+    }
+
     return {
       getBookingChartDataForOwner,
       buildChartDataForBooking,
@@ -334,6 +373,7 @@ angular.module("rentIT").factory("chartService", [
       buildChartDataForTopOwners,
       getOwnerAverageAgainstAllOwners,
       buildChartDataForComparision,
+      getOwnerCarGrowth,
     };
   },
 ]);

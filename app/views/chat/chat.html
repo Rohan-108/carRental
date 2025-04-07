@@ -192,8 +192,8 @@
               >
                 <p style="margin: 0; word-wrap: break-word">{{chat.message}}</p>
                 <img
-                  ng-if="chat.image"
-                  ng-src="{{chat.image}}"
+                  ng-if="chat.attachment"
+                  ng-src="{{chat.attachment.url}}"
                   alt="chat image"
                   class="img-responsive img-rounded"
                   style="max-width: 100%; border-radius: 8px; margin-top: 8px"

@@ -198,7 +198,11 @@ angular.module("rentIT").factory("chatService", [
                       avatar: $rootScope.user.avatar,
                     },
                     message: "",
-                    image: key,
+                    attachment: {
+                      name: key,
+                      type: contentType,
+                      refId: conversationId,
+                    },
                     conversationId,
                   };
                   socket.emit("sendMessage", data);

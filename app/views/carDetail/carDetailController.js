@@ -35,7 +35,7 @@ angular.module("rentIT").controller("carDetailController", [
     // Initialize variables
     $scope.isLoading = true; // set loading to true
     $scope.car = car; // set car details that came through resolve
-    $scope.currentImage = car.images[0]; // set current image to first image
+    $scope.currentImage = car?.images[0]; // set current image to first image
     $scope.image = null; // set image to null
     // set rental object with amount and isOutStation
     $scope.rental = {

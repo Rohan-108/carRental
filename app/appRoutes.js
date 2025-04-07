@@ -46,6 +46,9 @@ angular.module("rentIT").config([
                 .getCarById($stateParams.carId)
                 .then((response) => {
                   return response.data.vehicle;
+                })
+                .catch(() => {
+                  throw new Error("Car_Not_Found");
                 });
             },
           ],

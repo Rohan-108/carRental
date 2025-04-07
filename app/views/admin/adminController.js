@@ -11,6 +11,7 @@ angular.module("rentIT").controller("adminController", [
   "toaster",
   "$q",
   "$uibModal",
+  "configService",
   function (
     $scope,
     userService,
@@ -19,7 +20,8 @@ angular.module("rentIT").controller("adminController", [
     approvalService,
     toaster,
     $q,
-    $uibModal
+    $uibModal,
+    configService
   ) {
     // Initialize scope variables
     $scope.isLoading = false; // Loading state
@@ -64,6 +66,14 @@ angular.module("rentIT").controller("adminController", [
       bookChart: null,
       revenueChart: null,
       topEarningOwnersChart: null,
+    };
+
+    // Platform configuration
+    $scope.config = {
+      vehicleType: [],
+      fuelType: [],
+      transmissionType: [],
+      cities: [],
     };
 
     /**
@@ -161,6 +171,9 @@ angular.module("rentIT").controller("adminController", [
           break;
         case "carBookAnalytics":
           $q.all([$scope.carChart(), $scope.bookChart()]);
+          break;
+        case "platformConfig":
+          $scope.loadConfig();
           break;
       }
     };
@@ -435,7 +448,10 @@ angular.module("rentIT").controller("adminController", [
           $scope.isLoading = false;
         });
     };
-
+    /**
+     * @description To Load Chart data for top earning owners
+     * @param {number} days - Number of days for the chart data
+     */
     $scope.topEarningOwnersChart = function () {
       $scope.isLoading = true;
       const days = $scope.topEarningOwnersChartFilter.days;
@@ -528,6 +544,219 @@ angular.module("rentIT").controller("adminController", [
       });
       $scope.chartInstances[id] = chart;
     };
+
+    /**
+     * @description Load platform configuration
+     */
+    $scope.loadConfig = function () {
+      $scope.isLoading = true;
+      configService
+        .getConfig()
+        .then(function (response) {
+          $scope.config = response.data;
+          console.log("Platform configuration loaded:", $scope.config);
+        })
+        .catch(function (error) {
+          console.error("Error loading configuration:", error);
+          toaster.pop(
+            "error",
+            "Error",
+            "Failed to load platform configuration"
+          );
+        })
+        .finally(function () {
+          $scope.isLoading = false;
+        });
+    };
+
+    /**
+     * @description Open modal to add new configuration item
+     * @param {string} type - Type of configuration (vehicleType, fuelType, transmissionType, city)
+     */
+    $scope.openAddConfigModal = function (type) {
+      const modalInstance = $uibModal.open({
+        animation: true,
+        templateUrl: "addConfigModal.html",
+        controller: "AddConfigModalController",
+        size: "md",
+        backdrop: "static",
+        resolve: {
+          configType: function () {
+            return type;
+          },
+        },
+      });
+
+      modalInstance.result.then(function (newItem) {
+        // Pass the string value directly
+        $scope.updateConfiguration("add", type, newItem.name);
+      });
+    };
+
+    /**
+     * @description Open modal to edit configuration item
+     * @param {string} type - Type of configuration
+     * @param {string} item - String value to edit
+     */
+    $scope.openEditConfigModal = function (type, item) {
+      const modalInstance = $uibModal.open({
+        animation: true,
+        templateUrl: "editConfigModal.html",
+        controller: "EditConfigModalController",
+        size: "md",
+        backdrop: "static",
+        resolve: {
+          configType: function () {
+            return type;
+          },
+          configItem: function () {
+            // Create a temporary object with name property for the modal
+            return { name: item, original: item };
+          },
+        },
+      });
+
+      modalInstance.result.then(function (updatedItem) {
+        $scope.updateConfiguration("update", type, {
+          newValue: updatedItem.name,
+          oldValue: updatedItem.original,
+        });
+      });
+    };
+
+    /**
+     * @description Open modal to delete configuration item
+     * @param {string} type - Type of configuration
+     * @param {string} item - String value to delete
+     */
+    $scope.openDeleteConfigModal = function (type, item) {
+      const modalInstance = $uibModal.open({
+        animation: true,
+        templateUrl: "deleteConfigModal.html",
+        controller: "DeleteConfigModalController",
+        size: "md",
+        backdrop: "static",
+        resolve: {
+          configType: function () {
+            return type;
+          },
+          configItem: function () {
+            // Create a temporary object with name property for the modal
+            return { name: item };
+          },
+        },
+      });
+
+      modalInstance.result.then(function () {
+        $scope.updateConfiguration("delete", type, item);
+      });
+    };
+
+    /**
+     * @description Update configuration with a unified function
+     * @param {string} operation - Operation type ('add', 'update', 'delete')
+     * @param {string} type - Type of configuration
+     * @param {string|Object} item - String value for add/delete or object {newValue, oldValue} for update
+     */
+    $scope.updateConfiguration = function (operation, type, item) {
+      $scope.isLoading = true;
+
+      // Create a copy of the current config
+      let updatedConfig = angular.copy($scope.config);
+
+      // Map type to config property
+      const configMap = {
+        vehicleType: "vehicleType",
+        fuelType: "fuelType",
+        transmissionType: "transmissionType",
+        city: "cities",
+      };
+
+      const configKey = configMap[type];
+
+      // Update the config object based on the operation
+      switch (operation) {
+        case "add":
+          // Check if the item already exists (case insensitive)
+          if (
+            !updatedConfig[configKey].some(
+              (existing) => existing.toLowerCase() === item.toLowerCase()
+            )
+          ) {
+            updatedConfig[configKey].push(item);
+          } else {
+            toaster.pop("warning", "Warning", `This ${type} already exists`);
+            $scope.isLoading = false;
+            return;
+          }
+          break;
+
+        case "update":
+          // For update, item is an object with oldValue and newValue
+          const updateIndex = updatedConfig[configKey].indexOf(item.oldValue);
+          if (updateIndex !== -1) {
+            // Check if the new name already exists (excluding the current item)
+            const nameExists = updatedConfig[configKey].some(
+              (existing, idx) =>
+                idx !== updateIndex &&
+                existing.toLowerCase() === item.newValue.toLowerCase()
+            );
+
+            if (nameExists) {
+              toaster.pop(
+                "warning",
+                "Warning",
+                `This ${type} name already exists`
+              );
+              $scope.isLoading = false;
+              return;
+            }
+
+            updatedConfig[configKey][updateIndex] = item.newValue;
+          }
+          break;
+
+        case "delete":
+          // For delete, item is the string value to remove
+          const deleteIndex = updatedConfig[configKey].indexOf(item);
+          if (deleteIndex !== -1) {
+            updatedConfig[configKey].splice(deleteIndex, 1);
+          }
+          break;
+      }
+
+      // Update the scope config first
+      $scope.config = updatedConfig;
+
+      // Then call the service to persist changes
+      configService
+        .updateConfig(updatedConfig)
+        .then(function (response) {
+          // Update with the response from server to ensure consistency
+          $scope.config = response.data || response;
+          toaster.pop(
+            "success",
+            "Success",
+            `${type} ${
+              operation === "add"
+                ? "added"
+                : operation === "update"
+                ? "updated"
+                : "deleted"
+            } successfully`
+          );
+        })
+        .catch(function (error) {
+          console.error(`Error ${operation}ing ${type}:`, error);
+          toaster.pop("error", "Error", `Failed to ${operation} ${type}`);
+
+          // Reload the config to revert changes in case of failure
+          $scope.loadConfig();
+        })
+        .finally(function () {
+          $scope.isLoading = false;
+        });
+    };
   },
 ]);
 
@@ -560,6 +789,76 @@ angular.module("rentIT").controller("CancelModalController", [
   "approvalId",
   function ($scope, $uibModalInstance, approvalId) {
     $scope.approvalId = approvalId;
+
+    $scope.ok = function () {
+      $uibModalInstance.close();
+    };
+
+    $scope.cancel = function () {
+      $uibModalInstance.dismiss("cancel");
+    };
+  },
+]);
+
+/**
+ * Controller for Adding Configuration Items
+ */
+angular.module("rentIT").controller("AddConfigModalController", [
+  "$scope",
+  "$uibModalInstance",
+  "configType",
+  function ($scope, $uibModalInstance, configType) {
+    $scope.configType = configType;
+    $scope.configItem = {
+      name: "",
+    };
+
+    $scope.ok = function () {
+      $uibModalInstance.close($scope.configItem);
+    };
+
+    $scope.cancel = function () {
+      $uibModalInstance.dismiss("cancel");
+    };
+  },
+]);
+
+/**
+ * Controller for Editing Configuration Items
+ */
+angular.module("rentIT").controller("EditConfigModalController", [
+  "$scope",
+  "$uibModalInstance",
+  "configType",
+  "configItem",
+  function ($scope, $uibModalInstance, configType, configItem) {
+    $scope.configType = configType;
+    $scope.configItem = {
+      name: configItem.name,
+      original: configItem.original,
+    };
+
+    $scope.ok = function () {
+      $uibModalInstance.close($scope.configItem);
+    };
+
+    $scope.cancel = function () {
+      $uibModalInstance.dismiss("cancel");
+    };
+  },
+]);
+
+/**
+ * Controller for Deleting Configuration Items
+ */
+angular.module("rentIT").controller("DeleteConfigModalController", [
+  "$scope",
+  "$uibModalInstance",
+  "configType",
+  "configItem",
+  function ($scope, $uibModalInstance, configType, configItem) {
+    $scope.configType = configType;
+    $scope.configItem = configItem;
 
     $scope.ok = function () {
       $uibModalInstance.close();

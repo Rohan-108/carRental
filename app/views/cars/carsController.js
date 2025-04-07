@@ -16,6 +16,7 @@ angular.module("rentIT").controller("carsController", [
   "toaster",
   "$timeout",
   "$document",
+  "configService",
   function (
     $scope,
     $state,
@@ -23,11 +24,12 @@ angular.module("rentIT").controller("carsController", [
     utilService,
     toaster,
     $timeout,
-    $document
+    $document,
+    configService
   ) {
     // Initialize variables
     $scope.cars = []; // List of cars
-    $scope.pageSize = 2; // Number of cars per page
+    $scope.pageSize = 3; // Number of cars per page
     $scope.currentPage = 1; // Current page
     $scope.totalPage = null; // Total number of pages
 
@@ -58,6 +60,38 @@ angular.module("rentIT").controller("carsController", [
     $scope.filter = defaultFilter; // Filter
     $scope.query = ""; // Search query
 
+    /**
+     * @description Initialize the controller
+     */
+    $scope.init = function () {
+      // Set totalItems for pagination
+      $scope.totalItems = 0;
+      $scope.itemsPerPage = $scope.pageSize;
+
+      $scope.getConfig(); // Load configuration
+      $scope.setCars();
+    };
+
+    $scope.getConfig = function () {
+      configService
+        .getConfig()
+        .then((response) => {
+          const config = response.data;
+          console.log("Config loaded successfully", config);
+          $scope.transmissionType = ["All", ...config.transmissionType];
+          $scope.fuelTypes = ["All", ...config.fuelType];
+          $scope.vehicleTypes = ["All", ...config.vehicleType];
+          $scope.cities = ["All", ...config.cities];
+        })
+        .catch((error) => {
+          console.error("Error loading config", error);
+          toaster.error(
+            "error",
+            "Error",
+            error?.description || "Could not load config"
+          );
+        });
+    };
     /**
      * @description Toggle sidebar visibility (for mobile)
      */
@@ -164,17 +198,6 @@ angular.module("rentIT").controller("carsController", [
           left: $scope.filter.maxPrice / 100 + "%",
         },
       };
-    };
-
-    /**
-     * @description Initialize the controller
-     */
-    $scope.init = function () {
-      // Set totalItems for pagination
-      $scope.totalItems = 0;
-      $scope.itemsPerPage = $scope.pageSize;
-
-      $scope.setCars();
     };
 
     /**

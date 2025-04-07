@@ -510,7 +510,7 @@
                       {{chat.message}}
                     </p>
                     <img
-                      ng-src="{{chat.image}}"
+                      ng-src="{{chat.attachment.url}}"
                       alt="chat image"
                       class="img-responsive img-rounded"
                       style="
@@ -518,7 +518,7 @@
                         border-radius: 8px;
                         margin-top: 8px;
                       "
-                      ng-if="chat.image"
+                      ng-if="chat.attachment"
                     />
                   </div>
                 </div>

@@ -85,6 +85,7 @@ angular.module("rentIT").controller("dashboardController", [
       bookChart: null,
       revenueChart: null,
       comparisionChart: null,
+      carGrowthChart: null,
     };
     $scope.comparisionChartFilter = {
       days: "7",
@@ -100,6 +101,11 @@ angular.module("rentIT").controller("dashboardController", [
       typeOfChart: "bar",
       days: "7",
     };
+    $scope.carGrowthChartFilter = {
+      filterByCar: "all",
+      days: "7",
+    };
+
     /**
      * @description Initialize function
      */
@@ -109,6 +115,7 @@ angular.module("rentIT").controller("dashboardController", [
           $scope.setStat(),
           $scope.getCarsForFilter(),
           $scope.comparisionChart(),
+          $scope.carGrowthChart(),
         ]);
       }
     };
@@ -737,6 +744,43 @@ angular.module("rentIT").controller("dashboardController", [
             "error",
             "Error",
             error?.name || "Error loading Comparision Chart"
+          );
+        })
+        .finally(() => {
+          $scope.isLoading = false;
+        });
+    };
+
+    /**
+     * @description To Load Chart data for car growth
+     * @param {*} days - Number of days to compare
+     * @param {*} carId - Car id to compare
+     */
+    $scope.carGrowthChart = function () {
+      const days = $scope.carGrowthChartFilter.days;
+      const carId = $scope.carGrowthChartFilter.filterByCar;
+      $scope.isLoading = true;
+      chartService
+        .getOwnerCarGrowth(carId, days)
+        .then((response) => {
+          const datasetLabel = "Car Growth Chart";
+          const chartData = chartService.buildChartDataForRevenue(
+            response.data
+          );
+          console.log(chartData);
+          $scope.loadChart(
+            chartData,
+            "line",
+            "carGrowthChart",
+            false,
+            datasetLabel
+          );
+        })
+        .catch((error) => {
+          toaster.pop(
+            "error",
+            "Error",
+            error?.name || "Error loading Car Growth Chart"
           );
         })
         .finally(() => {

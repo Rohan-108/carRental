@@ -93,18 +93,14 @@ angular.module("rentIT").factory("carService", [
     }
     function getCarById(carId) {
       const deferred = $q.defer();
-      $http
-        .get(`${BACKEND_URL}/${carId}`, {
-          cache: true,
-        })
-        .then(
-          function successCallback(response) {
-            deferred.resolve(response.data);
-          },
-          function errorCallback(error) {
-            deferred.reject(error);
-          }
-        );
+      $http.get(`${BACKEND_URL}/${carId}`).then(
+        function successCallback(response) {
+          deferred.resolve(response.data);
+        },
+        function errorCallback(error) {
+          deferred.reject(error);
+        }
+      );
       return deferred.promise;
     }
     return {

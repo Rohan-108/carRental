@@ -44,6 +44,11 @@
             ><i class="glyphicon glyphicon-check"></i> Approvals</a
           >
         </li>
+        <li ng-class="{ active: currentTab === 'platformConfig' }">
+          <a href ng-click="changeTab('platformConfig')"
+            ><i class="glyphicon glyphicon-cog"></i> Platform Config</a
+          >
+        </li>
       </ul>
     </div>
 
@@ -86,6 +91,11 @@
           <li ng-class="{ active: currentTab === 'approvals' }">
             <a href ng-click="changeTab('approvals')"
               ><i class="glyphicon glyphicon-check"></i> Approvals</a
+            >
+          </li>
+          <li ng-class="{ active: currentTab === 'platformConfig' }">
+            <a href ng-click="changeTab('platformConfig')"
+              ><i class="glyphicon glyphicon-cog"></i> Platform Config</a
             >
           </li>
         </ul>
@@ -713,11 +723,250 @@
           </div>
         </div>
       </div>
+
+      <!-- Platform Config Section -->
+      <div ng-show="currentTab === 'platformConfig'">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              <i class="glyphicon glyphicon-cog"></i> Platform Configuration
+            </h3>
+          </div>
+          <div class="panel-body">
+            <!-- Vehicle Type Configuration -->
+            <div class="section-container" style="margin-bottom: 30px">
+              <div
+                class="d-flex justify-content-between"
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  margin-bottom: 15px;
+                "
+              >
+                <h4><i class="glyphicon glyphicon-road"></i> Vehicle Types</h4>
+                <button
+                  class="btn btn-success"
+                  ng-click="openAddConfigModal('vehicleType')"
+                >
+                  <i class="glyphicon glyphicon-plus"></i> Add Vehicle Type
+                </button>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-if="config.vehicleType.length === 0">
+                      <td colspan="3" class="text-center">
+                        No vehicle types found
+                      </td>
+                    </tr>
+                    <tr
+                      ng-repeat="type in config.vehicleType"
+                      ng-if="config.vehicleType.length > 0"
+                    >
+                      <td>{{type}}</td>
+                      <td>
+                        <button
+                          class="btn btn-primary btn-sm"
+                          ng-click="openEditConfigModal('vehicleType', type)"
+                        >
+                          <i class="glyphicon glyphicon-edit"></i> Edit
+                        </button>
+                        <button
+                          class="btn btn-danger btn-sm"
+                          ng-click="openDeleteConfigModal('vehicleType', type)"
+                        >
+                          <i class="glyphicon glyphicon-trash"></i> Delete
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Fuel Type Configuration -->
+            <div class="section-container" style="margin-bottom: 30px">
+              <div
+                class="d-flex justify-content-between"
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  margin-bottom: 15px;
+                "
+              >
+                <h4><i class="glyphicon glyphicon-tint"></i> Fuel Types</h4>
+                <button
+                  class="btn btn-success"
+                  ng-click="openAddConfigModal('fuelType')"
+                >
+                  <i class="glyphicon glyphicon-plus"></i> Add Fuel Type
+                </button>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-if="config.fuelType.length === 0">
+                      <td colspan="3" class="text-center">
+                        No fuel types found
+                      </td>
+                    </tr>
+                    <tr
+                      ng-repeat="type in config.fuelType"
+                      ng-if="config.fuelType.length > 0"
+                    >
+                      <td>{{type}}</td>
+                      <td>
+                        <button
+                          class="btn btn-primary btn-sm"
+                          ng-click="openEditConfigModal('fuelType', type)"
+                        >
+                          <i class="glyphicon glyphicon-edit"></i> Edit
+                        </button>
+                        <button
+                          class="btn btn-danger btn-sm"
+                          ng-click="openDeleteConfigModal('fuelType', type)"
+                        >
+                          <i class="glyphicon glyphicon-trash"></i> Delete
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Transmission Type Configuration -->
+            <div class="section-container" style="margin-bottom: 30px">
+              <div
+                class="d-flex justify-content-between"
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  margin-bottom: 15px;
+                "
+              >
+                <h4>
+                  <i class="glyphicon glyphicon-cog"></i> Transmission Types
+                </h4>
+                <button
+                  class="btn btn-success"
+                  ng-click="openAddConfigModal('transmissionType')"
+                >
+                  <i class="glyphicon glyphicon-plus"></i> Add Transmission Type
+                </button>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-if="config.transmissionType.length === 0">
+                      <td colspan="3" class="text-center">
+                        No transmission types found
+                      </td>
+                    </tr>
+                    <tr
+                      ng-repeat="type in config.transmissionType"
+                      ng-if="config.transmissionType.length > 0"
+                    >
+                      <td>{{type}}</td>
+                      <td>
+                        <button
+                          class="btn btn-primary btn-sm"
+                          ng-click="openEditConfigModal('transmissionType', type)"
+                        >
+                          <i class="glyphicon glyphicon-edit"></i> Edit
+                        </button>
+                        <button
+                          class="btn btn-danger btn-sm"
+                          ng-click="openDeleteConfigModal('transmissionType', type)"
+                        >
+                          <i class="glyphicon glyphicon-trash"></i> Delete
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Cities Configuration -->
+            <div class="section-container" style="margin-bottom: 30px">
+              <div
+                class="d-flex justify-content-between"
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  margin-bottom: 15px;
+                "
+              >
+                <h4><i class="glyphicon glyphicon-map-marker"></i> Cities</h4>
+                <button
+                  class="btn btn-success"
+                  ng-click="openAddConfigModal('city')"
+                >
+                  <i class="glyphicon glyphicon-plus"></i> Add City
+                </button>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-if="config.cities.length === 0">
+                      <td colspan="3" class="text-center">No cities found</td>
+                    </tr>
+                    <tr
+                      ng-repeat="city in config.cities"
+                      ng-if="config.cities.length > 0"
+                    >
+                      <td>{{city}}</td>
+                      <td>
+                        <button
+                          class="btn btn-primary btn-sm"
+                          ng-click="openEditConfigModal('city', city)"
+                        >
+                          <i class="glyphicon glyphicon-edit"></i> Edit
+                        </button>
+                        <button
+                          class="btn btn-danger btn-sm"
+                          ng-click="openDeleteConfigModal('city', city)"
+                        >
+                          <i class="glyphicon glyphicon-trash"></i> Delete
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Replace custom modals with Angular UI Bootstrap Modal Templates -->
 <!-- Approve Modal Template -->
 <script type="text/ng-template" id="approveModal.html">
   <div class="modal-header" style="background-color: #f8f9fa; border-bottom: 2px solid #28a745; padding: 15px 20px;">
@@ -758,6 +1007,108 @@
     </button>
     <button class="btn btn-danger" ng-click="ok()" style="font-weight: 600; padding: 8px 16px; border-radius: 4px;">
       <i class="glyphicon glyphicon-trash"></i> Yes, Reject Request
+    </button>
+  </div>
+</script>
+
+<!-- Add Configuration Modal Template -->
+<script type="text/ng-template" id="addConfigModal.html">
+  <div class="modal-header" style="background-color: #f8f9fa; border-bottom: 2px solid #28a745; padding: 15px 20px;">
+    <h3 class="modal-title" style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #28a745; font-weight: 600;">
+      <i class="glyphicon glyphicon-plus-sign" style="margin-right: 10px;"></i>Add {{configType}}
+    </h3>
+    <button type="button" class="close" ng-click="cancel()" style="font-size: 24px;">&times;</button>
+  </div>
+  <div class="modal-body" style="padding: 20px;">
+    <form name="configForm">
+      <div class="form-group">
+        <label for="configName">Name:</label>
+        <input
+          type="text"
+          id="configName"
+          class="form-control"
+          ng-model="configItem.name"
+          required
+          placeholder="Enter {{configType}} name"
+        >
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer" style="background-color: #f8f9fa; border-top: 1px solid #e9ecef; padding: 15px 20px;">
+    <button class="btn btn-default" ng-click="cancel()" style="padding: 8px 16px; border-radius: 4px;">
+      <i class="glyphicon glyphicon-remove"></i> Cancel
+    </button>
+    <button class="btn btn-success" ng-click="ok()" ng-disabled="configForm.$invalid" style="font-weight: 600; padding: 8px 16px; border-radius: 4px;">
+      <i class="glyphicon glyphicon-ok"></i> Add
+    </button>
+  </div>
+</script>
+
+<!-- Edit Configuration Modal Template -->
+<script type="text/ng-template" id="editConfigModal.html">
+  <div class="modal-header" style="background-color: #f8f9fa; border-bottom: 2px solid #007bff; padding: 15px 20px;">
+    <h3 class="modal-title" style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #007bff; font-weight: 600;">
+      <i class="glyphicon glyphicon-edit" style="margin-right: 10px;"></i>Edit {{configType}}
+    </h3>
+    <button type="button" class="close" ng-click="cancel()" style="font-size: 24px;">&times;</button>
+  </div>
+  <div class="modal-body" style="padding: 20px;">
+    <form name="configForm">
+      <div class="form-group">
+        <label for="configId">ID:</label>
+        <input
+          type="text"
+          id="configId"
+          class="form-control"
+          ng-model="configItem._id"
+          readonly
+        >
+      </div>
+      <div class="form-group">
+        <label for="configName">Name:</label>
+        <input
+          type="text"
+          id="configName"
+          class="form-control"
+          ng-model="configItem.name"
+          required
+          placeholder="Enter {{configType}} name"
+        >
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer" style="background-color: #f8f9fa; border-top: 1px solid #e9ecef; padding: 15px 20px;">
+    <button class="btn btn-default" ng-click="cancel()" style="padding: 8px 16px; border-radius: 4px;">
+      <i class="glyphicon glyphicon-remove"></i> Cancel
+    </button>
+    <button class="btn btn-primary" ng-click="ok()" ng-disabled="configForm.$invalid" style="font-weight: 600; padding: 8px 16px; border-radius: 4px;">
+      <i class="glyphicon glyphicon-ok"></i> Update
+    </button>
+  </div>
+</script>
+
+<!-- Delete Configuration Modal Template -->
+<script type="text/ng-template" id="deleteConfigModal.html">
+  <div class="modal-header" style="background-color: #f8f9fa; border-bottom: 2px solid #dc3545; padding: 15px 20px;">
+    <h3 class="modal-title" style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #dc3545; font-weight: 600;">
+      <i class="glyphicon glyphicon-trash" style="margin-right: 10px;"></i>Delete {{configType}}
+    </h3>
+    <button type="button" class="close" ng-click="cancel()" style="font-size: 24px;">&times;</button>
+  </div>
+  <div class="modal-body" style="padding: 20px;">
+    <p class="lead text-center">Are you sure you want to delete this {{configType}}?</p>
+    <div class="alert alert-warning">
+      <p><strong>Name:</strong> {{configItem.name}}</p>
+      <p><strong>ID:</strong> {{configItem._id}}</p>
+    </div>
+    <p class="text-center text-danger">This action cannot be undone!</p>
+  </div>
+  <div class="modal-footer" style="background-color: #f8f9fa; border-top: 1px solid #e9ecef; padding: 15px 20px;">
+    <button class="btn btn-default" ng-click="cancel()" style="padding: 8px 16px; border-radius: 4px;">
+      <i class="glyphicon glyphicon-remove"></i> Cancel
+    </button>
+    <button class="btn btn-danger" ng-click="ok()" style="font-weight: 600; padding: 8px 16px; border-radius: 4px;">
+      <i class="glyphicon glyphicon-trash"></i> Delete
     </button>
   </div>
 </script>
